@@ -1,37 +1,26 @@
 # Eco-Friendly Shopping Platform
 
-A React + Supabase web app for sustainable shopping: product catalog with sustainability scores, reviews, cart, mock checkout, and a user dashboard with green impact tracking.
+**EcoShop** is a web application that connects people with sustainable and eco-friendly products. The platform helps users make informed choices by showing each product’s environmental impact and lets them track their own “green impact” over time.
 
-## Setup
+## What it does
 
-1. **Install dependencies**
-   ```bash
-   npm install
-   ```
+The site works like a small e‑commerce store focused on sustainability. Users can browse a catalogue of eco-friendly products, see how each one scores on sustainability, what materials it uses, and how much carbon footprint it saves compared to conventional options. They can add items to a cart, go through a mock checkout, and review their order history. Logged-in users get a personal dashboard that summarises their orders and their total estimated carbon savings.
 
-2. **Supabase** (you must create the project in your account)
-   - Go to [supabase.com](https://supabase.com) and sign in (or create an account).
-   - Click **New project**.
-   - Choose your organization, set a **Project name** (e.g. `eco-shop`), set a **Database password** (save it somewhere safe), and pick a **Region** close to you. Click **Create new project**.
-   - Wait until the project is ready, then open **Project Settings** (gear icon) → **API**. Copy:
-     - **Project URL** → use as `VITE_SUPABASE_URL`
-     - **anon public** key → use as `VITE_SUPABASE_ANON_KEY`
-   - In the dashboard, go to **SQL Editor** → **New query**. Paste and run the full contents of `supabase/migrations/001_initial_schema.sql`, then run `supabase/seed.sql`.
-   - (Optional) Under **Storage**, create a bucket named `product-images` if you want to upload product images later; the seed uses external image URLs.
-   - **Admin:** To let an administrator add/edit/remove products, run `supabase/migrations/002_admin_products.sql` in the SQL Editor. Then set a user as admin: `UPDATE profiles SET role = 'admin' WHERE id = 'your-user-uuid';` (find the UUID in Authentication → Users).
+## Main features
 
-3. **Environment**
-   - Copy `.env.example` to `.env` and set:
-     - `VITE_SUPABASE_URL`
-     - `VITE_SUPABASE_ANON_KEY`
+- **Product catalogue** — Browse products by category. Each product shows its name, price, image, and sustainability score. You can search by name and filter by category, price range, and minimum sustainability score.
+- **Product details & sustainability** — Every product page shows a sustainability score (out of 10), the materials used, and the estimated carbon footprint saving (e.g. kg CO₂ saved). This information is presented clearly to support buying decisions.
+- **Reviews and ratings** — Logged-in users can leave a star rating and an optional written review. Product pages display all reviews and an average rating.
+- **Shopping cart and checkout** — Users can add items to a cart, change quantities, remove items, and see the total price. A mock checkout collects shipping details and (mock) card information and shows a confirmation message when the “order” is placed. No real payment is processed.
+- **User accounts** — Sign up and sign in with email and password, log out, and reset password via email. The interface includes clear options to create an account or log in.
+- **Dashboard and green impact** — Each user has a dashboard with their profile details, order history, and a summary of their cumulative environmental impact (total estimated CO₂ saved) based on the products they’ve “purchased”.
+- **Admin product management** — Administrators can add, edit, and remove products and manage sustainability data (materials, score, carbon saving) so the catalogue stays up to date.
 
-4. **Run the app**
-   ```bash
-   npm run dev
-   ```
+The design is responsive and works on desktop and mobile, with a simple layout and green-themed styling to match the sustainability focus.
 
-## Scripts
+## Tech stack
 
-- `npm run dev` – start dev server
-- `npm run build` – production build
-- `npm run preview` – preview production build
+- **Frontend:** React (Vite), React Router, Tailwind CSS  
+- **Backend & data:** Supabase (PostgreSQL, Auth, optional Storage for images)
+
+Setup and run instructions are in the repository; clone the repo and follow the configuration steps for your own Supabase project and environment variables.
