@@ -25,7 +25,7 @@ export default function Dashboard() {
     async function fetchDashboard() {
       if (!user) return
       const [profileRes, ordersRes, reviewsRes] = await Promise.all([
-        supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle(),
+        supabase.from('profiles').select('display_name, avatar_url').eq('id', user.id).maybeSingle(),
         supabase.from('orders').select('id, total_amount, status, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('reviews').select('id, rating, body, created_at, products(id, name, slug)').eq('user_id', user.id).order('created_at', { ascending: false }),
       ])
