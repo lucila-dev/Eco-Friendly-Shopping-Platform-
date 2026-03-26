@@ -31,6 +31,24 @@ export function useCart() {
     fetchCart()
   }, [user?.id])
 
+  useEffect(() => {
+    if (!user) return
+    const channel = supabase
+      .channel(`cart-items-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'cart_items', filter: `user_id=eq.${user.id}` },
+        () => {
+          fetchCart()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id])
+
   const updateQuantity = async (cartItemId, quantity) => {
     if (quantity < 1) return
     await supabase.from('cart_items').update({ quantity }).eq('id', cartItemId)

@@ -16,7 +16,10 @@ export default function Checkout() {
   const [form, setForm] = useState({
     shipping_name: '',
     shipping_email: user?.email ?? '',
-    shipping_address: '',
+    shipping_address_line_1: '',
+    shipping_address_line_2: '',
+    shipping_city: '',
+    shipping_postcode: '',
     card_number: '',
     card_expiry: '',
     card_cvc: '',
@@ -81,7 +84,11 @@ export default function Checkout() {
         status: 'completed',
         total_amount: totalAmount,
         shipping_name: form.shipping_name,
-        shipping_address: form.shipping_address,
+        shipping_address: [
+          form.shipping_address_line_1,
+          form.shipping_address_line_2,
+          `${form.shipping_city} ${form.shipping_postcode}`.trim(),
+        ].filter(Boolean).join(', '),
         shipping_email: form.shipping_email,
       })
       .select('id')
@@ -162,14 +169,15 @@ export default function Checkout() {
                   checked={paymentMethod === 'card'}
                   onChange={() => setPaymentMethod('card')}
                 />
-                Card (mock)
+                Card
               </label>
             </div>
             <p className="text-xs text-stone-500 mt-2">
               Available credits: {loadingCredits ? 'Loading...' : loyaltyCredits.toFixed(2)} | Order total: {total.toFixed(2)}
             </p>
           </div>
-          <div className="space-y-3">
+          {paymentMethod === 'card' && (
+            <div className="space-y-3">
             <div>
               <label htmlFor="card_number" className="block text-sm font-medium text-stone-700 mb-1">Card number</label>
               <input
@@ -180,8 +188,7 @@ export default function Checkout() {
                 value={form.card_number}
                 onChange={(e) => setForm((f) => ({ ...f, card_number: e.target.value.replace(/\D/g, '').slice(0, 16) }))}
                 placeholder="1234 5678 9012 3456"
-                required={paymentMethod === 'card'}
-                disabled={paymentMethod !== 'card'}
+                required
                 className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -197,8 +204,7 @@ export default function Checkout() {
                   onChange={(e) => setForm((f) => ({ ...f, card_expiry: e.target.value }))}
                   placeholder="MM/YY"
                   maxLength={5}
-                  required={paymentMethod === 'card'}
-                  disabled={paymentMethod !== 'card'}
+                  required
                   className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
@@ -212,13 +218,13 @@ export default function Checkout() {
                   value={form.card_cvc}
                   onChange={(e) => setForm((f) => ({ ...f, card_cvc: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
                   placeholder="123"
-                  required={paymentMethod === 'card'}
-                  disabled={paymentMethod !== 'card'}
+                  required
                   className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
-          </div>
+            </div>
+          )}
         </div>
         <div>
           <h2 className="font-semibold text-stone-800 mb-3">Shipping address</h2>
@@ -246,16 +252,49 @@ export default function Checkout() {
               />
             </div>
             <div>
-              <label htmlFor="shipping_address" className="block text-sm font-medium text-stone-700 mb-1">Home address</label>
-              <textarea
-                id="shipping_address"
-                value={form.shipping_address}
-                onChange={(e) => setForm((f) => ({ ...f, shipping_address: e.target.value }))}
+              <label htmlFor="shipping_address_line_1" className="block text-sm font-medium text-stone-700 mb-1">Address line 1</label>
+              <input
+                id="shipping_address_line_1"
+                type="text"
+                value={form.shipping_address_line_1}
+                onChange={(e) => setForm((f) => ({ ...f, shipping_address_line_1: e.target.value }))}
                 required
-                rows={3}
-                placeholder="Street, city, postcode"
                 className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
               />
+            </div>
+            <div>
+              <label htmlFor="shipping_address_line_2" className="block text-sm font-medium text-stone-700 mb-1">Address line 2 (optional)</label>
+              <input
+                id="shipping_address_line_2"
+                type="text"
+                value={form.shipping_address_line_2}
+                onChange={(e) => setForm((f) => ({ ...f, shipping_address_line_2: e.target.value }))}
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="shipping_city" className="block text-sm font-medium text-stone-700 mb-1">City</label>
+                <input
+                  id="shipping_city"
+                  type="text"
+                  value={form.shipping_city}
+                  onChange={(e) => setForm((f) => ({ ...f, shipping_city: e.target.value }))}
+                  required
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="shipping_postcode" className="block text-sm font-medium text-stone-700 mb-1">Postcode</label>
+                <input
+                  id="shipping_postcode"
+                  type="text"
+                  value={form.shipping_postcode}
+                  onChange={(e) => setForm((f) => ({ ...f, shipping_postcode: e.target.value }))}
+                  required
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
             </div>
           </div>
         </div>

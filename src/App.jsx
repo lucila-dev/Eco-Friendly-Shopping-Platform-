@@ -10,6 +10,7 @@ const Cart = lazy(() => import('./pages/Cart'))
 const Checkout = lazy(() => import('./pages/Checkout'))
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Profile = lazy(() => import('./pages/Profile'))
 const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 const AdminProducts = lazy(() => import('./pages/AdminProducts'))
@@ -35,6 +36,7 @@ function App() {
           <Route path="checkout" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Checkout /></Suspense></ProtectedRoute>} />
           <Route path="order-confirmation/:id" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><OrderConfirmation /></Suspense></ProtectedRoute>} />
           <Route path="dashboard" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Dashboard /></Suspense></ProtectedRoute>} />
+          <Route path="profile" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Profile /></Suspense></ProtectedRoute>} />
           <Route path="login" element={<Suspense fallback={<PageFallback />}><Login /></Suspense>} />
           <Route path="signup" element={<Suspense fallback={<PageFallback />}><Signup /></Suspense>} />
           <Route path="admin/products" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><AdminProducts /></Suspense></ProtectedRoute>} />

@@ -33,6 +33,9 @@ export default function Layout() {
             <Link to="/dashboard" className="text-stone-600 hover:text-emerald-700 text-sm">
               Dashboard
             </Link>
+            <Link to="/profile" className="text-stone-600 hover:text-emerald-700 text-sm">
+              Profile
+            </Link>
             {canManageProducts && (
               <Link to="/admin/products" className="text-stone-600 hover:text-emerald-700 text-sm">
                 Dev tools
@@ -41,7 +44,7 @@ export default function Layout() {
             {isAuthenticated ? (
               <>
                 <Link
-                  to="/dashboard"
+                  to="/profile"
                   className="inline-flex items-center gap-1.5 text-stone-600 hover:text-emerald-700 text-sm"
                   aria-label="Profile"
                 >
