@@ -30,24 +30,33 @@ export default function Layout() {
                 </span>
               )}
             </Link>
-            <Link to="/dashboard" className="text-stone-600 hover:text-emerald-700 text-sm sm:text-base hidden sm:inline">
+            <Link to="/dashboard" className="text-stone-600 hover:text-emerald-700 text-sm sm:text-base">
               Dashboard
             </Link>
             {canManageProducts && (
-              <Link to="/admin/products" className="text-stone-600 hover:text-emerald-700 text-sm sm:text-base hidden sm:inline">
+              <Link to="/admin/products" className="text-stone-600 hover:text-emerald-700 text-sm sm:text-base">
                 Dev tools
               </Link>
             )}
             {isAuthenticated ? (
-              <button
-                type="button"
-                onClick={() => signOut()}
-                className="text-stone-600 hover:text-emerald-700 text-sm sm:text-base flex items-center gap-1.5"
-                aria-label="Log out"
-              >
-                <PersonIcon className="w-5 h-5 sm:hidden" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
+              <>
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-1.5 text-stone-600 hover:text-emerald-700 text-sm sm:text-base"
+                  aria-label="Profile"
+                >
+                  <PersonIcon className="w-5 h-5" />
+                  <span>Profile</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className="text-red-600 hover:text-red-700 text-sm sm:text-base flex items-center gap-1.5"
+                  aria-label="Log out"
+                >
+                  <span>Logout</span>
+                </button>
+              </>
             ) : (
               <>
                 <Link
