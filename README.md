@@ -14,7 +14,7 @@ The site works like a small e‑commerce store focused on sustainability. Users 
 - **Shopping cart and checkout** — Users can add items to a cart, change quantities, remove items, and see the total price. A mock checkout collects shipping details and (mock) card information and shows a confirmation message when the “order” is placed. No real payment is processed.
 - **User accounts** — Sign up and sign in with email and password, log out, and reset password via email. The interface includes clear options to create an account or log in.
 - **Dashboard and green impact** — Each user has a dashboard with their profile details, order history, and a summary of their cumulative environmental impact (total estimated CO₂ saved) based on the products they’ve “purchased”.
-- **Admin product management** — Administrators can add, edit, and remove products and manage sustainability data (materials, score, carbon saving) so the catalogue stays up to date.
+- **Developer/owner product management** — Owners, developers, and admins can add, edit, and remove products and manage sustainability data (materials, score, carbon saving) so the catalogue stays up to date.
 
 The design is responsive and works on desktop and mobile, with a simple layout and green-themed styling to match the sustainability focus.
 

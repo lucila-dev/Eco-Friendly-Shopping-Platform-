@@ -4,11 +4,14 @@ import { supabase } from '../lib/supabase'
 import { useProfile } from '../hooks/useProfile'
 
 export default function AdminProducts() {
-  const { isAdmin, loading: profileLoading } = useProfile()
+  const { canManageProducts, loading: profileLoading, role } = useProfile()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
+  const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState(null)
+  const [selectedIds, setSelectedIds] = useState([])
+  const [bulkDeleting, setBulkDeleting] = useState(false)
 
   useEffect(() => {
     document.title = 'Manage products – EcoShop'
@@ -36,28 +39,101 @@ export default function AdminProducts() {
     setDeletingId(null)
   }
 
-  if (profileLoading || !isAdmin) {
+  if (profileLoading || !canManageProducts) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-stone-800 mb-6">Manage products</h1>
-        {!profileLoading && !isAdmin && (
-          <p className="text-stone-600">Access denied. Only administrators can manage products.</p>
+        <h1 className="text-2xl font-bold text-stone-800 mb-6">Developer Product Management</h1>
+        {!profileLoading && !canManageProducts && (
+          <p className="text-stone-600">Access denied. Only owners/developers/admins can manage products.</p>
         )}
         {profileLoading && <p className="text-stone-500">Loading...</p>}
       </div>
     )
   }
 
+  const normalizedSearch = search.trim().toLowerCase()
+  const filteredProducts = normalizedSearch
+    ? products.filter((p) =>
+      p.name?.toLowerCase().includes(normalizedSearch) ||
+      p.slug?.toLowerCase().includes(normalizedSearch)
+    )
+    : products
+
+  const visibleIds = filteredProducts.map((p) => p.id)
+  const isAllVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id))
+
+  const toggleOne = (id) => {
+    setSelectedIds((prev) => (
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id]
+    ))
+  }
+
+  const toggleAllVisible = () => {
+    setSelectedIds((prev) => {
+      if (isAllVisibleSelected) {
+        return prev.filter((id) => !visibleIds.includes(id))
+      }
+      const merged = new Set([...prev, ...visibleIds])
+      return Array.from(merged)
+    })
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return
+    if (!confirm(`Remove ${selectedIds.length} selected product(s)?`)) return
+    setBulkDeleting(true)
+    const { error } = await supabase.from('products').delete().in('id', selectedIds)
+    if (!error) {
+      setProducts((prev) => prev.filter((p) => !selectedIds.includes(p.id)))
+      setSelectedIds([])
+    }
+    setBulkDeleting(false)
+  }
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-stone-800">Manage products</h1>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold text-stone-800">Developer Product Management</h1>
         <Link
           to="/admin/products/new"
           className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
         >
           Add product
         </Link>
+      </div>
+      <p className="text-sm text-stone-500 mb-6">Current role: {role}</p>
+      <div className="mb-4">
+        <label htmlFor="dev-product-search" className="block text-sm font-medium text-stone-700 mb-1">
+          Search product to edit
+        </label>
+        <input
+          id="dev-product-search"
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by product name or slug"
+          className="w-full max-w-md px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+        />
+      </div>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={toggleAllVisible}
+          disabled={filteredProducts.length === 0}
+          className="px-3 py-1.5 text-sm border border-stone-300 rounded-lg text-stone-700 hover:bg-stone-100 disabled:opacity-50"
+        >
+          {isAllVisibleSelected ? 'Unselect all' : 'Select all'}
+        </button>
+        <button
+          type="button"
+          onClick={handleBulkDelete}
+          disabled={selectedIds.length === 0 || bulkDeleting}
+          className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+        >
+          {bulkDeleting ? 'Deleting...' : `Delete selected (${selectedIds.length})`}
+        </button>
       </div>
       {loading ? (
         <p className="text-stone-500">Loading products...</p>
@@ -66,6 +142,14 @@ export default function AdminProducts() {
           <table className="w-full border border-stone-200 rounded-lg overflow-hidden">
             <thead className="bg-stone-100">
               <tr>
+                <th className="text-left p-3 text-stone-700 font-medium w-12">
+                  <input
+                    type="checkbox"
+                    checked={isAllVisibleSelected}
+                    onChange={toggleAllVisible}
+                    aria-label="Select all visible products"
+                  />
+                </th>
                 <th className="text-left p-3 text-stone-700 font-medium">Name</th>
                 <th className="text-left p-3 text-stone-700 font-medium">Price</th>
                 <th className="text-left p-3 text-stone-700 font-medium">Score</th>
@@ -74,8 +158,16 @@ export default function AdminProducts() {
               </tr>
             </thead>
             <tbody>
-              {products.map((p) => (
+              {filteredProducts.map((p) => (
                 <tr key={p.id} className="border-t border-stone-200">
+                  <td className="p-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(p.id)}
+                      onChange={() => toggleOne(p.id)}
+                      aria-label={`Select ${p.name}`}
+                    />
+                  </td>
                   <td className="p-3">
                     <Link to={`/products/${p.slug}`} className="text-emerald-700 hover:underline font-medium">
                       {p.name}
@@ -109,6 +201,9 @@ export default function AdminProducts() {
         </div>
       )}
       {!loading && products.length === 0 && <p className="text-stone-500 mt-4">No products yet. Add one to get started.</p>}
+      {!loading && products.length > 0 && filteredProducts.length === 0 && (
+        <p className="text-stone-500 mt-4">No products match your search.</p>
+      )}
     </div>
   )
 }

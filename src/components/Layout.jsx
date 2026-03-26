@@ -7,7 +7,7 @@ import { LeafIcon, CartIcon, PersonIcon } from './Icons'
 export default function Layout() {
   const { signOut, isAuthenticated } = useAuth()
   const { items } = useCart()
-  const { isAdmin } = useProfile()
+  const { canManageProducts } = useProfile()
   const cartCount = items.length
 
   return (
@@ -33,9 +33,9 @@ export default function Layout() {
             <Link to="/dashboard" className="text-stone-600 hover:text-emerald-700 text-sm sm:text-base hidden sm:inline">
               Dashboard
             </Link>
-            {isAdmin && (
+            {canManageProducts && (
               <Link to="/admin/products" className="text-stone-600 hover:text-emerald-700 text-sm sm:text-base hidden sm:inline">
-                Admin
+                Dev tools
               </Link>
             )}
             {isAuthenticated ? (

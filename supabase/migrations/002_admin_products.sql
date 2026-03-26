@@ -1,12 +1,23 @@
--- Run in SQL Editor to enable admin product management.
--- Then set a user as admin: UPDATE profiles SET role = 'admin' WHERE id = 'your-user-uuid';
+-- Run in SQL Editor to enable owner/developer/admin product management.
+-- Set a user role as needed:
+-- UPDATE profiles SET role = 'owner' WHERE id = 'your-user-uuid';
+-- UPDATE profiles SET role = 'developer' WHERE id = 'your-user-uuid';
+-- UPDATE profiles SET role = 'admin' WHERE id = 'your-user-uuid';
 
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'));
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'user';
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
+ALTER TABLE profiles ADD CONSTRAINT profiles_role_check CHECK (role IN ('user', 'developer', 'owner', 'admin'));
 
--- Allow admins to insert, update, delete products
-CREATE POLICY "Admins can insert products" ON products FOR INSERT
-  WITH CHECK ((SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
-CREATE POLICY "Admins can update products" ON products FOR UPDATE
-  USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
-CREATE POLICY "Admins can delete products" ON products FOR DELETE
-  USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
+DROP POLICY IF EXISTS "Admins can insert products" ON products;
+DROP POLICY IF EXISTS "Admins can update products" ON products;
+DROP POLICY IF EXISTS "Admins can delete products" ON products;
+DROP POLICY IF EXISTS "Managers can insert products" ON products;
+DROP POLICY IF EXISTS "Managers can update products" ON products;
+DROP POLICY IF EXISTS "Managers can delete products" ON products;
+
+CREATE POLICY "Managers can insert products" ON products FOR INSERT
+  WITH CHECK ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner', 'developer', 'admin'));
+CREATE POLICY "Managers can update products" ON products FOR UPDATE
+  USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner', 'developer', 'admin'));
+CREATE POLICY "Managers can delete products" ON products FOR DELETE
+  USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner', 'developer', 'admin'));

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
+const MANAGEMENT_ROLES = ['owner', 'developer', 'admin']
+
 export function useProfile() {
   const { user } = useAuth()
   const [profile, setProfile] = useState(null)
@@ -14,18 +16,38 @@ export function useProfile() {
         setLoading(false)
         return
       }
-      const { data, error } = await supabase.from('profiles').select('display_name, role').eq('id', user.id).maybeSingle()
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name, role')
+        .eq('id', user.id)
+        .maybeSingle()
+
       if (error && error.message?.includes('role')) {
-        const { data: fallback } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+        const { data: fallback } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .maybeSingle()
         setProfile(fallback ? { ...fallback, role: 'user' } : null)
       } else {
         setProfile(data ?? null)
       }
+
       setLoading(false)
     }
+
     fetchProfile()
   }, [user?.id])
 
-  const isAdmin = profile?.role === 'admin'
-  return { profile, loading, isAdmin }
+  const role = profile?.role || 'user'
+  const canManageProducts = MANAGEMENT_ROLES.includes(role)
+
+  return {
+    profile,
+    role,
+    loading,
+    canManageProducts,
+    isAdmin: canManageProducts,
+  }
 }
