@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   display_name text,
   avatar_url text,
   role text NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'developer', 'owner', 'admin')),
+  loyalty_credits numeric(10,2) NOT NULL DEFAULT 1000,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );

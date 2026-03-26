@@ -5,6 +5,7 @@
 -- UPDATE profiles SET role = 'admin' WHERE id = 'your-user-uuid';
 
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'user';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS loyalty_credits numeric(10,2) NOT NULL DEFAULT 1000;
 ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
 ALTER TABLE profiles ADD CONSTRAINT profiles_role_check CHECK (role IN ('user', 'developer', 'owner', 'admin'));
 
