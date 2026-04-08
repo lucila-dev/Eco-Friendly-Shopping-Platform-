@@ -11,6 +11,9 @@ const Checkout = lazy(() => import('./pages/Checkout'))
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Profile = lazy(() => import('./pages/Profile'))
+const Orders = lazy(() => import('./pages/Orders'))
+const Wishlist = lazy(() => import('./pages/Wishlist'))
+const About = lazy(() => import('./pages/About'))
 const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 const AdminProducts = lazy(() => import('./pages/AdminProducts'))
@@ -35,6 +38,9 @@ function App() {
           <Route path="cart" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Cart /></Suspense></ProtectedRoute>} />
           <Route path="checkout" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Checkout /></Suspense></ProtectedRoute>} />
           <Route path="order-confirmation/:id" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><OrderConfirmation /></Suspense></ProtectedRoute>} />
+          <Route path="orders" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Orders /></Suspense></ProtectedRoute>} />
+          <Route path="wishlist" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Wishlist /></Suspense></ProtectedRoute>} />
+          <Route path="about" element={<Suspense fallback={<PageFallback />}><About /></Suspense>} />
           <Route path="dashboard" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Dashboard /></Suspense></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Profile /></Suspense></ProtectedRoute>} />
           <Route path="login" element={<Suspense fallback={<PageFallback />}><Login /></Suspense>} />

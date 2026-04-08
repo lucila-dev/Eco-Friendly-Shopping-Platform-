@@ -13,6 +13,7 @@ export default function Checkout() {
   const [loadingCredits, setLoadingCredits] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [acceptTerms, setAcceptTerms] = useState(false)
   const [form, setForm] = useState({
     shipping_name: '',
     shipping_email: user?.email ?? '',
@@ -48,6 +49,10 @@ export default function Checkout() {
     setError('')
     if (items.length === 0) {
       setError('Your cart is empty.')
+      return
+    }
+    if (!acceptTerms) {
+      setError('Please accept the terms to continue.')
       return
     }
     setSubmitting(true)
@@ -127,6 +132,7 @@ export default function Checkout() {
     }
 
     await supabase.from('cart_items').delete().eq('user_id', user.id)
+    window.dispatchEvent(new Event('ecoshop-cart-updated'))
     await refetch()
     setSubmitting(false)
     navigate(`/order-confirmation/${order.id}`, { replace: true })
@@ -141,10 +147,18 @@ export default function Checkout() {
     )
   }
 
+  const deliveryFee = total >= 50 ? 0 : 4.99
+  const finalTotal = total + deliveryFee
+
   return (
-    <div className="max-w-lg">
+    <div className="max-w-lg rounded-2xl border border-emerald-200 bg-white/90 p-5 shadow-sm">
       <h1 className="text-2xl font-bold text-stone-800 mb-6">Checkout</h1>
-      <p className="text-stone-600 mb-6">Mock checkout – no real payment is processed. Use loyalty credits (recommended for testing) or card details.</p>
+      <p className="text-stone-600 mb-6">Checkout – no real payment is processed. Use loyalty credits or card details.</p>
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 mb-5 text-sm">
+        <p className="text-stone-700">Subtotal: ${total.toFixed(2)}</p>
+        <p className="text-stone-700">Delivery: {deliveryFee === 0 ? 'Free' : `$${deliveryFee.toFixed(2)}`}</p>
+        <p className="text-stone-800 font-semibold mt-1">Total to pay: ${finalTotal.toFixed(2)}</p>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <h2 className="font-semibold text-stone-800 mb-3">Payment details</h2>
@@ -298,7 +312,11 @@ export default function Checkout() {
             </div>
           </div>
         </div>
-        <p className="text-stone-700 font-medium">Total: ${total.toFixed(2)}</p>
+        <label className="flex items-start gap-2 text-sm text-stone-700">
+          <input type="checkbox" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="mt-0.5" />
+          <span>I agree to the delivery, returns, and privacy policies.</span>
+        </label>
+        <p className="text-stone-700 font-medium">Total: ${finalTotal.toFixed(2)}</p>
         {error && <p className="text-red-600 text-sm">{error}</p>}
         <button
           type="submit"

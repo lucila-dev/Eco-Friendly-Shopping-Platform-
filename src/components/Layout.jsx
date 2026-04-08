@@ -2,25 +2,28 @@ import { Outlet, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../hooks/useCart'
 import { useProfile } from '../hooks/useProfile'
-import { LeafIcon, CartIcon, PersonIcon } from './Icons'
+import { CartIcon, PersonIcon } from './Icons'
 
 export default function Layout() {
   const { signOut, isAuthenticated } = useAuth()
   const { items } = useCart()
   const { canManageProducts } = useProfile()
-  const cartCount = items.length
+  const cartCount = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-50">
-      <header className="border-b border-stone-200 bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <header className="border-b border-emerald-200 bg-gradient-to-r from-white via-emerald-50 to-teal-50 shadow-sm sticky top-0 z-10">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 text-emerald-800 hover:text-emerald-700 shrink-0">
-            <LeafIcon className="w-7 h-7 text-emerald-600" />
+            <img src="/favicon.svg" alt="" aria-hidden="true" className="w-7 h-7" />
             <span className="text-xl font-semibold">EcoShop</span>
           </Link>
           <nav className="w-full sm:w-auto flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-6">
             <Link to="/products" className="text-stone-600 hover:text-emerald-700 text-sm">
               Products
+            </Link>
+            <Link to="/about" className="text-stone-600 hover:text-emerald-700 text-sm">
+              About
             </Link>
             <Link to="/cart" className="relative flex items-center text-stone-600 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-stone-100" aria-label="Shopping cart">
               <CartIcon className="w-6 h-6" />
@@ -30,11 +33,13 @@ export default function Layout() {
                 </span>
               )}
             </Link>
+            {isAuthenticated && (
+              <Link to="/wishlist" className="text-stone-600 hover:text-emerald-700 text-sm">
+                Wishlist
+              </Link>
+            )}
             <Link to="/dashboard" className="text-stone-600 hover:text-emerald-700 text-sm">
               Dashboard
-            </Link>
-            <Link to="/profile" className="text-stone-600 hover:text-emerald-700 text-sm">
-              Profile
             </Link>
             {canManageProducts && (
               <Link to="/admin/products" className="text-stone-600 hover:text-emerald-700 text-sm">
@@ -49,7 +54,6 @@ export default function Layout() {
                   aria-label="Profile"
                 >
                   <PersonIcon className="w-5 h-5" />
-                  <span>Profile</span>
                 </Link>
                 <button
                   type="button"
@@ -78,11 +82,11 @@ export default function Layout() {
           </nav>
         </div>
       </header>
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-6 sm:py-8">
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 text-[15px] sm:text-base">
         <Outlet />
       </main>
-      <footer className="border-t border-stone-200 bg-white py-6 mt-auto">
-        <div className="max-w-6xl mx-auto px-4 text-center text-stone-500 text-sm">
+      <footer className="border-t border-emerald-200 bg-gradient-to-r from-white to-emerald-50 py-6 mt-auto">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center text-stone-500 text-sm">
           EcoShop – Sustainable shopping for a greener future.
         </div>
       </footer>

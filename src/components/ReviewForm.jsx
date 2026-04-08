@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
-export default function ReviewForm({ productId, onSubmitted }) {
+export default function ReviewForm({ productId, canReview, onSubmitted }) {
   const [rating, setRating] = useState(5)
   const [body, setBody] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -10,6 +10,14 @@ export default function ReviewForm({ productId, onSubmitted }) {
   const { user } = useAuth()
 
   if (!user) return null
+  if (!canReview) {
+    return (
+      <div className="mt-4 p-4 bg-stone-50 rounded-lg">
+        <h3 className="font-medium text-stone-800 mb-1">Write a review</h3>
+        <p className="text-sm text-stone-600">You can review this product after you buy it.</p>
+      </div>
+    )
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()

@@ -73,6 +73,21 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-12 sm:mb-16">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+          <p className="text-sm font-semibold text-stone-800">Free delivery over $50</p>
+          <p className="text-xs text-stone-500 mt-1">Automatic at checkout.</p>
+        </div>
+        <div className="rounded-lg border border-teal-200 bg-teal-50 p-4">
+          <p className="text-sm font-semibold text-stone-800">Tracked orders</p>
+          <p className="text-xs text-stone-500 mt-1">Live status in your dashboard.</p>
+        </div>
+        <div className="rounded-lg border border-lime-200 bg-lime-50 p-4">
+          <p className="text-sm font-semibold text-stone-800">30-day returns</p>
+          <p className="text-xs text-stone-500 mt-1">Simple and transparent policy.</p>
+        </div>
+      </section>
+
       {/* Our Environmental Commitment */}
       <section className="mb-12 sm:mb-16">
         <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 text-center mb-2">
@@ -85,7 +100,7 @@ export default function Home() {
           {COMMITMENTS.map(({ title, description, Icon }) => (
             <div
               key={title}
-              className="rounded-xl border border-stone-200 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow"
+              className="rounded-xl border border-emerald-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all"
             >
               <div className="flex items-center gap-3 mb-3">
                 <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700">
@@ -110,7 +125,7 @@ export default function Home() {
             <Link
               key={cat.id}
               to={`/products?category=${cat.slug}`}
-              className="block rounded-xl border border-stone-200 bg-white p-5 hover:border-emerald-300 hover:shadow-md transition-all group"
+              className="block rounded-xl border border-emerald-100 bg-white p-5 hover:border-emerald-300 hover:shadow-md transition-all group"
             >
               <h3 className="font-semibold text-stone-800 group-hover:text-emerald-700">{cat.name}</h3>
               {cat.description && (

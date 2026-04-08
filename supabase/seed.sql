@@ -75,20 +75,132 @@ WITH category_map AS (
       END || ' ' || (ARRAY['Core', 'Plus', 'Premium'])[((n - 1) / 7) + 1] AS item_name,
       'Category-specific sustainable product designed for lower-impact everyday use.' AS item_description,
       CASE c.slug
-        WHEN 'fashion' THEN (ARRAY['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400','https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400','https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400','https://images.unsplash.com/photo-1445205170230-053b83016050?w=400','https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400','https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'home' THEN (ARRAY['https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400','https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=400','https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400','https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=400','https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?w=400','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'personal-care' THEN (ARRAY['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400','https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400','https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?w=400','https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400','https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400','https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'kitchen' THEN (ARRAY['https://images.unsplash.com/photo-1594489572280-6f0112d438f9?w=400','https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400','https://images.unsplash.com/photo-1516594798947-e65505dbb29d?w=400','https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=400','https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400','https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'beauty' THEN (ARRAY['https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400','https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400','https://images.unsplash.com/photo-1617897903246-719242758050?w=400','https://images.unsplash.com/photo-1583241800698-d4b7f1d3e6b5?w=400','https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400','https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'outdoors' THEN (ARRAY['https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=400','https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=400','https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400','https://images.unsplash.com/photo-1501554728187-ce583db33af7?w=400','https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=400','https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'kids' THEN (ARRAY['https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=400','https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?w=400','https://images.unsplash.com/photo-1542838132-92c53300491e?w=400','https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400','https://images.unsplash.com/photo-1519340333755-c6e9f6b88a45?w=400','https://images.unsplash.com/photo-1522771930-78848d9293e8?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'office' THEN (ARRAY['https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400','https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=400','https://images.unsplash.com/photo-1497366216548-37526070297c?w=400','https://images.unsplash.com/photo-1545239351-1141bd82e8a6?w=400','https://images.unsplash.com/photo-1487014679447-9f8336841d58?w=400','https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'tech' THEN (ARRAY['https://images.unsplash.com/photo-1518770660439-4636190af475?w=400','https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400','https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=400','https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400','https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400','https://images.unsplash.com/photo-1580894908361-967195033215?w=400'])[((n - 1) % 6) + 1]
-        WHEN 'garden' THEN (ARRAY['https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400','https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400','https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=400','https://images.unsplash.com/photo-1463320726281-696a485928c7?w=400','https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400','https://images.unsplash.com/photo-1492496913980-501348b61469?w=400'])[((n - 1) % 6) + 1]
+        WHEN 'fashion' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+          'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400',
+          'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400',
+          'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400',
+          'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400',
+          'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400',
+          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'home' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=400',
+          'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400',
+          'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400',
+          'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=400',
+          'https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?w=400',
+          'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400',
+          'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'personal-care' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400',
+          'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
+          'https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?w=400',
+          'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400',
+          'https://images.unsplash.com/photo-1559591935-c6c23a6f3bce?w=400',
+          'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400',
+          'https://images.unsplash.com/photo-1607006483224-5340f1e9d2b7?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'kitchen' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1594489572280-6f0112d438f9?w=400',
+          'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
+          'https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=400',
+          'https://images.unsplash.com/photo-1516594798947-e65505dbb29d?w=400',
+          'https://images.unsplash.com/photo-1525328437458-0c4d4db7cab4?w=400',
+          'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400',
+          'https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'beauty' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400',
+          'https://images.unsplash.com/photo-1583241800698-d4b7f1d3e6b5?w=400',
+          'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400',
+          'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400',
+          'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400',
+          'https://images.unsplash.com/photo-1617897903246-719242758050?w=400',
+          'https://images.unsplash.com/photo-1580870069867-74c57ee1bb07?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'outdoors' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=400',
+          'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=400',
+          'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400',
+          'https://images.unsplash.com/photo-1499696010181-529a2df2828b?w=400',
+          'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=400',
+          'https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=400',
+          'https://images.unsplash.com/photo-1455218873509-8097305ee378?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'kids' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=400',
+          'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400',
+          'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400',
+          'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400',
+          'https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?w=400',
+          'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=400',
+          'https://images.unsplash.com/photo-1519340333755-c6e9f6b88a45?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'office' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=400',
+          'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
+          'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400',
+          'https://images.unsplash.com/photo-1508780709619-79562169bc64?w=400',
+          'https://images.unsplash.com/photo-1487014679447-9f8336841d58?w=400',
+          'https://images.unsplash.com/photo-1456324504439-367cee3b3c32?w=400',
+          'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'tech' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400',
+          'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
+          'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=400',
+          'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=400',
+          'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400',
+          'https://images.unsplash.com/photo-1580894908361-967195033215?w=400',
+          'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?w=400'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'garden' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400',
+          'https://images.unsplash.com/photo-1463320726281-696a485928c7?w=400',
+          'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
+          'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=400',
+          'https://images.unsplash.com/photo-1492496913980-501348b61469?w=400',
+          'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=400',
+          'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400'
+        ])[((n - 1) % 7) + 1]
       END AS image_url
   ) t
 )
 INSERT INTO products (category_id, name, slug, description, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg)
 SELECT category_id, name, slug, description, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg
 FROM generated
-ON CONFLICT (slug) DO NOTHING;
+ON CONFLICT (slug) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  image_url = EXCLUDED.image_url,
+  materials = EXCLUDED.materials,
+  sustainability_score = EXCLUDED.sustainability_score,
+  carbon_footprint_saving_kg = EXCLUDED.carbon_footprint_saving_kg;
+
+-- Enforce stronger name-to-image matching for generated catalog items
+UPDATE products
+SET image_url = CASE
+  WHEN name ILIKE '%Backpack%' THEN 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200'
+  WHEN name ILIKE '%Onesie%' THEN 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=1200'
+  WHEN name ILIKE '%Jacket%' THEN 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200'
+  WHEN name ILIKE '%Tee%' OR name ILIKE '%Shirt%' THEN 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200'
+  WHEN name ILIKE '%Sneakers%' THEN 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200'
+  WHEN name ILIKE '%Bottle%' THEN 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=1200'
+  WHEN name ILIKE '%Lantern%' THEN 'https://images.unsplash.com/photo-1520962880247-cfaf541c8724?w=1200'
+  WHEN name ILIKE '%Yoga Mat%' THEN 'https://images.unsplash.com/photo-1592432678016-e910b452f9a2?w=1200'
+  WHEN name ILIKE '%Toothbrush%' THEN 'https://images.unsplash.com/photo-1559591935-c6c23a6f3bce?w=1200'
+  WHEN name ILIKE '%Toothpaste%' THEN 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=1200'
+  WHEN name ILIKE '%Shampoo%' OR name ILIKE '%Conditioner%' THEN 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1200'
+  WHEN name ILIKE '%Straw%' THEN 'https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=1200'
+  WHEN name ILIKE '%Utensils%' OR name ILIKE '%Cutlery%' THEN 'https://images.unsplash.com/photo-1594489572280-6f0112d438f9?w=1200'
+  WHEN name ILIKE '%Vase%' THEN 'https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=1200'
+  WHEN name ILIKE '%Planter%' OR name ILIKE '%Pots%' OR name ILIKE '%Garden%' THEN 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1200'
+  WHEN name ILIKE '%Notebook%' OR name ILIKE '%Planner%' OR name ILIKE '%Pen%' THEN 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=1200'
+  WHEN name ILIKE '%Phone Case%' OR name ILIKE '%Laptop Sleeve%' OR name ILIKE '%Power Bank%' THEN 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200'
+  WHEN name ILIKE '%Lip Balm%' OR name ILIKE '%Mascara%' OR name ILIKE '%Blush%' OR name ILIKE '%Makeup%' THEN 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200'
+  ELSE image_url
+END
+WHERE slug LIKE '%-core-%' OR slug LIKE '%-plus-%' OR slug LIKE '%-premium-%';

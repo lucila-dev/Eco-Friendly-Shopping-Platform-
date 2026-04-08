@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { LOYALTY_POINTS_PER_DOLLAR, loyaltyCreditsToMoney, formatMoneyUsd } from '../lib/loyaltyValue'
 
 export default function Profile() {
   const { user } = useAuth()
@@ -35,6 +36,8 @@ export default function Profile() {
   if (loading) return <p className="text-stone-500">Loading profile...</p>
 
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User'
+  const loyaltyBalance = Number(profile?.loyalty_credits ?? 1000)
+  const redeemApproxUsd = loyaltyCreditsToMoney(loyaltyBalance)
 
   const saveProfile = async (e) => {
     e.preventDefault()
@@ -99,9 +102,15 @@ export default function Profile() {
             <p className="text-stone-500 text-sm mt-1">{user?.email}</p>
             <p className="text-stone-500 text-sm mt-1">Member since: {new Date(user?.created_at || Date.now()).toLocaleDateString()}</p>
 
-            <div className="mt-3 inline-flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2">
-              <span className="text-emerald-700 font-semibold">Loyalty card</span>
-              <span className="text-emerald-800 text-sm">Credits: {Number(profile?.loyalty_credits ?? 1000).toFixed(2)}</span>
+            <div className="mt-3 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 max-w-md shadow-md border border-emerald-500/40">
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-100/90">EcoShop loyalty</p>
+              <p className="text-2xl font-bold mt-1 tabular-nums">{loyaltyBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })} pts</p>
+              <p className="text-sm text-emerald-50 mt-2">
+                {LOYALTY_POINTS_PER_DOLLAR} points = {formatMoneyUsd(1)} at checkout (demo rate).
+              </p>
+              <p className="text-sm font-medium mt-1">
+                Balance worth about <span className="tabular-nums">{formatMoneyUsd(redeemApproxUsd)}</span> off eligible orders.
+              </p>
             </div>
 
             <form onSubmit={saveProfile} className="mt-4 space-y-3">

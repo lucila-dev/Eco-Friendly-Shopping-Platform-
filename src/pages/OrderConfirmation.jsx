@@ -33,13 +33,13 @@ export default function OrderConfirmation() {
   if (!order) return <p className="text-stone-600">Order not found.</p>
 
   return (
-    <div className="max-w-lg text-center">
+    <div className="max-w-lg mx-auto text-center">
       <h1 className="text-2xl font-bold text-stone-800 mb-2">Thank you for your order</h1>
       <p className="text-stone-600 mb-4">
         Order <span className="font-mono text-stone-800">{order.id.slice(0, 8)}...</span> has been placed.
       </p>
       <p className="text-emerald-700 font-medium mb-6">Total: ${Number(order.total_amount).toFixed(2)}</p>
-      <Link to="/dashboard" className="text-emerald-600 hover:underline">View in dashboard</Link>
+      <Link to="/orders" className="text-emerald-600 hover:underline">Track order</Link>
       <span className="mx-2 text-stone-400">|</span>
       <Link to="/products" className="text-emerald-600 hover:underline">Continue shopping</Link>
     </div>

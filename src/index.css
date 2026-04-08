@@ -3,4 +3,11 @@
 body {
   margin: 0;
   min-height: 100vh;
+  background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 18%, #f8fafc 100%);
+  color: #1c1917;
+}
+
+::selection {
+  background: #86efac;
+  color: #14532d;
 }

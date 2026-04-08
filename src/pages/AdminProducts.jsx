@@ -169,9 +169,16 @@ export default function AdminProducts() {
                     />
                   </td>
                   <td className="p-3">
-                    <Link to={`/products/${p.slug}`} className="text-emerald-700 hover:underline font-medium">
-                      {p.name}
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={p.image_url || '/placeholder.svg'}
+                        alt={p.name}
+                        className="w-10 h-10 rounded-md object-cover border border-stone-200"
+                      />
+                      <Link to={`/products/${p.slug}`} className="text-emerald-700 hover:underline font-medium">
+                        {p.name}
+                      </Link>
+                    </div>
                   </td>
                   <td className="p-3 text-stone-600">${Number(p.price).toFixed(2)}</td>
                   <td className="p-3 text-stone-600">{p.sustainability_score ?? '–'}/10</td>

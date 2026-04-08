@@ -23,6 +23,7 @@ export default function ProductList() {
   const [priceMin, setPriceMin] = useState(searchParams.get('priceMin') || '')
   const [priceMax, setPriceMax] = useState(searchParams.get('priceMax') || '')
   const [scoreMin, setScoreMin] = useState(searchParams.get('scoreMin') || '')
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest')
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
@@ -48,16 +49,20 @@ export default function ProductList() {
     setPage(0)
     setProducts([])
     setHasMore(true)
-  }, [selectedCategoryId, search, priceMin, priceMax, scoreMin])
+  }, [selectedCategoryId, search, priceMin, priceMax, scoreMin, sortBy])
 
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true)
       let query = supabase
         .from('products')
-        .select('id, name, slug, price, image_url, sustainability_score', { count: 'exact' })
-        .order('created_at', { ascending: false })
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg', { count: 'exact' })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+
+      if (sortBy === 'price-asc') query = query.order('price', { ascending: true })
+      else if (sortBy === 'price-desc') query = query.order('price', { ascending: false })
+      else if (sortBy === 'score-desc') query = query.order('sustainability_score', { ascending: false })
+      else query = query.order('created_at', { ascending: false })
 
       if (selectedCategoryId) {
         query = query.eq('category_id', selectedCategoryId)
@@ -89,7 +94,7 @@ export default function ProductList() {
       setLoading(false)
     }
     fetchProducts()
-  }, [selectedCategoryId, search, priceMin, priceMax, scoreMin, page])
+  }, [selectedCategoryId, search, priceMin, priceMax, scoreMin, sortBy, page])
 
   const applyFilters = () => {
     const next = new URLSearchParams(searchParams)
@@ -101,6 +106,8 @@ export default function ProductList() {
     else next.delete('priceMax')
     if (scoreMin !== '') next.set('scoreMin', scoreMin)
     else next.delete('scoreMin')
+    if (sortBy && sortBy !== 'newest') next.set('sort', sortBy)
+    else next.delete('sort')
     setSearchParams(next, { replace: true })
   }
 
@@ -109,7 +116,7 @@ export default function ProductList() {
       <h1 className="text-2xl font-bold text-stone-800 mb-6">Products</h1>
 
       {/* Search */}
-      <div className="flex flex-wrap items-end gap-3 mb-4">
+      <div className="flex flex-wrap items-end gap-3 mb-4 rounded-xl border border-emerald-200 bg-gradient-to-r from-white to-emerald-50 p-3">
         <div className="flex-1 min-w-[200px]">
           <label htmlFor="search" className="block text-sm font-medium text-stone-700 mb-1">Search by name</label>
           <input
@@ -162,6 +169,20 @@ export default function ProductList() {
               className="w-20 px-2 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
             />
           </div>
+          <div>
+            <label htmlFor="sortBy" className="block text-sm font-medium text-stone-700 mb-1">Sort by</label>
+            <select
+              id="sortBy"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-2 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-sm"
+            >
+              <option value="newest">Newest</option>
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
+              <option value="score-desc">Sustainability: high first</option>
+            </select>
+          </div>
           <button
             type="button"
             onClick={applyFilters}
@@ -186,14 +207,14 @@ export default function ProductList() {
             key={cat.id}
             type="button"
             onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), category: cat.slug })}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${selectedCategoryId === cat.id ? 'bg-emerald-600 text-white' : 'bg-stone-200 text-stone-700'}`}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${selectedCategoryId === cat.id ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
           >
             {cat.name}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
+const CART_UPDATED_EVENT = 'ecoshop-cart-updated'
+
 export function useCart() {
   const { user } = useAuth()
   const [items, setItems] = useState([])
@@ -49,14 +51,24 @@ export function useCart() {
     }
   }, [user?.id])
 
+  useEffect(() => {
+    const onCartUpdated = () => {
+      fetchCart()
+    }
+    window.addEventListener(CART_UPDATED_EVENT, onCartUpdated)
+    return () => window.removeEventListener(CART_UPDATED_EVENT, onCartUpdated)
+  }, [user?.id])
+
   const updateQuantity = async (cartItemId, quantity) => {
     if (quantity < 1) return
     await supabase.from('cart_items').update({ quantity }).eq('id', cartItemId)
+    window.dispatchEvent(new Event(CART_UPDATED_EVENT))
     await fetchCart()
   }
 
   const removeItem = async (cartItemId) => {
     await supabase.from('cart_items').delete().eq('id', cartItemId)
+    window.dispatchEvent(new Event(CART_UPDATED_EVENT))
     await fetchCart()
   }
 

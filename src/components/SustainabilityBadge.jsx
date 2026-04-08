@@ -1,8 +1,9 @@
+import { getProductMetrics } from '../lib/productMetrics'
+
 export default function SustainabilityBadge({ product }) {
-  const score = product.sustainability_score ?? 0
+  const { displayScore: score, displayCarbon: carbonSaving } = getProductMetrics(product)
   const maxScore = 10
   const materials = product.materials || 'Not specified'
-  const carbonSaving = product.carbon_footprint_saving_kg ?? 0
 
   return (
     <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 space-y-3">
