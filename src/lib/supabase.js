@@ -1,10 +1,43 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// src/lib/supabase.js
+import { createClient } from '@supabase/supabase-js'
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Create a .env file with these variables.')
+const supabaseUrl = "https://bzriqjatqnydrgnrwngb.supabase.co"
+const supabaseAnonKey = "sb_publishable_93qzdvN8hldL_myVn7OGGQ_9bkAXzH_"
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+export async function signUp(email, password) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  })
+
+  if (error) {
+    console.error(error)
+    return null
+  }
+
+  return data
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
+export async function login(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (error) {
+    console.error(error)
+    return null
+  }
+
+  return data
+}
+
+export async function logout() {
+  await supabase.auth.signOut()
+}
+
+
