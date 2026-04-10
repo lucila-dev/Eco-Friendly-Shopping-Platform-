@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
-function MailIcon({ className = 'w-5 h-5' }) {
+function MailIcon({ className = 'w-4 h-4' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
@@ -11,7 +11,7 @@ function MailIcon({ className = 'w-5 h-5' }) {
   )
 }
 
-function LockIcon({ className = 'w-5 h-5' }) {
+function LockIcon({ className = 'w-4 h-4' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <rect x="4" y="11" width="16" height="10" rx="2" ry="2" />
@@ -58,26 +58,26 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] w-full flex items-center justify-center px-4 py-6 sm:py-10">
-      <div className="w-full max-w-md rounded-2xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-6 py-8 sm:px-8 sm:py-9 shadow-md dark:shadow-lg dark:shadow-black/25">
-        <div className="mb-6 flex flex-col items-center">
-          <img src="/favicon-96x96.png" alt="EcoShop" className="mb-3 h-14 w-14 sm:h-16 sm:w-16" />
-          <h1 className="text-3xl sm:text-4xl font-bold leading-tight text-stone-900 dark:text-stone-50 text-center">
+    <div className="min-h-[calc(100vh-7rem)] w-full flex items-center justify-center px-4 py-4 sm:py-6">
+      <div className="w-full max-w-sm mx-auto rounded-xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-5 py-6 shadow-md dark:shadow-lg dark:shadow-black/25">
+        <div className="mb-4 flex flex-col items-center text-center">
+          <img src="/favicon-96x96.png" alt="" className="mb-2 h-10 w-10 sm:h-11 sm:w-11" />
+          <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-stone-900 dark:text-stone-50">
             {forgotMode ? 'Reset Password' : 'Welcome Back'}
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-stone-500 dark:text-stone-400 text-center max-w-sm">
+          <p className="mt-1 text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-[18rem]">
             {forgotMode
               ? 'Enter your email and we will send you a reset link'
               : 'Sign in to continue your sustainable shopping journey'}
           </p>
         </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+          <label htmlFor="email" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
             Email
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-stone-400 dark:text-stone-500">
+            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
               <MailIcon />
             </span>
             <input
@@ -86,18 +86,18 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-12 pr-4 text-sm sm:text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-sm text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
               placeholder="Enter your email"
             />
           </div>
         </div>
         {!forgotMode && (
           <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+            <label htmlFor="password" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
               Password
             </label>
             <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-stone-400 dark:text-stone-500">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
                 <LockIcon />
               </span>
               <input
@@ -107,44 +107,44 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-12 pr-4 text-sm sm:text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-sm text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
                 placeholder="Enter your password"
               />
             </div>
           </div>
         )}
-        {error && <p className="text-red-600 dark:text-red-400 text-sm sm:text-base">{error}</p>}
-        {success && <p className="text-emerald-600 dark:text-emerald-400 text-sm sm:text-base">{success}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-xs sm:text-sm">{error}</p>}
+        {success && <p className="text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">{success}</p>}
         <button
           type="submit"
-          className="mt-1 w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base font-semibold text-white transition hover:bg-emerald-700 shadow-md"
+          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
         >
           {forgotMode ? 'Send Reset Link' : 'Sign In'}
         </button>
       </form>
       {!forgotMode && (
-        <p className="mt-6 text-center">
+        <p className="mt-4 text-center">
           <button
             type="button"
             onClick={() => setForgotMode(true)}
-            className="text-sm sm:text-base font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+            className="text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
           >
             Forgot password?
           </button>
         </p>
       )}
       {forgotMode && (
-        <p className="mt-6 text-center">
+        <p className="mt-4 text-center">
           <button
             type="button"
             onClick={() => setForgotMode(false)}
-            className="text-sm sm:text-base text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400"
+            className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400"
           >
             Back to sign in
           </button>
         </p>
       )}
-      <p className="mt-6 text-center text-sm sm:text-base text-stone-500 dark:text-stone-400">
+      <p className="mt-4 text-center text-xs sm:text-sm text-stone-500 dark:text-stone-400">
         Don’t have an account?{' '}
         <Link to="/signup" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
           Create Account
