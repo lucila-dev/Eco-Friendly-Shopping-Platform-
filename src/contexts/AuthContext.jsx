@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, deleteCurrentAuthUser } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
@@ -41,6 +41,8 @@ export function AuthProvider({ children }) {
     await supabase.auth.signOut()
   }
 
+  const deleteAccount = async (credentials) => deleteCurrentAuthUser(credentials)
+
   const resetPassword = async (email) => {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/login`,
@@ -55,6 +57,7 @@ export function AuthProvider({ children }) {
     signUp,
     signIn,
     signOut,
+    deleteAccount,
     resetPassword,
     isAuthenticated: !!user,
   }

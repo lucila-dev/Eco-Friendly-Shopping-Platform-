@@ -21,6 +21,7 @@ export function useCart() {
       .select(`
         id,
         product_id,
+        size,
         quantity,
         products ( id, name, slug, price, image_url )
       `)

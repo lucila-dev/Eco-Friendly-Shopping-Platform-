@@ -16,7 +16,7 @@ const OVERRIDES = [
   { match: /lip balm|mascara|blush|makeup/i, url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200' },
 ]
 
-const CATEGORY_DEFAULTS = {
+export const CATEGORY_DEFAULTS = {
   fashion: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200',
   home: 'https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=1200',
   'personal-care': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1200',
@@ -29,7 +29,38 @@ const CATEGORY_DEFAULTS = {
   garden: 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1200',
 }
 
-export function getProductImage({ name = '', slug = '', image_url = '' }) {
+const CATEGORY_FALLBACK =
+  'https://images.unsplash.com/photo-1473341308940-3f45f58a8327?w=1200'
+
+/** Cover image for category cards on Home (by category slug). */
+export function getCategoryImage(slug = '') {
+  const s = String(slug ?? '').toLowerCase().trim()
+  if (!s) return CATEGORY_FALLBACK
+  if (CATEGORY_DEFAULTS[s]) return CATEGORY_DEFAULTS[s]
+  const parts = s.split('-').filter(Boolean)
+  if (parts.length >= 2) {
+    const two = `${parts[0]}-${parts[1]}`
+    if (CATEGORY_DEFAULTS[two]) return CATEGORY_DEFAULTS[two]
+  }
+  if (parts[0] && CATEGORY_DEFAULTS[parts[0]]) return CATEGORY_DEFAULTS[parts[0]]
+  return CATEGORY_FALLBACK
+}
+
+function hasStoredImageUrl(image_url) {
+  const t = String(image_url || '').trim()
+  return t.length > 0 && (/^https?:\/\//i.test(t) || t.startsWith('//'))
+}
+
+export function getProductImage(input = {}) {
+  const name = String(input?.name ?? '')
+  const slug = String(input?.slug ?? '')
+  const image_url = input?.image_url
+
+  if (hasStoredImageUrl(image_url)) {
+    const t = String(image_url).trim()
+    return t.startsWith('//') ? `https:${t}` : t
+  }
+
   const key = `${name} ${slug}`
   const hit = OVERRIDES.find((rule) => rule.match.test(key))
   if (hit?.url) return hit.url
@@ -47,5 +78,6 @@ export function getProductImage({ name = '', slug = '', image_url = '' }) {
   const firstSegment = slug.split('-')[0]
   if (CATEGORY_DEFAULTS[firstSegment]) return CATEGORY_DEFAULTS[firstSegment]
 
-  return image_url || '/placeholder.svg'
+  const fallback = image_url != null ? String(image_url).trim() : ''
+  return fallback || '/placeholder.svg'
 }
