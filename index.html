@@ -2,9 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EcoShop – Sustainable Shopping</title>
+    <script>
+      (function () {
+        try {
+          var pref = localStorage.getItem('ecoshop-theme') || 'system'
+          var dark =
+            pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.classList.toggle('dark', dark)
+          document.documentElement.classList.toggle('ecoshop-reduce-motion', localStorage.getItem('ecoshop-reduced-motion') === '1')
+          document.documentElement.classList.toggle('ecoshop-comfortable-text', localStorage.getItem('ecoshop-large-text') === '1')
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
