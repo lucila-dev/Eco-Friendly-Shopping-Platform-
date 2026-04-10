@@ -55,9 +55,10 @@ CREATE TABLE IF NOT EXISTS cart_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   product_id uuid NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  size text NOT NULL DEFAULT '',
   quantity int NOT NULL DEFAULT 1 CHECK (quantity > 0),
   created_at timestamptz DEFAULT now(),
-  UNIQUE(user_id, product_id)
+  UNIQUE(user_id, product_id, size)
 );
 
 CREATE INDEX IF NOT EXISTS idx_cart_items_user ON cart_items(user_id);
@@ -81,6 +82,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id uuid NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   product_id uuid NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  selected_size text,
   quantity int NOT NULL CHECK (quantity > 0),
   price_at_order decimal(10,2) NOT NULL,
   carbon_saving_kg decimal(10,2) NOT NULL DEFAULT 0,

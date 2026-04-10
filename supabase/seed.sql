@@ -7,11 +7,10 @@ INSERT INTO categories (id, name, slug, description) VALUES
   ('a1b2c3d4-0003-4000-8000-000000000003', 'Personal Care', 'personal-care', 'Natural and low-waste personal care'),
   ('a1b2c3d4-0004-4000-8000-000000000004', 'Kitchen', 'kitchen', 'Low-waste and reusable kitchen essentials'),
   ('a1b2c3d4-0005-4000-8000-000000000005', 'Beauty', 'beauty', 'Clean beauty and sustainable cosmetics'),
-  ('a1b2c3d4-0006-4000-8000-000000000006', 'Outdoors', 'outdoors', 'Sustainable products for outdoor lifestyles'),
+  ('a1b2c3d4-0006-4000-8000-000000000006', 'Garden & Outdoors', 'outdoors', 'Gear for trails and yards—low-impact choices for outside the home'),
   ('a1b2c3d4-0007-4000-8000-000000000007', 'Kids', 'kids', 'Eco-friendly items for babies and children'),
   ('a1b2c3d4-0008-4000-8000-000000000008', 'Office', 'office', 'Sustainable office and study supplies'),
-  ('a1b2c3d4-0009-4000-8000-000000000009', 'Tech', 'tech', 'Energy-efficient and responsible tech accessories'),
-  ('a1b2c3d4-0010-4000-8000-000000000010', 'Garden', 'garden', 'Eco-conscious gardening products')
+  ('a1b2c3d4-0009-4000-8000-000000000009', 'Tech', 'tech', 'Energy-efficient and responsible tech accessories')
 ON CONFLICT (id) DO NOTHING;
 
 -- Starter products
@@ -28,34 +27,44 @@ ON CONFLICT (slug) DO NOTHING;
 DELETE FROM products
 WHERE slug LIKE '%-eco-product-%';
 
--- Generate 210 category-specific products across 10 categories (21 per category)
+-- Generate 189 category-specific products across 9 categories (21 per category)
 WITH category_map AS (
-  SELECT id, slug,
-    CASE slug
-      WHEN 'fashion' THEN 'Organic cotton, hemp blend'
-      WHEN 'home' THEN 'Recycled glass, FSC wood'
-      WHEN 'personal-care' THEN 'Plant oils, natural extracts'
-      WHEN 'kitchen' THEN 'Bamboo, stainless steel'
-      WHEN 'beauty' THEN 'Vegan waxes, mineral pigments'
-      WHEN 'outdoors' THEN 'Recycled nylon, cork'
-      WHEN 'kids' THEN 'Organic cotton, natural rubber'
-      WHEN 'office' THEN 'Recycled paper, bamboo fiber'
-      WHEN 'tech' THEN 'Recycled aluminum, bio-plastic'
-      WHEN 'garden' THEN 'Compostable fiber, reclaimed wood'
-      ELSE 'Recycled materials'
-    END AS materials
+  SELECT id, slug
   FROM categories
-  WHERE slug IN ('fashion','home','personal-care','kitchen','beauty','outdoors','kids','office','tech','garden')
+  WHERE slug IN ('fashion','home','personal-care','kitchen','beauty','outdoors','kids','office','tech')
 ), generated AS (
   SELECT
     c.id AS category_id,
     t.item_name AS name,
     c.slug || '-' || regexp_replace(lower(t.item_name), '[^a-z0-9]+', '-', 'g') || '-' || n AS slug,
     t.item_description AS description,
-    round((9 + (n % 50) * 1.35)::numeric, 2) AS price,
+    round((
+      (CASE c.slug
+        WHEN 'office' THEN
+          2.49::numeric + (mod(n, 11)) * 1.05 + least(2, (n - 1) / 7) * 3.5
+        WHEN 'kids' THEN
+          7.99 + (mod(n, 12)) * 2.05 + least(2, (n - 1) / 7) * 6.0
+        WHEN 'personal-care' THEN
+          6.49 + (mod(n, 12)) * 2.2 + least(2, (n - 1) / 7) * 5.5
+        WHEN 'kitchen' THEN
+          9.99 + (mod(n, 12)) * 2.65 + least(2, (n - 1) / 7) * 8.0
+        WHEN 'beauty' THEN
+          8.99 + (mod(n, 12)) * 2.85 + least(2, (n - 1) / 7) * 9.0
+        WHEN 'outdoors' THEN
+          10.99 + (mod(n, 14)) * 3.1 + least(2, (n - 1) / 7) * 10.0
+        WHEN 'home' THEN
+          12.99 + (mod(n, 12)) * 3.45 + least(2, (n - 1) / 7) * 12.5
+        WHEN 'tech' THEN
+          14.99 + (mod(n, 12)) * 3.95 + least(2, (n - 1) / 7) * 14.0
+        WHEN 'fashion' THEN
+          18.99 + (mod(n, 12)) * 4.35 + least(2, (n - 1) / 7) * 16.0
+        ELSE 9.99 + (mod(n, 12)) * 2.0
+      END)
+      + (abs(hashtext(concat(c.slug, '-', n::text))) % 280) / 100.0
+    )::numeric, 2) AS price,
     t.image_url,
     (5 + (n % 6))::smallint AS sustainability_score,
-    c.materials,
+    t.item_materials AS materials,
     round((0.6 + (n % 15) * 0.35)::numeric, 2) AS carbon_footprint_saving_kg
   FROM category_map c
   CROSS JOIN generate_series(1, 21) AS n
@@ -67,13 +76,194 @@ WITH category_map AS (
         WHEN 'personal-care' THEN (ARRAY['Natural Toothpaste Tabs','Compostable Floss Kit','Refillable Hand Wash','Plant-Based Face Cleanser','Bamboo Toothbrush Set','Eco Body Lotion','Solid Conditioner Bar'])[((n - 1) % 7) + 1]
         WHEN 'kitchen' THEN (ARRAY['Stainless Steel Straw Set','Bamboo Cooking Utensils','Reusable Silicone Food Bags','Compost Bin Caddy','Glass Meal Prep Containers','Cotton Produce Bags','Beeswax Food Wrap Kit'])[((n - 1) % 7) + 1]
         WHEN 'beauty' THEN (ARRAY['Refillable Lip Balm','Vegan Mascara Tube','Eco Makeup Brush Set','Reusable Cotton Rounds','Natural Tint Moisturizer','Plastic-Free Face Mask','Mineral Blush Compact'])[((n - 1) % 7) + 1]
-        WHEN 'outdoors' THEN (ARRAY['Recycled Trail Backpack','Insulated Steel Bottle','Solar Camp Lantern','Reusable Travel Cutlery','Eco Picnic Blanket','Cork Yoga Mat','Compostable Wet Wipes'])[((n - 1) % 7) + 1]
+        WHEN 'outdoors' THEN (ARRAY[
+          'Recycled Trail Backpack','Insulated Steel Bottle','Solar Camp Lantern','Reusable Travel Cutlery','Eco Picnic Blanket','Cork Yoga Mat','Compostable Wet Wipes',
+          'Compost Starter Kit','Biodegradable Seed Pots','Reclaimed Wood Planter','Rainwater Collection Barrel','Organic Herb Grow Set','Natural Coir Mulch Mat','Bamboo Plant Labels'
+        ])[((n - 1) % 14) + 1]
         WHEN 'kids' THEN (ARRAY['Organic Baby Onesie','Natural Rubber Teether','Bamboo Kids Plate Set','Eco Story Book Set','Reusable Snack Pouch','Wooden Learning Blocks','Organic Cotton Blanket'])[((n - 1) % 7) + 1]
         WHEN 'office' THEN (ARRAY['Recycled Notebook Pack','Bamboo Desk Organizer','Refillable Pen Set','Cork Mouse Pad','Eco Sticky Notes','FSC Paper Planner','Reusable Cable Ties'])[((n - 1) % 7) + 1]
         WHEN 'tech' THEN (ARRAY['Recycled Phone Case','Solar Power Bank','Bamboo Keyboard Wrist Rest','Eco Cable Organizer','Bioplastic Earbud Case','Energy Saving Smart Plug','Recycled Laptop Sleeve'])[((n - 1) % 7) + 1]
-        WHEN 'garden' THEN (ARRAY['Compost Starter Kit','Biodegradable Seed Pots','Reclaimed Wood Planter','Rainwater Collection Barrel','Organic Herb Grow Set','Natural Coir Mulch Mat','Bamboo Plant Labels'])[((n - 1) % 7) + 1]
       END || ' ' || (ARRAY['Core', 'Plus', 'Premium'])[((n - 1) / 7) + 1] AS item_name,
-      'Category-specific sustainable product designed for lower-impact everyday use.' AS item_description,
+      CASE c.slug
+        WHEN 'fashion' THEN (ARRAY[
+          'Soft daily tee in GOTS-certified organic cotton with a relaxed fit.',
+          'Classic-fit jacket in denim woven with recycled cotton and polyester.',
+          'Midweight hoodie blending organic cotton and hemp for year-round wear.',
+          'Breathable shirt in European linen with organic cotton trim.',
+          'Cozy sweater spun with recycled fibers to cut virgin wool use.',
+          'Loungewear jersey from bamboo viscose blended with organic cotton.',
+          'Low-profile sneakers with organic cotton canvas and natural rubber soles.'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'home' THEN (ARRAY[
+          'Hand-blown vase from recycled glass with a soft green tint.',
+          'Side table in FSC-certified solid wood with low-VOC finish.',
+          'Area rug in undyed jute and wool for living spaces.',
+          'LED lamp with warm dimming and recycled aluminum heat sink.',
+          'Glass storage jars with bamboo lids for pantry staples.',
+          'Throw blanket woven from GOTS organic cotton.',
+          'Decor basket upcycled from textile offcuts and cotton rope.'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'personal-care' THEN (ARRAY[
+          'Fluoride-free toothpaste tablets with peppermint polish.',
+          'Compostable floss on a refillable glass spool.',
+          'Concentrated hand wash; mix with water in a reusable dispenser.',
+          'Gentle face cleanser with aloe and coconut-derived surfactants.',
+          'Bamboo toothbrush set with soft plant-based bristles.',
+          'Body lotion with shea butter and fast-absorbing plant oils.',
+          'Solid conditioner bar to skip plastic bottles in the shower.'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'kitchen' THEN (ARRAY[
+          'Set of metal straws plus a slender cleaning brush and pouch.',
+          'Five-piece bamboo utensil set for cooking and serving.',
+          'Leak-proof silicone bags for freezer, lunch, and sous-vide.',
+          'Countertop compost caddy with replaceable charcoal filter.',
+          'Glass meal-prep containers with snap lids for leftovers.',
+          'GOTS organic cotton mesh bags for produce runs.',
+          'Reusable food wraps using beeswax on organic cotton.'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'beauty' THEN (ARRAY[
+          'Tinted lip balm in a refillable aluminum slider.',
+          'Mascara built with plant waxes and mineral pigment.',
+          'Twelve makeup brushes with bamboo handles and vegan fibers.',
+          'Washable cotton rounds for toner and makeup removal.',
+          'Tinted moisturizer with non-nano mineral SPF.',
+          'Clay face mask powder you mix fresh with water.',
+          'Pressed mineral blush in a compact paper sleeve.'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'outdoors' THEN (ARRAY[
+          'Daypack with recycled ripstop shell and breathable harness.',
+          'Insulated steel bottle that keeps drinks cold or hot for hours.',
+          'Rechargeable camp lantern with dimmable warm LED.',
+          'Travel cutlery set in a roll: knife, fork, spoon, chopsticks.',
+          'Picnic blanket with recycled-fiber backing and cotton top.',
+          'Cork and natural rubber yoga mat for studio or trail.',
+          'Plant-based wet wipes for quick cleanup; compost where accepted.',
+          'Compost starter mix with brown and green balance tips.',
+          'Biodegradable seedling pots that break down in garden soil.',
+          'Planter box from reclaimed wood with drainage tray.',
+          'Rain barrel kit with food-grade liner and diverter.',
+          'Herb growing kit with organic soil discs and seed sachets.',
+          'Coir mulch mat to hold moisture and block weeds.',
+          'Bamboo plant labels you can write on for rows and beds.'
+        ])[((n - 1) % 14) + 1]
+        WHEN 'kids' THEN (ARRAY[
+          'Organic cotton onesie with snap shoulders for easy changes.',
+          'Teething ring molded from natural rubber without BPA.',
+          'Bamboo kids plate and cup set with divided sections.',
+          'Storybook set printed on FSC paper with soy inks.',
+          'Silicone snack pouch for purees and finger foods.',
+          'Wooden blocks with water-based paints for toddlers.',
+          'Muslin swaddle blanket in breathable organic cotton.'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'office' THEN (ARRAY[
+          'Notebook trio with recycled-card covers and dot-grid pages.',
+          'Bamboo desk organizer with trays for pens and accessories.',
+          'Refillable pen set with compostable ink cartridges.',
+          'Cork desk mat sized for mouse and compact keyboard.',
+          'Sticky notes made from sugarcane paper with gentle adhesive.',
+          'Weekly planner on FSC paper with lay-flat binding.',
+          'Reusable cable ties for laptop and charger cords.'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'tech' THEN (ARRAY[
+          'Phone case molded from recycled handset plastics where noted.',
+          'Solar-assisted power bank for phones on multi-day trips.',
+          'Keyboard wrist rest with laminated bamboo and cork base.',
+          'Cable organizer kit with silicone ties and printed labels.',
+          'Earbud case in a bio-based polymer shell.',
+          'Smart plug with scheduling to trim standby energy use.',
+          'Laptop sleeve with recycled nylon shell and fleece lining.'
+        ])[((n - 1) % 7) + 1]
+      END AS item_description,
+      CASE c.slug
+        WHEN 'fashion' THEN (ARRAY[
+          '100% GOTS organic cotton jersey',
+          'Recycled cotton, recycled polyester denim',
+          'Organic cotton, hemp, elastane',
+          'European linen, organic cotton trim',
+          'Recycled wool blend, recycled acrylic',
+          'Bamboo viscose, organic cotton',
+          'Organic cotton canvas, natural rubber'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'home' THEN (ARRAY[
+          'Recycled glass',
+          'FSC-certified solid hardwood, low-VOC finish',
+          'Jute, undyed wool',
+          'LED module, recycled aluminum, steel base',
+          'Borosilicate glass, bamboo lid',
+          'GOTS organic cotton',
+          'Recycled cotton rope, pine frame'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'personal-care' THEN (ARRAY[
+          'Sorbitol, calcium carbonate, peppermint oil',
+          'Corn PLA filament, candelilla wax, glass spool',
+          'Coconut-derived surfactants, glycerin, essential oils',
+          'Aloe juice, chamomile extract, mild surfactants',
+          'Bamboo, castor-oil based bristles',
+          'Shea butter, sunflower oil, vitamin E',
+          'Coconut oil, BTMS, essential oils'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'kitchen' THEN (ARRAY[
+          '18/8 stainless steel, nylon brush',
+          'Moso bamboo, food-grade oil',
+          'Platinum silicone, BPA-free',
+          'Recycled plastic, activated charcoal filter',
+          'Tempered glass, polypropylene lid',
+          'GOTS organic cotton mesh',
+          'Organic cotton, beeswax, tree resin'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'beauty' THEN (ARRAY[
+          'Castor oil, candelilla wax, refill pod',
+          'Plant waxes, iron oxide pigments',
+          'Bamboo, synthetic taklon (vegan)',
+          'Organic cotton flannel',
+          'Zinc oxide, shea butter, jojoba',
+          'Kaolin clay, aloe, green tea extract',
+          'Mica, jojoba oil, vitamin E'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'outdoors' THEN (ARRAY[
+          'Recycled polyester ripstop, nylon webbing',
+          '18/8 stainless steel, polypropylene lid',
+          'ABS housing, lithium cell, LED',
+          'Stainless steel, bamboo, cotton roll',
+          'Recycled PET fleece, organic cotton',
+          'Natural cork, natural rubber',
+          'Wood pulp viscose, aloe extract',
+          'Coconut coir, alfalfa meal, gypsum',
+          'Recycled paper pulp, natural latex binder',
+          'Reclaimed pine, natural oil finish',
+          'Recycled HDPE, brass hardware',
+          'Organic coir, non-GMO seeds',
+          'Natural coconut coir fiber',
+          'Moso bamboo'
+        ])[((n - 1) % 14) + 1]
+        WHEN 'kids' THEN (ARRAY[
+          'GOTS organic cotton',
+          'Hevea natural rubber',
+          'Bamboo fiber, plant-based lacquer',
+          'FSC paper, soy ink',
+          'Platinum silicone',
+          'Beech wood, water-based paint',
+          'Organic cotton muslin'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'office' THEN (ARRAY[
+          'Recycled paper, kraft cover',
+          'Bamboo ply, steel hardware',
+          'Recycled plastic barrel, plant-based ink',
+          'Natural cork',
+          'Sugarcane paper, low-tack adhesive',
+          'FSC paper, linen thread',
+          'Recycled PET hook-and-loop, elastic'
+        ])[((n - 1) % 7) + 1]
+        WHEN 'tech' THEN (ARRAY[
+          'Recycled polycarbonate blend',
+          'Lithium cells, monocrystalline solar strip',
+          'Bamboo laminate, cork',
+          'Silicone, recycled PET tags',
+          'Bio-based polymer',
+          'Fire-rated ABS, Wi-Fi radio',
+          'Recycled nylon, recycled polyester fleece'
+        ])[((n - 1) % 7) + 1]
+      END AS item_materials,
       CASE c.slug
         WHEN 'fashion' THEN (ARRAY[
           'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
@@ -127,8 +317,15 @@ WITH category_map AS (
           'https://images.unsplash.com/photo-1499696010181-529a2df2828b?w=400',
           'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=400',
           'https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=400',
-          'https://images.unsplash.com/photo-1455218873509-8097305ee378?w=400'
-        ])[((n - 1) % 7) + 1]
+          'https://images.unsplash.com/photo-1455218873509-8097305ee378?w=400',
+          'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400',
+          'https://images.unsplash.com/photo-1463320726281-696a485928c7?w=400',
+          'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
+          'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=400',
+          'https://images.unsplash.com/photo-1492496913980-501348b61469?w=400',
+          'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=400',
+          'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400'
+        ])[((n - 1) % 14) + 1]
         WHEN 'kids' THEN (ARRAY[
           'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=400',
           'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400',
@@ -156,15 +353,6 @@ WITH category_map AS (
           'https://images.unsplash.com/photo-1580894908361-967195033215?w=400',
           'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?w=400'
         ])[((n - 1) % 7) + 1]
-        WHEN 'garden' THEN (ARRAY[
-          'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400',
-          'https://images.unsplash.com/photo-1463320726281-696a485928c7?w=400',
-          'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
-          'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=400',
-          'https://images.unsplash.com/photo-1492496913980-501348b61469?w=400',
-          'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=400',
-          'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400'
-        ])[((n - 1) % 7) + 1]
       END AS image_url
   ) t
 )
@@ -175,32 +363,7 @@ ON CONFLICT (slug) DO UPDATE
 SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,
-  image_url = EXCLUDED.image_url,
+  price = EXCLUDED.price,
   materials = EXCLUDED.materials,
   sustainability_score = EXCLUDED.sustainability_score,
   carbon_footprint_saving_kg = EXCLUDED.carbon_footprint_saving_kg;
-
--- Enforce stronger name-to-image matching for generated catalog items
-UPDATE products
-SET image_url = CASE
-  WHEN name ILIKE '%Backpack%' THEN 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200'
-  WHEN name ILIKE '%Onesie%' THEN 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=1200'
-  WHEN name ILIKE '%Jacket%' THEN 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200'
-  WHEN name ILIKE '%Tee%' OR name ILIKE '%Shirt%' THEN 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200'
-  WHEN name ILIKE '%Sneakers%' THEN 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200'
-  WHEN name ILIKE '%Bottle%' THEN 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=1200'
-  WHEN name ILIKE '%Lantern%' THEN 'https://images.unsplash.com/photo-1520962880247-cfaf541c8724?w=1200'
-  WHEN name ILIKE '%Yoga Mat%' THEN 'https://images.unsplash.com/photo-1592432678016-e910b452f9a2?w=1200'
-  WHEN name ILIKE '%Toothbrush%' THEN 'https://images.unsplash.com/photo-1559591935-c6c23a6f3bce?w=1200'
-  WHEN name ILIKE '%Toothpaste%' THEN 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=1200'
-  WHEN name ILIKE '%Shampoo%' OR name ILIKE '%Conditioner%' THEN 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1200'
-  WHEN name ILIKE '%Straw%' THEN 'https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=1200'
-  WHEN name ILIKE '%Utensils%' OR name ILIKE '%Cutlery%' THEN 'https://images.unsplash.com/photo-1594489572280-6f0112d438f9?w=1200'
-  WHEN name ILIKE '%Vase%' THEN 'https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=1200'
-  WHEN name ILIKE '%Planter%' OR name ILIKE '%Pots%' OR name ILIKE '%Garden%' THEN 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1200'
-  WHEN name ILIKE '%Notebook%' OR name ILIKE '%Planner%' OR name ILIKE '%Pen%' THEN 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=1200'
-  WHEN name ILIKE '%Phone Case%' OR name ILIKE '%Laptop Sleeve%' OR name ILIKE '%Power Bank%' THEN 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200'
-  WHEN name ILIKE '%Lip Balm%' OR name ILIKE '%Mascara%' OR name ILIKE '%Blush%' OR name ILIKE '%Makeup%' THEN 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200'
-  ELSE image_url
-END
-WHERE slug LIKE '%-core-%' OR slug LIKE '%-plus-%' OR slug LIKE '%-premium-%';
