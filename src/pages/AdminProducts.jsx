@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useProfile } from '../hooks/useProfile'
+import { getProductImage } from '../lib/productImageOverrides'
+import AdminCategoryImagesPanel from '../components/AdminCategoryImagesPanel'
 
 export default function AdminProducts() {
-  const { canManageProducts, loading: profileLoading, role } = useProfile()
+  const location = useLocation()
+  const categorySectionRef = useRef(null)
+  const { canManageProducts, loading: profileLoading } = useProfile()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [search, setSearch] = useState('')
@@ -17,6 +21,12 @@ export default function AdminProducts() {
     document.title = 'Manage products – EcoShop'
     return () => { document.title = 'EcoShop – Sustainable Shopping' }
   }, [])
+
+  useEffect(() => {
+    if (location.hash === '#category-images' && categorySectionRef.current) {
+      categorySectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [location.hash])
 
   useEffect(() => {
     async function fetch() {
@@ -42,11 +52,13 @@ export default function AdminProducts() {
   if (profileLoading || !canManageProducts) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-stone-800 mb-6">Developer Product Management</h1>
+        <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6">Developer Product Management</h1>
         {!profileLoading && !canManageProducts && (
-          <p className="text-stone-600">Access denied. Only owners/developers/admins can manage products.</p>
+          <p className="text-stone-600 dark:text-stone-300">
+            Access denied. Dev tools is only available to accounts on the project allowlist.
+          </p>
         )}
-        {profileLoading && <p className="text-stone-500">Loading...</p>}
+        {profileLoading && <p className="text-stone-500 dark:text-stone-400">Loading...</p>}
       </div>
     )
   }
@@ -94,8 +106,8 @@ export default function AdminProducts() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
-        <h1 className="text-2xl font-bold text-stone-800">Developer Product Management</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100">Developer Product Management</h1>
         <Link
           to="/admin/products/new"
           className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
@@ -103,9 +115,16 @@ export default function AdminProducts() {
           Add product
         </Link>
       </div>
-      <p className="text-sm text-stone-500 mb-6">Current role: {role}</p>
+      <section
+        id="category-images"
+        ref={categorySectionRef}
+        className="mb-8 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900/90 p-4 sm:p-5 shadow-sm dark:shadow-none"
+      >
+        <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3 sm:mb-4">Category images</h2>
+        <AdminCategoryImagesPanel />
+      </section>
       <div className="mb-4">
-        <label htmlFor="dev-product-search" className="block text-sm font-medium text-stone-700 mb-1">
+        <label htmlFor="dev-product-search" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
           Search product to edit
         </label>
         <input
@@ -114,7 +133,7 @@ export default function AdminProducts() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by product name or slug"
-          className="w-full max-w-md px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+          className="w-full max-w-md px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 placeholder:text-stone-500 focus:ring-2 focus:ring-emerald-500"
         />
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -122,7 +141,7 @@ export default function AdminProducts() {
           type="button"
           onClick={toggleAllVisible}
           disabled={filteredProducts.length === 0}
-          className="px-3 py-1.5 text-sm border border-stone-300 rounded-lg text-stone-700 hover:bg-stone-100 disabled:opacity-50"
+          className="px-3 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-50"
         >
           {isAllVisibleSelected ? 'Unselect all' : 'Select all'}
         </button>
@@ -136,13 +155,13 @@ export default function AdminProducts() {
         </button>
       </div>
       {loading ? (
-        <p className="text-stone-500">Loading products...</p>
+        <p className="text-stone-500 dark:text-stone-400">Loading products...</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border border-stone-200 rounded-lg overflow-hidden">
-            <thead className="bg-stone-100">
+        <div className="overflow-x-auto rounded-lg border border-stone-200 dark:border-stone-600">
+          <table className="w-full border-collapse">
+            <thead className="bg-stone-100 dark:bg-stone-800/90">
               <tr>
-                <th className="text-left p-3 text-stone-700 font-medium w-12">
+                <th className="text-left p-3 text-stone-700 dark:text-stone-200 font-medium w-12">
                   <input
                     type="checkbox"
                     checked={isAllVisibleSelected}
@@ -150,16 +169,16 @@ export default function AdminProducts() {
                     aria-label="Select all visible products"
                   />
                 </th>
-                <th className="text-left p-3 text-stone-700 font-medium">Name</th>
-                <th className="text-left p-3 text-stone-700 font-medium">Price</th>
-                <th className="text-left p-3 text-stone-700 font-medium">Score</th>
-                <th className="text-left p-3 text-stone-700 font-medium">Category</th>
-                <th className="text-right p-3 text-stone-700 font-medium">Actions</th>
+                <th className="text-left p-3 text-stone-700 dark:text-stone-200 font-medium">Name</th>
+                <th className="text-left p-3 text-stone-700 dark:text-stone-200 font-medium">Price</th>
+                <th className="text-left p-3 text-stone-700 dark:text-stone-200 font-medium">Score</th>
+                <th className="text-left p-3 text-stone-700 dark:text-stone-200 font-medium">Category</th>
+                <th className="text-right p-3 text-stone-700 dark:text-stone-200 font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white dark:bg-stone-900/70">
               {filteredProducts.map((p) => (
-                <tr key={p.id} className="border-t border-stone-200">
+                <tr key={p.id} className="border-t border-stone-200 dark:border-stone-600">
                   <td className="p-3">
                     <input
                       type="checkbox"
@@ -170,19 +189,25 @@ export default function AdminProducts() {
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={p.image_url || '/placeholder.svg'}
-                        alt={p.name}
-                        className="w-10 h-10 rounded-md object-cover border border-stone-200"
-                      />
-                      <Link to={`/products/${p.slug}`} className="text-emerald-700 hover:underline font-medium">
+                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800">
+                        <img
+                          src={getProductImage(p)}
+                          alt={p.name}
+                          className="h-full w-full object-cover object-center"
+                          loading="lazy"
+                        />
+                      </div>
+                      <Link
+                        to={`/products/${p.slug}`}
+                        className="text-emerald-700 dark:text-emerald-400 hover:underline font-medium"
+                      >
                         {p.name}
                       </Link>
                     </div>
                   </td>
-                  <td className="p-3 text-stone-600">${Number(p.price).toFixed(2)}</td>
-                  <td className="p-3 text-stone-600">{p.sustainability_score ?? '–'}/10</td>
-                  <td className="p-3 text-stone-600">
+                  <td className="p-3 text-stone-600 dark:text-stone-300">${Number(p.price).toFixed(2)}</td>
+                  <td className="p-3 text-stone-600 dark:text-stone-300">{p.sustainability_score ?? '–'}/10</td>
+                  <td className="p-3 text-stone-600 dark:text-stone-300">
                     {categories.find((c) => c.id === p.category_id)?.name ?? '–'}
                   </td>
                   <td className="p-3 text-right">
@@ -196,7 +221,7 @@ export default function AdminProducts() {
                       type="button"
                       onClick={() => handleDelete(p.id)}
                       disabled={deletingId === p.id}
-                      className="text-red-600 hover:underline text-sm disabled:opacity-50"
+                      className="text-red-600 dark:text-red-400 hover:underline text-sm disabled:opacity-50"
                     >
                       {deletingId === p.id ? 'Deleting...' : 'Remove'}
                     </button>
@@ -207,9 +232,11 @@ export default function AdminProducts() {
           </table>
         </div>
       )}
-      {!loading && products.length === 0 && <p className="text-stone-500 mt-4">No products yet. Add one to get started.</p>}
+      {!loading && products.length === 0 && (
+        <p className="text-stone-500 dark:text-stone-400 mt-4">No products yet. Add one to get started.</p>
+      )}
       {!loading && products.length > 0 && filteredProducts.length === 0 && (
-        <p className="text-stone-500 mt-4">No products match your search.</p>
+        <p className="text-stone-500 dark:text-stone-400 mt-4">No products match your search.</p>
       )}
     </div>
   )

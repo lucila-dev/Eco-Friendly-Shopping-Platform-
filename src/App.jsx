@@ -11,6 +11,7 @@ const Checkout = lazy(() => import('./pages/Checkout'))
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Profile = lazy(() => import('./pages/Profile'))
+const Settings = lazy(() => import('./pages/Settings'))
 const Orders = lazy(() => import('./pages/Orders'))
 const Wishlist = lazy(() => import('./pages/Wishlist'))
 const About = lazy(() => import('./pages/About'))
@@ -18,6 +19,7 @@ const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 const AdminProducts = lazy(() => import('./pages/AdminProducts'))
 const AdminProductForm = lazy(() => import('./pages/AdminProductForm'))
+const AdminCategoryImages = lazy(() => import('./pages/AdminCategoryImages'))
 
 function PageFallback() {
   return (
@@ -43,9 +45,11 @@ function App() {
           <Route path="about" element={<Suspense fallback={<PageFallback />}><About /></Suspense>} />
           <Route path="dashboard" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Dashboard /></Suspense></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Profile /></Suspense></ProtectedRoute>} />
+          <Route path="settings" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Settings /></Suspense></ProtectedRoute>} />
           <Route path="login" element={<Suspense fallback={<PageFallback />}><Login /></Suspense>} />
           <Route path="signup" element={<Suspense fallback={<PageFallback />}><Signup /></Suspense>} />
           <Route path="admin/products" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><AdminProducts /></Suspense></ProtectedRoute>} />
+          <Route path="admin/categories" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><AdminCategoryImages /></Suspense></ProtectedRoute>} />
           <Route path="admin/products/new" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><AdminProductForm /></Suspense></ProtectedRoute>} />
           <Route path="admin/products/:id" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><AdminProductForm /></Suspense></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
