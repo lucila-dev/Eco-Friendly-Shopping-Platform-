@@ -1,76 +1,92 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { hashString } from '../lib/productMetrics'
 
-const REVIEW_OPENERS = [
-  'Shipped faster than I expected.',
-  'Took a few extra days but worth the wait.',
-  'Tracking was clear the whole way.',
-  'Arrived with no damage.',
-  'Box was smaller than I thought—in a good way.',
-  'Local depot held it briefly; still happy.',
-  'Courier left it in a safe spot.',
-]
-const REVIEW_MIDDLES = [
-  'Build quality feels solid for daily use.',
-  'Materials match what the listing promised.',
-  'Finish is even in person.',
-  'A bit lighter than I imagined.',
-  'Heavier than photos suggest—feels substantial.',
-  'Sizing ran true for me.',
-  'I’d size up next time.',
-  'Instructions could be clearer, but usable.',
-  'Setup took under ten minutes.',
-  'No weird smells out of the box.',
-]
-const REVIEW_CLOSERS = [
-  'Would buy again.',
-  'Happy to support a greener option.',
-  'Good value at the sale price.',
-  'Full price would be a maybe.',
-  'Recommended it to a friend already.',
-  'Not perfect, but I’m keeping it.',
-  'Returns process looks fair if needed.',
-]
-const REVIEW_NAMES = [
+const FIRST_NAMES = [
   'Emma', 'Noah', 'Sofia', 'Mason', 'Olivia', 'Luca', 'Ava', 'Ethan', 'Mia', 'Leo',
   'Chloe', 'Ben', 'Harper', 'Sam', 'Zoe', 'Ryan', 'Priya', 'Diego', 'Nina', 'Alex',
   'Jordan', 'Taylor', 'Casey', 'Riley', 'Quinn', 'Jamal', 'Yuki', 'Fatima', 'Omar', 'Elena',
+  'Marcus', 'Hannah', 'Victor', 'Mei', 'Jonah', 'Amara', 'Dmitri', 'Ines', 'Kenji', 'Bianca',
 ]
 
-function buildDemoReviewBody(seed) {
-  const o = REVIEW_OPENERS[seed % REVIEW_OPENERS.length]
-  const m = REVIEW_MIDDLES[(Math.floor(seed / 17)) % REVIEW_MIDDLES.length]
-  const c = REVIEW_CLOSERS[(Math.floor(seed / 61)) % REVIEW_CLOSERS.length]
-  const mode = seed % 5
-  if (mode === 0) return ''
-  if (mode === 1) return o
-  if (mode === 2) return `${m} ${c}`
-  if (mode === 3) return `${o} ${m}`
-  return `${o} ${m} ${c}`
+const LAST_NAMES = [
+  'Nguyen', 'Patel', 'Garcia', 'Kim', 'Okafor', 'Johansson', 'Silva', 'Ibrahim', 'Martinez',
+  'Olsen', 'Park', 'Nakamura', 'Hansen', 'Kowalczyk', 'Fernandez', 'OBrien', 'Lindberg',
+  'Carvalho', 'Yamamoto', 'Schmidt', 'Varga', 'Abbasi', 'Novak', 'Berg', 'Liu',
+  'Santos', 'Ricci', 'Duarte', 'Bakker', 'Haddad', 'Kaur', 'Petrov', 'Costa',
+]
+
+function hashString(value = '') {
+  let h = 0
+  for (let i = 0; i < value.length; i += 1) {
+    h = ((h << 5) - h) + value.charCodeAt(i)
+    h |= 0
+  }
+  return Math.abs(h)
 }
 
-/** Weighted toward 4–5 stars; occasional 2–3 for realism. */
-function demoRating(seed) {
-  const table = [5, 5, 4, 4, 5, 4, 3, 5, 4, 5, 3, 2, 4, 5, 4, 4, 5, 3, 4, 5]
+function reviewerName(seed) {
+  const fi = seed % FIRST_NAMES.length
+  const li = Math.floor(seed / FIRST_NAMES.length) % LAST_NAMES.length
+  return `${FIRST_NAMES[fi]} ${LAST_NAMES[li]}`
+}
+
+function reviewBody(seed, productLabel) {
+  const context = (productLabel || 'this item').trim()
+  const openers = [
+    'Arrived quickly and was packed well.',
+    'I have been using it for a few days now.',
+    'Honestly better than I expected at this price.',
+    'First impression was very positive.',
+    'I was a little unsure at first, but it turned out great.',
+    `Picked this up recently and it has been a good addition.`,
+  ]
+  const details = [
+    'Quality feels solid and the finish is clean.',
+    'The material feels comfortable and not cheap at all.',
+    'It feels durable enough for regular use.',
+    'Looks just like the listing photos in person.',
+    'No weird smell or defects when it arrived.',
+    'It has held up well after multiple uses already.',
+  ]
+  const sustainabilityMentions = [
+    'Also appreciate the lower-impact materials.',
+    'I like that it is a more sustainable option.',
+    'Feels good choosing something with a smaller footprint.',
+    `Nice to have a greener alternative without sacrificing quality.`,
+  ]
+  const closers = [
+    'Would buy again.',
+    'Happy with this purchase.',
+    'I would recommend it.',
+    'Good value overall.',
+    'This one is staying in my routine.',
+  ]
+  const first = openers[seed % openers.length]
+  const second = details[(seed + 5) % details.length]
+  const third = sustainabilityMentions[(seed + 11) % sustainabilityMentions.length]
+  const end = closers[(seed + 17) % closers.length]
+  const includeContext = seed % 4 === 0
+  const contextSentence = includeContext ? ` It works especially well for ${context.toLowerCase()}.` : ''
+  return `${first} ${second}${contextSentence} ${third} ${end}`
+}
+
+function syntheticRating(seed) {
+  const table = [5, 5, 4, 4, 5, 4, 5, 4, 3, 5, 4, 5, 3, 4, 5]
   return table[seed % table.length]
 }
 
-function buildDemoReviews(productId, productName) {
-  const base = hashString(`${productId}|${productName || ''}|${productName?.length || 0}`)
-  const reviewCount = 2 + (base % 11) // 2 to 12 demo reviews
-  return Array.from({ length: reviewCount }).map((_, idx) => {
-    const seed = hashString(`${productId}-${idx}-${productName || 'p'}-${base}`)
-    const rating = demoRating(hashString(`${seed}-${idx}-${base}`))
-    const dayOffset = 2 + ((seed + idx * 11) % 52)
-    const body = buildDemoReviewBody(seed)
+function buildFallbackReviews(productId, productName) {
+  const base = hashString(`${productId}|${productName || ''}`)
+  const count = 4 + (base % 4) // 4..7 reviews
+  return Array.from({ length: count }).map((_, idx) => {
+    const seed = hashString(`${productId}|${productName || 'p'}|${idx}|${base}`)
+    const dayOffset = 4 + ((seed + idx * 11) % 80)
     return {
-      id: `demo-${productId}-${idx}`,
-      rating,
-      body,
+      id: `fallback-${productId}-${idx}`,
+      rating: syntheticRating(seed),
+      body: reviewBody(seed, productName),
       created_at: new Date(Date.now() - dayOffset * 24 * 60 * 60 * 1000).toISOString(),
-      display_name: REVIEW_NAMES[(seed * 7 + idx * 13) % REVIEW_NAMES.length],
-      is_demo: true,
+      display_name: reviewerName(seed),
     }
   })
 }
@@ -94,7 +110,10 @@ export default function ReviewList({ productId, productName }) {
         names = Object.fromEntries((profiles ?? []).map((p) => [p.id, p.display_name]))
       }
       const dbReviews = reviewsList.map((r) => ({ ...r, display_name: names[r.user_id] ?? null }))
-      const merged = dbReviews.length > 0 ? dbReviews : buildDemoReviews(productId, productName)
+      const fallbacks = buildFallbackReviews(productId, productName)
+      const merged = [...dbReviews, ...fallbacks].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )
       setReviews(merged)
       setLoading(false)
     }
@@ -103,8 +122,10 @@ export default function ReviewList({ productId, productName }) {
 
   if (loading) return <p className="text-stone-500 text-sm">Loading reviews...</p>
 
-  const avgRating = reviews.length
-    ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+  const verifiedOnly = reviews.filter((r) => !String(r.id).startsWith('fallback-'))
+  const forAverage = verifiedOnly.length > 0 ? verifiedOnly : reviews
+  const avgRating = forAverage.length
+    ? (forAverage.reduce((s, r) => s + r.rating, 0) / forAverage.length).toFixed(1)
     : null
 
   return (
@@ -112,7 +133,11 @@ export default function ReviewList({ productId, productName }) {
       <h2 className="text-lg font-semibold text-stone-800 mb-2">Reviews</h2>
       {avgRating && (
         <p className="text-stone-600 text-sm mb-4">
-          Average: {avgRating} / 5 ({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})
+          Average: {avgRating} / 5 ({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+          {verifiedOnly.length > 0 && verifiedOnly.length < reviews.length
+            ? ` · ${verifiedOnly.length} from verified buyers`
+            : ''}
+          )
         </p>
       )}
       {reviews.length === 0 ? (
@@ -121,11 +146,10 @@ export default function ReviewList({ productId, productName }) {
         <ul className="space-y-3">
           {reviews.map((r) => (
             <li key={r.id} className="border-b border-stone-100 pb-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium text-stone-800">
                   {r.display_name ?? 'Anonymous'}
                 </span>
-                {r.is_demo && <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">Verified buyer</span>}
                 <span className="text-amber-500 text-sm">
                   {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
                 </span>
