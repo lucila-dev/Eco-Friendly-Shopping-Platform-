@@ -62,6 +62,7 @@ export default function Checkout() {
       .select(`
         id,
         product_id,
+        size,
         quantity,
         products ( price, carbon_footprint_saving_kg )
       `)
@@ -74,7 +75,9 @@ export default function Checkout() {
     }
 
     const rows = cartWithProducts.data ?? []
-    const totalAmount = rows.reduce((sum, r) => sum + r.quantity * (r.products?.price ?? 0), 0)
+    const subtotal = rows.reduce((sum, r) => sum + r.quantity * (r.products?.price ?? 0), 0)
+    const deliveryFee = subtotal >= 50 ? 0 : 4.99
+    const totalAmount = subtotal + deliveryFee
 
     if (paymentMethod === 'loyalty' && loyaltyCredits < totalAmount) {
       setError('Not enough loyalty credits for this checkout.')
@@ -82,22 +85,30 @@ export default function Checkout() {
       return
     }
 
-    const { data: order, error: orderError } = await supabase
+    const orderPayload = {
+      user_id: user.id,
+      status: 'completed',
+      total_amount: totalAmount,
+      shipping_name: form.shipping_name,
+      shipping_address: [
+        form.shipping_address_line_1,
+        form.shipping_address_line_2,
+        `${form.shipping_city} ${form.shipping_postcode}`.trim(),
+      ].filter(Boolean).join(', '),
+      shipping_email: form.shipping_email,
+    }
+
+    let orderRes = await supabase
       .from('orders')
-      .insert({
-        user_id: user.id,
-        status: 'completed',
-        total_amount: totalAmount,
-        shipping_name: form.shipping_name,
-        shipping_address: [
-          form.shipping_address_line_1,
-          form.shipping_address_line_2,
-          `${form.shipping_city} ${form.shipping_postcode}`.trim(),
-        ].filter(Boolean).join(', '),
-        shipping_email: form.shipping_email,
-      })
+      .insert({ ...orderPayload, shipping_amount: deliveryFee })
       .select('id')
       .single()
+
+    if (orderRes.error && /shipping_amount|column|schema cache/i.test(orderRes.error.message ?? '')) {
+      orderRes = await supabase.from('orders').insert(orderPayload).select('id').single()
+    }
+
+    const { data: order, error: orderError } = orderRes
 
     if (orderError) {
       setError(orderError.message)
@@ -108,13 +119,15 @@ export default function Checkout() {
     const orderItems = rows.map((r) => ({
       order_id: order.id,
       product_id: r.product_id,
+      selected_size: r.size || null,
       quantity: r.quantity,
-      price_at_order: r.products?.price ?? 0,
-      carbon_saving_kg: (r.products?.carbon_footprint_saving_kg ?? 0) * r.quantity,
+      price_at_order: Number(r.products?.price ?? 0),
+      carbon_saving_kg: Number(r.products?.carbon_footprint_saving_kg ?? 0) * r.quantity,
     }))
 
     const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
     if (itemsError) {
+      await supabase.from('orders').delete().eq('id', order.id)
       setError(itemsError.message)
       setSubmitting(false)
       return
@@ -153,7 +166,9 @@ export default function Checkout() {
   return (
     <div className="max-w-lg rounded-2xl border border-emerald-200 bg-white/90 p-5 shadow-sm">
       <h1 className="text-2xl font-bold text-stone-800 mb-6">Checkout</h1>
-      <p className="text-stone-600 mb-6">Checkout – no real payment is processed. Use loyalty credits or card details.</p>
+      <p className="text-stone-600 mb-6">
+        Checkout – loyalty credits use your account balance. Card fields below are for display only; no card is charged.
+      </p>
       <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 mb-5 text-sm">
         <p className="text-stone-700">Subtotal: ${total.toFixed(2)}</p>
         <p className="text-stone-700">Delivery: {deliveryFee === 0 ? 'Free' : `$${deliveryFee.toFixed(2)}`}</p>
@@ -187,7 +202,7 @@ export default function Checkout() {
               </label>
             </div>
             <p className="text-xs text-stone-500 mt-2">
-              Available credits: {loadingCredits ? 'Loading...' : loyaltyCredits.toFixed(2)} | Order total: {total.toFixed(2)}
+              Available credits: {loadingCredits ? 'Loading...' : loyaltyCredits.toFixed(2)} | Charged at checkout: {finalTotal.toFixed(2)}
             </p>
           </div>
           {paymentMethod === 'card' && (
