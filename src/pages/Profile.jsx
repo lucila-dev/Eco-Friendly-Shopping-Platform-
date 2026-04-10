@@ -1,7 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { LOYALTY_POINTS_PER_DOLLAR, loyaltyCreditsToMoney, formatMoneyUsd } from '../lib/loyaltyValue'
+import {
+  getProfileAvatarLocal,
+  setProfileAvatarLocal,
+  notifyProfileAvatarUpdated,
+} from '../lib/profileAvatarLocal'
+import { CartIcon, LeafIcon, TruckIcon } from '../components/Icons'
+
+const DEFAULT_AVATAR = '/favicon-96x96.png'
 
 export default function Profile() {
   const { user } = useAuth()
@@ -9,9 +18,10 @@ export default function Profile() {
   const [nameInput, setNameInput] = useState('')
   const [savingProfile, setSavingProfile] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
-  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null)
   const [profileMessage, setProfileMessage] = useState('')
   const [loading, setLoading] = useState(true)
+  const [avatarBump, setAvatarBump] = useState(0)
+  const avatarInputRef = useRef(null)
 
   useEffect(() => {
     document.title = 'Profile – EcoShop'
@@ -19,34 +29,117 @@ export default function Profile() {
   }, [])
 
   useEffect(() => {
+    const fn = () => setAvatarBump((n) => n + 1)
+    window.addEventListener('ecoshop_profile_avatar', fn)
+    return () => window.removeEventListener('ecoshop_profile_avatar', fn)
+  }, [])
+
+  useEffect(() => {
     async function fetchProfile() {
-      if (!user) return
+      if (!user) {
+        setLoading(false)
+        return
+      }
       const { data } = await supabase
         .from('profiles')
         .select('display_name, avatar_url, loyalty_credits')
         .eq('id', user.id)
         .maybeSingle()
-      setProfile(data ?? null)
-      setNameInput(data?.display_name ?? '')
+      const localAv = getProfileAvatarLocal(user.id)
+      const merged = data
+        ? { ...data, avatar_url: (data.avatar_url || '').trim() || localAv || data.avatar_url }
+        : data
+      setProfile(merged ?? null)
+      setNameInput(merged?.display_name ?? '')
       setLoading(false)
     }
     fetchProfile()
-  }, [user?.id])
+  }, [user?.id, avatarBump])
 
-  if (loading) return <p className="text-stone-500">Loading profile...</p>
+  if (loading) {
+    return (
+      <div className="w-full max-w-3xl mx-auto flex justify-center py-16">
+        <p className="text-stone-500 dark:text-stone-400 text-lg">Loading profile...</p>
+      </div>
+    )
+  }
 
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User'
   const loyaltyBalance = Number(profile?.loyalty_credits ?? 1000)
   const redeemApproxUsd = loyaltyCreditsToMoney(loyaltyBalance)
+  const avatarSrc =
+    (profile?.avatar_url || '').trim() ||
+    getProfileAvatarLocal(user?.id) ||
+    DEFAULT_AVATAR
+
+  const persistAvatarUrl = async (avatarUrl) => {
+    if (!user?.id || !avatarUrl?.trim()) return { error: new Error('Missing user or URL') }
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({
+        id: user.id,
+        display_name: nameInput.trim() || null,
+        avatar_url: avatarUrl.trim(),
+        loyalty_credits: Number(profile?.loyalty_credits ?? 1000),
+      })
+    return { error }
+  }
+
+  const processAvatarFile = async (file) => {
+    if (!file || !user?.id) return
+    setProfileMessage('')
+    setUploadingAvatar(true)
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const path = `avatars/${user.id}-${Date.now()}.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(path, file, { upsert: false })
+
+    if (!uploadError) {
+      const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+      const publicUrl = data.publicUrl
+      setProfile((prev) => ({ ...(prev ?? {}), avatar_url: publicUrl }))
+      setProfileAvatarLocal(user.id, publicUrl)
+      notifyProfileAvatarUpdated()
+      const { error: saveErr } = await persistAvatarUrl(publicUrl)
+      setUploadingAvatar(false)
+      setProfileMessage(saveErr ? `Could not save: ${saveErr.message}` : '')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const dataUrl = reader.result
+      if (typeof dataUrl !== 'string') {
+        setUploadingAvatar(false)
+        setProfileMessage(`Could not use image: ${uploadError.message}`)
+        return
+      }
+      setProfile((prev) => ({ ...(prev ?? {}), avatar_url: dataUrl }))
+      setProfileAvatarLocal(user.id, dataUrl)
+      notifyProfileAvatarUpdated()
+      setUploadingAvatar(false)
+      const { error: saveErr } = await persistAvatarUrl(dataUrl)
+      setProfileMessage(saveErr ? `Could not save: ${saveErr.message}` : '')
+    }
+    reader.onerror = () => {
+      setUploadingAvatar(false)
+      setProfileMessage(`Could not read file: ${uploadError.message}`)
+    }
+    reader.readAsDataURL(file)
+  }
 
   const saveProfile = async (e) => {
     e.preventDefault()
     setProfileMessage('')
     setSavingProfile(true)
+    const url = (profile?.avatar_url || '').trim() || null
+    if (url) setProfileAvatarLocal(user.id, url)
     const updates = {
       id: user.id,
       display_name: nameInput.trim() || null,
-      avatar_url: profile?.avatar_url || null,
+      avatar_url: url,
       loyalty_credits: Number(profile?.loyalty_credits ?? 1000),
     }
     const { data, error } = await supabase
@@ -60,101 +153,154 @@ export default function Profile() {
       return
     }
     setProfile(data)
-    setProfileMessage('Profile updated successfully.')
+    notifyProfileAvatarUpdated()
+    setProfileMessage('')
   }
 
-  const uploadAvatar = async () => {
-    if (!selectedAvatarFile) return
-    setProfileMessage('')
-    setUploadingAvatar(true)
-    const ext = selectedAvatarFile.name.split('.').pop()?.toLowerCase() || 'jpg'
-    const path = `avatars/${user.id}-${Date.now()}.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(path, selectedAvatarFile, { upsert: false })
-    if (uploadError) {
-      setUploadingAvatar(false)
-      setProfileMessage(`Avatar upload failed: ${uploadError.message}`)
-      return
-    }
-    const { data } = supabase.storage.from('product-images').getPublicUrl(path)
-    const next = { ...(profile ?? {}), avatar_url: data.publicUrl }
-    setProfile(next)
-    setUploadingAvatar(false)
-    setProfileMessage('Avatar uploaded. Click Save profile to keep changes.')
-  }
+  const memberSinceLabel = new Date(user?.created_at || Date.now()).toLocaleDateString(undefined, {
+    dateStyle: 'long',
+  })
+
+  const shortcutClass =
+    'group flex flex-col items-center justify-center gap-2 rounded-xl border border-emerald-100 dark:border-emerald-800/70 bg-white dark:bg-stone-900 px-4 py-5 text-center shadow-sm transition hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-stone-800/80 hover:shadow'
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-stone-800 mb-6">Profile</h1>
-      <section className="rounded-xl border border-stone-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-stone-800 mb-3">Your details</h2>
-        <div className="flex flex-col sm:flex-row gap-6">
-          <div className="shrink-0">
-            <img
-              src={profile?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200'}
-              alt={`${displayName} avatar`}
-              className="w-24 h-24 rounded-full object-cover border border-stone-200"
-            />
-          </div>
-          <div className="flex-1">
-            <p className="text-stone-700 font-medium">{displayName}</p>
-            <p className="text-stone-500 text-sm mt-1">{user?.email}</p>
-            <p className="text-stone-500 text-sm mt-1">Member since: {new Date(user?.created_at || Date.now()).toLocaleDateString()}</p>
+    <div className="w-full max-w-3xl mx-auto pb-8">
+      <header className="text-center mb-8 sm:mb-10">
+        <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Your profile</h1>
+        <p className="mt-3 text-stone-600 dark:text-stone-300 max-w-md mx-auto leading-relaxed">
+          Update how you appear on EcoShop, check your loyalty balance, and jump back to shopping or your activity.
+        </p>
+      </header>
 
-            <div className="mt-3 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 max-w-md shadow-md border border-emerald-500/40">
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-100/90">EcoShop loyalty</p>
-              <p className="text-2xl font-bold mt-1 tabular-nums">{loyaltyBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })} pts</p>
-              <p className="text-sm text-emerald-50 mt-2">
-                {LOYALTY_POINTS_PER_DOLLAR} points = {formatMoneyUsd(1)} at checkout (demo rate).
-              </p>
-              <p className="text-sm font-medium mt-1">
-                Balance worth about <span className="tabular-nums">{formatMoneyUsd(redeemApproxUsd)}</span> off eligible orders.
+      <section className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-sm overflow-hidden">
+        <div className="h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" aria-hidden />
+        <div className="p-6 sm:p-8 lg:p-10">
+          <div className="flex flex-col items-center text-center">
+            <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+              <img
+                src={avatarSrc}
+                alt={`${displayName} avatar`}
+                className="w-full h-full rounded-full object-cover border-4 border-emerald-100 dark:border-emerald-800 shadow-md ring-4 ring-emerald-50 dark:ring-emerald-950/50"
+              />
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                className="sr-only"
+                tabIndex={-1}
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  e.target.value = ''
+                  if (f) processAvatarFile(f)
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="absolute bottom-0 right-0 flex h-11 w-11 items-center justify-center rounded-full border-[3px] border-white dark:border-stone-900 bg-emerald-600 text-xl font-light leading-none text-white shadow-md hover:bg-emerald-700 disabled:opacity-50"
+                aria-label="Change profile photo"
+              >
+                {uploadingAvatar ? '…' : '+'}
+              </button>
+            </div>
+            <p className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-100 mt-6">{displayName}</p>
+            <p className="text-stone-600 dark:text-stone-400 mt-2 text-sm sm:text-base break-all max-w-md">{user?.email}</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8 sm:mt-10">
+            <div className="rounded-xl border border-stone-100 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/60 px-4 py-4 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Member since</p>
+              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100 mt-1.5 leading-snug">{memberSinceLabel}</p>
+            </div>
+            <div className="rounded-xl border border-stone-100 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/60 px-4 py-4 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Loyalty snapshot</p>
+              <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400 mt-1 tabular-nums">
+                {loyaltyBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })} pts
               </p>
             </div>
+            <div className="rounded-xl border border-stone-100 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/60 px-4 py-4 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Redeem value</p>
+              <p className="text-lg font-semibold text-stone-800 dark:text-stone-100 mt-1 tabular-nums">{formatMoneyUsd(redeemApproxUsd)}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">at checkout</p>
+            </div>
+          </div>
 
-            <form onSubmit={saveProfile} className="mt-4 space-y-3">
+          <div className="mt-8 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-6 sm:p-8 shadow-lg border border-emerald-500/40 text-center sm:text-left">
+            <p className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-emerald-100/90">EcoShop loyalty</p>
+            <p className="text-3xl sm:text-4xl font-bold mt-2 tabular-nums text-center sm:text-left">
+              {loyaltyBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })} pts
+            </p>
+            <p className="text-base sm:text-lg text-emerald-50 mt-3 leading-snug">
+              {LOYALTY_POINTS_PER_DOLLAR} points = {formatMoneyUsd(1)} when redeemed at checkout.
+            </p>
+            <p className="text-base font-medium mt-2">
+              Balance worth about <span className="tabular-nums">{formatMoneyUsd(redeemApproxUsd)}</span> off eligible orders.
+            </p>
+          </div>
+
+          <div className="mt-10 pt-8 border-t border-stone-200 dark:border-stone-700">
+            <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 text-center sm:text-left mb-5">Edit your details</h2>
+            <form onSubmit={saveProfile} className="space-y-5 max-w-lg mx-auto sm:mx-0">
               <div>
-                <label htmlFor="displayName" className="block text-sm font-medium text-stone-700 mb-1">Display name</label>
+                <label htmlFor="displayName" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+                  Display name
+                </label>
                 <input
                   id="displayName"
                   type="text"
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
-                  className="w-full max-w-md px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-4 py-3 text-base border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 placeholder:text-stone-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
-              <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 max-w-md">
-                <label className="block text-sm font-medium text-stone-700 mb-1">Profile picture</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
-                    onChange={(e) => setSelectedAvatarFile(e.target.files?.[0] ?? null)}
-                    className="block w-full text-xs text-stone-600 file:mr-2 file:rounded file:border-0 file:bg-emerald-600 file:px-2 file:py-1 file:text-white hover:file:bg-emerald-700"
-                  />
-                  <button
-                    type="button"
-                    onClick={uploadAvatar}
-                    disabled={uploadingAvatar || !selectedAvatarFile}
-                    className="shrink-0 px-3 py-1.5 text-xs bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50"
-                  >
-                    {uploadingAvatar ? 'Uploading...' : 'Upload'}
-                  </button>
-                </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white text-base font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {savingProfile ? 'Saving...' : 'Save profile'}
+                </button>
               </div>
-              <button
-                type="submit"
-                disabled={savingProfile}
-                className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50"
-              >
-                {savingProfile ? 'Saving...' : 'Save profile'}
-              </button>
-              {profileMessage && <p className="text-sm text-stone-600">{profileMessage}</p>}
+              {profileMessage && <p className="text-base text-red-700 dark:text-red-400">{profileMessage}</p>}
             </form>
           </div>
         </div>
       </section>
+
+      <section className="mt-10" aria-label="Quick links">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 text-center mb-4">Quick links</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Link to="/products" className={shortcutClass}>
+            <CartIcon className="w-7 h-7 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+            <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Shop</span>
+            <span className="text-xs text-stone-500 dark:text-stone-400">Browse products</span>
+          </Link>
+          <Link to="/dashboard" className={shortcutClass}>
+            <LeafIcon className="w-7 h-7 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+            <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Impact</span>
+            <span className="text-xs text-stone-500 dark:text-stone-400">Your dashboard</span>
+          </Link>
+          <Link to="/orders" className={shortcutClass}>
+            <TruckIcon className="w-7 h-7 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+            <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Orders</span>
+            <span className="text-xs text-stone-500 dark:text-stone-400">Track shipments</span>
+          </Link>
+          <Link to="/wishlist" className={shortcutClass}>
+            <span className="text-2xl" aria-hidden>
+              ♡
+            </span>
+            <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Wishlist</span>
+            <span className="text-xs text-stone-500 dark:text-stone-400">Saved items</span>
+          </Link>
+        </div>
+      </section>
+
+      <p className="mt-10 text-center text-sm text-stone-500 dark:text-stone-400 max-w-lg mx-auto leading-relaxed px-2">
+        Earn more points with every purchase, then apply them at checkout to support a lower-impact basket.
+      </p>
     </div>
   )
 }

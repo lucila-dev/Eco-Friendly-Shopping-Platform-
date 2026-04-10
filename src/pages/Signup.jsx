@@ -1,12 +1,29 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { PersonIcon } from '../components/Icons'
+
+function MailIcon({ className = 'w-5 h-5' }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
+      <polyline points="3,7 12,13 21,7" />
+    </svg>
+  )
+}
+
+function LockIcon({ className = 'w-5 h-5' }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="4" y="11" width="16" height="10" rx="2" ry="2" />
+      <path d="M8 11V8a4 4 0 118 0v3" />
+    </svg>
+  )
+}
 
 export default function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { signUp } = useAuth()
@@ -21,7 +38,7 @@ export default function Signup() {
     e.preventDefault()
     setError('')
     setSuccess('')
-    const { error: err } = await signUp(email, password, { full_name: name })
+    const { error: err } = await signUp(email, password, { full_name: username })
     if (err) {
       setError(err.message)
       return
@@ -31,79 +48,94 @@ export default function Signup() {
   }
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="flex items-center justify-center gap-2 mb-6">
-        <PersonIcon className="w-8 h-8 text-emerald-600" aria-hidden />
-        <h1 className="text-2xl font-bold text-stone-800">Create account</h1>
-      </div>
-      <p className="text-stone-600 text-sm mb-6">
-        Create an account with a secure password to save your cart and track your green impact.
-      </p>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-stone-700 mb-1">
-            Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            placeholder="Your name"
-          />
+    <div className="min-h-[calc(100vh-7rem)] w-full flex items-center justify-center px-4 py-8 sm:px-10 sm:py-12">
+      <div className="w-full max-w-lg sm:max-w-xl lg:max-w-2xl rounded-3xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-8 py-10 sm:px-12 sm:py-12 shadow-md dark:shadow-lg dark:shadow-black/25">
+        <div className="mb-8 flex flex-col items-center">
+          <img src="/favicon-96x96.png" alt="EcoShop" className="mb-4 h-16 w-16 sm:h-20 sm:w-20" />
+          <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-stone-900 dark:text-stone-50 text-center">
+            Create Your Account
+          </h1>
+          <p className="mt-3 text-base sm:text-lg text-stone-500 dark:text-stone-400 text-center max-w-md">
+            Join us in making sustainable shopping choices
+          </p>
         </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1">
+          <label htmlFor="email" className="mb-2 block text-sm font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
             Email
           </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            placeholder="you@example.com"
-          />
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-stone-400 dark:text-stone-500">
+              <MailIcon />
+            </span>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-3.5 sm:py-4 pl-12 pr-4 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              placeholder="Enter your email"
+            />
+          </div>
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
+          <label htmlFor="username" className="mb-2 block text-sm font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+            Username
+          </label>
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-stone-400 dark:text-stone-500">
+              <MailIcon />
+            </span>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-3.5 sm:py-4 pl-12 pr-4 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              placeholder="Choose a username"
+            />
+          </div>
+        </div>
+        <div>
+          <label htmlFor="password" className="mb-2 block text-sm font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            placeholder="••••••••"
-          />
-          <p className="text-stone-500 text-xs mt-1">At least 6 characters</p>
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-stone-400 dark:text-stone-500">
+              <LockIcon />
+            </span>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              className="w-full rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-3.5 sm:py-4 pl-12 pr-4 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              placeholder="Create a password"
+            />
+          </div>
+          <p className="mt-2 text-sm sm:text-base text-stone-500 dark:text-stone-400">
+            Must be at least 8 characters with uppercase, lowercase, and numbers
+          </p>
         </div>
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        {success && <p className="text-emerald-600 text-sm">{success}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-base">{error}</p>}
+        {success && <p className="text-emerald-600 dark:text-emerald-400 text-base">{success}</p>}
         <button
           type="submit"
-          className="w-full py-2.5 px-4 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2"
+          className="mt-2 w-full rounded-2xl bg-emerald-600 px-4 py-4 sm:py-5 text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
         >
-          <PersonIcon className="w-5 h-5" />
-          Create account
+          Create Account
         </button>
       </form>
-      <p className="mt-6 text-stone-600 text-sm">
+      <p className="mt-8 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
         Already have an account?{' '}
-        <Link to="/login" className="text-emerald-600 font-medium hover:underline">
-          Sign in
+        <Link to="/login" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+          Log In
         </Link>
       </p>
-      <p className="mt-4">
-        <Link to="/" className="text-stone-500 hover:text-emerald-600 text-sm">
-          Back to home
-        </Link>
-      </p>
+      </div>
     </div>
   )
 }
