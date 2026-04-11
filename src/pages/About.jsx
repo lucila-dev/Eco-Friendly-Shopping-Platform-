@@ -10,7 +10,7 @@ const SECTIONS = [
   { id: 'help', label: 'Quick links', title: 'Quick links' },
 ]
 
-const bodyText = 'text-base text-stone-800 dark:text-stone-200 leading-7'
+const bodyText = 'text-sm sm:text-base text-stone-800 dark:text-stone-200 leading-6 sm:leading-7'
 
 const navInactive =
   'w-full text-left rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-900 px-3 py-2.5 text-sm font-medium text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50/90 dark:hover:bg-stone-800'
@@ -18,14 +18,14 @@ const navActive =
   'w-full text-left rounded-lg border border-emerald-800 dark:border-emerald-600 bg-emerald-700 dark:bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-900/10'
 
 const panelClass =
-  'relative overflow-hidden rounded-2xl border border-emerald-200/90 dark:border-emerald-800/80 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 dark:from-stone-900 dark:via-emerald-950/35 dark:to-stone-900 p-6 shadow-md ring-1 ring-emerald-100/80 dark:ring-emerald-900/40 sm:p-8 lg:min-h-[420px] lg:p-10'
+  'relative overflow-hidden rounded-2xl border border-emerald-200/90 dark:border-emerald-800/80 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 dark:from-stone-900 dark:via-emerald-950/35 dark:to-stone-900 p-5 shadow-md ring-1 ring-emerald-100/80 dark:ring-emerald-900/40 sm:p-6 lg:min-h-[360px] lg:p-8'
 
 const subAccordion =
-  'w-full text-left rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white/90 dark:bg-stone-900/95 px-4 py-3 text-base font-medium text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-stone-800'
+  'w-full text-left rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white/90 dark:bg-stone-900/95 px-3 py-2.5 text-sm font-medium text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-stone-800'
 const subAccordionBody = `${bodyText} rounded-r-lg border-l-[3px] border-emerald-600 dark:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 py-3 pl-4 pr-3 ml-1 mt-2 mb-3`
 
 const inputClass =
-  'w-full rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-950 px-4 py-3 text-base text-stone-900 dark:text-stone-100 placeholder:text-stone-500 dark:placeholder:text-stone-500 shadow-inner shadow-stone-100/80 dark:shadow-none focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/25'
+  'w-full rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-950 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-500 dark:placeholder:text-stone-500 shadow-inner shadow-stone-100/80 dark:shadow-none focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/25'
 
 const panelProse = 'w-full max-w-5xl mx-auto'
 
@@ -69,8 +69,8 @@ export default function About() {
   const activeMeta = SECTIONS.find((s) => s.id === activeSection)
 
   return (
-    <div className="w-full max-w-none rounded-2xl border border-emerald-100/80 dark:border-emerald-900/50 bg-gradient-to-b from-emerald-50/50 via-stone-50/80 to-white dark:from-stone-900 dark:via-stone-900 dark:to-stone-950 px-4 py-8 text-stone-900 dark:text-stone-100 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-      <div className="relative mb-8 overflow-hidden rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-100/90 via-white to-teal-50 dark:from-emerald-950/70 dark:via-stone-900 dark:to-emerald-950/50 px-6 py-10 text-center shadow-md sm:mb-10 sm:px-10 sm:py-12">
+    <div className="w-full max-w-none rounded-2xl border border-emerald-100/80 dark:border-emerald-900/50 bg-gradient-to-b from-emerald-50/50 via-stone-50/80 to-white dark:from-stone-900 dark:via-stone-900 dark:to-stone-950 px-4 py-6 text-stone-900 dark:text-stone-100 sm:px-6 sm:py-8 lg:px-6 lg:py-10">
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-100/90 via-white to-teal-50 dark:from-emerald-950/70 dark:via-stone-900 dark:to-emerald-950/50 px-5 py-7 text-center shadow-md sm:mb-8 sm:px-8 sm:py-9">
         <div
           className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-emerald-200/40 blur-2xl"
           aria-hidden
@@ -80,13 +80,13 @@ export default function About() {
           aria-hidden
         />
         <p className="relative text-xs font-semibold uppercase tracking-widest text-emerald-800 dark:text-emerald-300">Help center</p>
-        <h1 className="relative mt-3 text-3xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 sm:text-4xl">
+        <h1 className="relative mt-2 text-2xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 sm:text-3xl">
           About EcoShop
         </h1>
-        <p className="relative mx-auto mt-4 max-w-xl text-base leading-relaxed text-emerald-950/90 dark:text-emerald-100/85 sm:text-lg">
+        <p className="relative mx-auto mt-3 max-w-xl text-sm leading-relaxed text-emerald-950/90 dark:text-emerald-100/85 sm:text-base">
           Delivery help, policies, and support.
         </p>
-        <div className="relative mx-auto mt-8 flex max-w-3xl flex-col gap-3 sm:flex-row sm:gap-4">
+        <div className="relative mx-auto mt-6 flex max-w-3xl flex-col gap-2.5 sm:flex-row sm:gap-3">
           <HeroStat title="Free shipping" detail="On orders over $50" />
           <HeroStat title="30-day returns" detail="Unused items, original packaging" />
           <HeroStat title="Secure checkout" detail="Encrypted payments" />
@@ -119,12 +119,12 @@ export default function About() {
               className="pointer-events-none absolute right-0 top-0 h-32 w-32 translate-x-1/3 -translate-y-1/3 rounded-full bg-emerald-200/25 blur-2xl"
               aria-hidden
             />
-            <header className="relative mx-auto mb-8 max-w-5xl border-b border-emerald-200/60 dark:border-emerald-800/70 pb-6 text-center">
+            <header className="relative mx-auto mb-6 max-w-5xl border-b border-emerald-200/60 dark:border-emerald-800/70 pb-4 text-center">
               <p className="text-xs font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">Current section</p>
-              <h2 className="mt-2 text-2xl font-bold text-emerald-950 dark:text-emerald-100 sm:text-3xl">
+              <h2 className="mt-1.5 text-xl font-bold text-emerald-950 dark:text-emerald-100 sm:text-2xl">
                 {activeMeta?.title ?? activeMeta?.label}
               </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-stone-700 dark:text-stone-300">
+              <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base leading-relaxed text-stone-700 dark:text-stone-300">
                 {activeSection === 'guarantee' && 'How we choose products and keep listings honest.'}
                 {activeSection === 'essentials' && 'Before you check out.'}
                 {activeSection === 'delivery' && 'Estimates and free shipping thresholds.'}

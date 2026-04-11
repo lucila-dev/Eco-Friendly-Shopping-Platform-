@@ -16,7 +16,7 @@ export default function Cart() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6">Your cart</h1>
+      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Your cart</h1>
       {items.length === 0 ? (
         <p className="text-stone-600 dark:text-stone-300">
           Your cart is empty.{' '}
@@ -36,9 +36,9 @@ export default function Cart() {
               />
             ))}
           </div>
-          <div className="mt-6 flex items-center justify-between border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/40 rounded-xl p-4">
+          <div className="mt-5 flex items-center justify-between border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/40 rounded-xl p-3 sm:p-4">
             <div>
-              <p className="text-lg font-semibold text-stone-800 dark:text-stone-100">Subtotal: ${total.toFixed(2)}</p>
+              <p className="text-base font-semibold text-stone-800 dark:text-stone-100">Subtotal: ${total.toFixed(2)}</p>
               <p className="text-sm text-stone-500 dark:text-stone-400">
                 Delivery: {deliveryFee === 0 ? 'Free' : `$${deliveryFee.toFixed(2)}`}
               </p>
@@ -49,7 +49,7 @@ export default function Cart() {
             <div className="text-right">
               <Link
                 to="/checkout"
-                className="inline-block px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
+                className="inline-block px-5 py-2.5 text-sm bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
               >
                 Proceed to checkout
               </Link>

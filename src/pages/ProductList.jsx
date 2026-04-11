@@ -147,8 +147,8 @@ export default function ProductList() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-baseline justify-between gap-3 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Products</h1>
+      <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Products</h1>
         {!loading && totalMatching != null && (
           <p className="text-sm font-medium text-stone-700 dark:text-stone-300 tabular-nums">
             {totalMatching > MAX_ROWS
@@ -159,7 +159,7 @@ export default function ProductList() {
       </div>
 
       {/* Search — capped width so fields aren’t a full-screen strip; text stays text-base for legibility */}
-      <div className="max-w-5xl rounded-xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-white to-emerald-50 dark:from-stone-900 dark:to-emerald-950/40 p-3 sm:p-4 mb-5">
+      <div className="max-w-5xl rounded-xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-white to-emerald-50 dark:from-stone-900 dark:to-emerald-950/40 p-2.5 sm:p-3 mb-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full min-w-[12rem] max-w-md flex-1">
             <label htmlFor="search" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Search by name</label>
@@ -170,7 +170,7 @@ export default function ProductList() {
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
               placeholder="e.g. cotton, bamboo"
-              className="w-full px-3 py-2 text-base leading-normal border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-2.5 py-1.5 text-sm leading-normal border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div className="flex flex-wrap gap-3 items-end">
@@ -184,7 +184,7 @@ export default function ProductList() {
                 value={priceMin}
                 onChange={(e) => setPriceMin(e.target.value)}
                 placeholder="0"
-                className="w-24 px-2 py-2 text-base border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
+                className="w-24 px-2 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -197,7 +197,7 @@ export default function ProductList() {
                 value={priceMax}
                 onChange={(e) => setPriceMax(e.target.value)}
                 placeholder="Any"
-                className="w-24 px-2 py-2 text-base border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
+                className="w-24 px-2 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -211,7 +211,7 @@ export default function ProductList() {
                 onChange={(e) => setScoreMin(e.target.value)}
                 placeholder="1–10"
                 title="Minimum sustainability score (1–10)"
-                className="w-20 px-2 py-2 text-base border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
+                className="w-20 px-2 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -220,7 +220,7 @@ export default function ProductList() {
                 id="sortBy"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-2 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-base focus:ring-2 focus:ring-emerald-500 min-h-[2.5rem]"
+                className="px-2 py-1.5 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-sm focus:ring-2 focus:ring-emerald-500 min-h-[2.25rem]"
               >
                 <option value="newest">Newest</option>
                 <option value="price-asc">Price: low to high</option>
@@ -240,7 +240,7 @@ export default function ProductList() {
       </div>
 
       {/* Category pills */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-4">
         <button
           type="button"
           onClick={() => setSearchParams({})}
@@ -260,14 +260,14 @@ export default function ProductList() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      {loading && <p className="text-center text-stone-600 dark:text-stone-400 text-base font-medium py-6">Loading...</p>}
+      {loading && <p className="text-center text-stone-600 dark:text-stone-400 text-sm font-medium py-4">Loading...</p>}
       {!loading && products.length === 0 && (
-        <p className="text-stone-700 dark:text-stone-300 text-base py-8 leading-relaxed max-w-prose">No products found. Try different filters or search.</p>
+        <p className="text-stone-700 dark:text-stone-300 text-sm py-6 leading-relaxed max-w-prose">No products found. Try different filters or search.</p>
       )}
     </div>
   )

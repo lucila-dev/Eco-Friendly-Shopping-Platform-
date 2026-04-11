@@ -69,8 +69,8 @@ export default function ProductCard({ product }) {
             </span>
           )}
         </div>
-        <div className="p-4">
-          <h2 className="font-semibold text-base text-stone-900 dark:text-stone-100 line-clamp-2 transition-colors group-hover:text-emerald-700 dark:group-hover:text-emerald-400 leading-snug">{name}</h2>
+        <div className="p-3">
+          <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100 line-clamp-2 transition-colors group-hover:text-emerald-700 dark:group-hover:text-emerald-400 leading-snug">{name}</h2>
           <p className="text-sm text-stone-700 dark:text-stone-300 mt-1.5 line-clamp-1 leading-normal">{materials || 'Eco-friendly materials'}</p>
           <div className="mt-2 flex items-center gap-2 flex-wrap">
             <p className="text-emerald-700 dark:text-emerald-400 font-bold text-lg tabular-nums">${Number(price).toFixed(2)}</p>
@@ -84,7 +84,7 @@ export default function ProductCard({ product }) {
           </div>
         </div>
       </Link>
-      <div className="px-4 pb-4 flex items-center gap-2">
+      <div className="px-3 pb-3 flex items-center gap-2">
         <button
           type="button"
           onClick={addFromCard}

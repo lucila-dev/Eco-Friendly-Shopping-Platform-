@@ -98,26 +98,26 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative rounded-2xl overflow-hidden mb-10 sm:mb-14">
+      <section className="relative rounded-2xl overflow-hidden mb-8 sm:mb-10">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50/90 to-teal-50/80 dark:from-emerald-950/80 dark:via-stone-900 dark:to-emerald-950/60" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1200')] bg-cover bg-center opacity-20 mix-blend-multiply dark:opacity-10 dark:mix-blend-soft-light" />
-        <div className="relative max-w-3xl mx-auto text-center px-6 py-14 sm:py-20">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-950 dark:text-emerald-100 mb-4 leading-tight">
+        <div className="relative max-w-2xl mx-auto text-center px-4 py-8 sm:py-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-emerald-950 dark:text-emerald-100 mb-3 leading-tight">
             Shop Sustainably, Live Better
           </h1>
-          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-lg sm:text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-base sm:text-lg mb-5 max-w-xl mx-auto leading-relaxed">
             Discover eco-friendly products that make a difference. Every purchase helps reduce your carbon footprint.
           </p>
           <Link
             to="/products"
-            className="inline-flex items-center justify-center px-6 py-2.5 text-base font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            className="inline-flex items-center justify-center px-5 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
           >
             Shop Now
           </Link>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10 sm:mb-14">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 sm:mb-10">
         <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-4">
           <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">Free delivery over $50</p>
           <p className="text-sm text-stone-700 dark:text-stone-300 mt-1 leading-relaxed">Automatic at checkout.</p>
@@ -133,26 +133,26 @@ export default function Home() {
       </section>
 
       {/* Our Environmental Commitment */}
-      <section className="mb-10 sm:mb-14">
-        <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 text-center mb-2">
+      <section className="mb-8 sm:mb-10">
+        <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 text-center mb-2">
           Our Environmental Commitment
         </h2>
-        <p className="text-stone-700 dark:text-stone-300 text-base text-center max-w-2xl mx-auto mb-8 leading-relaxed">
+        <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base text-center max-w-xl mx-auto mb-6 leading-relaxed">
           We're dedicated to reducing environmental impact through every aspect of our platform.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {COMMITMENTS.map(({ title, description, Icon }) => (
             <div
               key={title}
-              className="rounded-xl border border-emerald-100 dark:border-emerald-800/80 bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-600 transition-all"
+              className="rounded-xl border border-emerald-100 dark:border-emerald-800/80 bg-white dark:bg-stone-900 p-4 sm:p-5 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-600 transition-all"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
-                  <Icon className="w-5 h-5" />
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
+                  <Icon className="w-4 h-4" />
                 </span>
-                <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-base leading-snug">{title}</h3>
+                <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm sm:text-base leading-snug">{title}</h3>
               </div>
-              <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base leading-relaxed">{description}</p>
+              <p className="text-stone-700 dark:text-stone-300 text-sm leading-relaxed">{description}</p>
             </div>
           ))}
         </div>
@@ -160,8 +160,8 @@ export default function Home() {
 
       {/* Categories */}
       <section>
-        <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Shop by category</h2>
-        <p className="text-stone-700 dark:text-stone-300 text-base mb-6 max-w-2xl leading-relaxed">
+        <h2 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-1.5">Shop by category</h2>
+        <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mb-5 max-w-2xl leading-relaxed">
           Choose a category to find eco-friendly products quickly.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -183,8 +183,8 @@ export default function Home() {
                     decoding="async"
                   />
                 </div>
-                <div className="p-4 sm:p-5">
-                  <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-base sm:text-lg group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{cat.name}</h3>
+                <div className="p-3 sm:p-4">
+                  <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm sm:text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{cat.name}</h3>
                   {cardSubtitle && (
                     <p className="text-stone-700 dark:text-stone-300 text-sm mt-1.5 line-clamp-2 leading-relaxed">{cardSubtitle}</p>
                   )}

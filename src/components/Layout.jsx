@@ -131,13 +131,13 @@ export default function Layout() {
         className={`flex-1 text-stone-900 dark:text-stone-100 ${
           isAuthPage
             ? 'w-full max-w-none mx-0 px-0 py-0'
-            : `${contentWidth} ${mainHorizontalPadding} py-6 sm:py-8`
-        } ${!isAuthPage ? 'text-base leading-relaxed' : ''}`}
+            : `${contentWidth} ${mainHorizontalPadding} py-4 sm:py-6`
+        } ${!isAuthPage ? 'text-sm sm:text-base leading-relaxed' : ''}`}
       >
         <Outlet />
       </main>
-      <footer className={`border-t border-emerald-200 dark:border-emerald-800/50 py-6 sm:py-7 mt-auto ${footerBg}`}>
-        <div className={`${contentWidth} ${contentPad} text-center text-stone-600 dark:text-stone-400 text-sm sm:text-base`}>
+      <footer className={`border-t border-emerald-200 dark:border-emerald-800/50 py-4 sm:py-5 mt-auto ${footerBg}`}>
+        <div className={`${contentWidth} ${contentPad} text-center text-stone-600 dark:text-stone-400 text-xs sm:text-sm`}>
           EcoShop – Sustainable shopping for a greener future.
         </div>
       </footer>

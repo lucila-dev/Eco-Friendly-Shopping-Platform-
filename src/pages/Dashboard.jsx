@@ -296,21 +296,21 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-6">Your dashboard</h1>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-4">Your dashboard</h1>
 
       {/* Green impact */}
-      <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/50 dark:bg-emerald-950/35 p-6 md:p-8 mb-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2">Your green impact</h2>
-        <p className="text-stone-700 dark:text-stone-300 text-base mb-2">
+      <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/50 dark:bg-emerald-950/35 p-5 md:p-6 mb-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">Your green impact</h2>
+        <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mb-1.5">
           By choosing eco-friendly products, you have saved an estimated:
         </p>
-        <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">
+        <p className="text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-400">
           {greenImpact.totalCarbonSaved.toFixed(1)} kg CO₂
         </p>
-        <p className="text-stone-600 dark:text-stone-400 text-base mt-1">
+        <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base mt-1">
           Across {greenImpact.orderCount} {greenImpact.orderCount === 1 ? 'order' : 'orders'}.
         </p>
-        <p className="text-stone-700 dark:text-stone-300 text-base mt-3">
+        <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mt-2">
           Your contribution to the environment through your purchases is shown above.
         </p>
         {chartData.length > 0 && (

@@ -37,7 +37,7 @@ export default function Wishlist() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Your wishlist</h1>
+      <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-4">Your wishlist</h1>
       {products.length === 0 ? (
         <p className="text-stone-600 dark:text-stone-300">
           No saved items yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline">Browse products</Link>
