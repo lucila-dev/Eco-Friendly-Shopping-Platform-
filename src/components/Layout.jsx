@@ -8,11 +8,11 @@ import { CartIcon, PersonIcon } from './Icons'
 const contentPad = 'px-4 sm:px-6 lg:px-8'
 const contentWidth = 'max-w-7xl mx-auto w-full'
 
-/** Header nav text — matches Login / Sign up scale (text-lg). */
+/** Header nav — compact scale so bar doesn’t dominate the viewport. */
 const navLinkClass =
-  'text-lg font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 px-2 py-2 rounded-xl hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
+  'text-sm sm:text-[0.9375rem] font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 px-1.5 py-1.5 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 const navLinkActiveClass =
-  'text-lg font-semibold text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 px-2 py-2 rounded-xl hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
+  'text-sm sm:text-[0.9375rem] font-semibold text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 px-1.5 py-1.5 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 
 export default function Layout() {
   const { signOut, isAuthenticated } = useAuth()
@@ -40,15 +40,15 @@ export default function Layout() {
       }`}
     >
       <header className="border-b border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-white via-emerald-50 to-teal-50 dark:from-stone-900 dark:via-emerald-950/50 dark:to-stone-900 shadow-sm sticky top-0 z-10">
-        <div className={`${contentWidth} ${contentPad} py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4`}>
+        <div className={`${contentWidth} ${contentPad} py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3`}>
           <Link
             to="/"
-            className="flex items-center gap-3 text-emerald-800 dark:text-emerald-300 hover:text-emerald-700 dark:hover:text-emerald-200 shrink-0 py-1"
+            className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 hover:text-emerald-700 dark:hover:text-emerald-200 shrink-0 py-0.5"
           >
-            <img src="/favicon-96x96.png" alt="" aria-hidden="true" className="w-10 h-10 sm:w-11 sm:h-11" />
-            <span className="text-2xl sm:text-[1.65rem] font-bold tracking-tight">EcoShop</span>
+            <img src="/favicon-96x96.png" alt="" aria-hidden="true" className="w-8 h-8 sm:w-9 sm:h-9" />
+            <span className="text-lg sm:text-xl font-bold tracking-tight">EcoShop</span>
           </Link>
-          <nav className="w-full sm:w-auto flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-x-3 sm:gap-y-2 lg:gap-x-4">
+          <nav className="w-full sm:w-auto flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2 sm:gap-y-1.5">
             <Link to="/" className={navLinkActiveClass}>
               Home
             </Link>
@@ -60,12 +60,12 @@ export default function Layout() {
             </Link>
             <Link
               to="/cart"
-              className={`relative inline-flex items-center justify-center ${navLinkClass} !px-3`}
+              className={`relative inline-flex items-center justify-center ${navLinkClass} !px-2`}
               aria-label="Shopping cart"
             >
-              <CartIcon className="w-7 h-7" />
+              <CartIcon className="w-5 h-5 sm:w-6 sm:h-6" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[1.375rem] h-6 px-1.5 flex items-center justify-center bg-emerald-600 text-white text-sm font-semibold rounded-full">
+                <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-5 px-1 flex items-center justify-center bg-emerald-600 text-white text-[0.65rem] font-semibold rounded-full leading-none">
                   {cartCount}
                 </span>
               )}
@@ -92,33 +92,33 @@ export default function Layout() {
                 </Link>
                 <Link
                   to="/profile"
-                  className={`inline-flex items-center justify-center ${navLinkClass} !px-3`}
+                  className={`inline-flex items-center justify-center ${navLinkClass} !px-2`}
                   aria-label="Profile"
                 >
-                  <PersonIcon className="w-7 h-7" />
+                  <PersonIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </Link>
                 <button
                   type="button"
                   onClick={() => signOut()}
-                  className="text-lg font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                  className="text-sm sm:text-[0.9375rem] font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-1.5 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                   aria-label="Log out"
                 >
                   Logout
                 </button>
               </>
             ) : (
-              <span className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <span className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-2.5 px-7 py-3 sm:px-8 sm:py-3.5 bg-emerald-600 text-white text-lg font-semibold rounded-2xl hover:bg-emerald-700 shadow-md"
+                  className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2 bg-emerald-600 text-white text-sm sm:text-[0.9375rem] font-semibold rounded-xl hover:bg-emerald-700 shadow-sm"
                   aria-label="Log in"
                 >
-                  <PersonIcon className="w-7 h-7 shrink-0" />
+                  <PersonIcon className="w-5 h-5 shrink-0" />
                   <span>Login</span>
                 </Link>
                 <Link
                   to="/signup"
-                  className="text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-lg font-semibold px-4 py-2.5 sm:py-3 rounded-2xl hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30 border-2 border-transparent hover:border-emerald-200/80 dark:hover:border-emerald-700/50"
+                  className="text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-sm sm:text-[0.9375rem] font-semibold px-3 py-2 rounded-xl hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30 border border-transparent hover:border-emerald-200/80 dark:hover:border-emerald-700/50"
                 >
                   Sign up
                 </Link>
