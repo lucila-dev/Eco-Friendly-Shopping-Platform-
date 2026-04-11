@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { getProductImage } from '../lib/productImageOverrides'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
+import OrderTrackingTimeline from '../components/OrderTrackingTimeline'
 
 const PRODUCT_ID_CHUNK = 120
 
@@ -74,16 +75,6 @@ async function fetchLineItemsByOrder(orderIds) {
     }))
   }
   return byOrder
-}
-
-function getShipmentStatus(createdAt) {
-  const created = new Date(createdAt).getTime()
-  const now = Date.now()
-  const hours = Math.max(0, (now - created) / (1000 * 60 * 60))
-  if (hours < 6) return { label: 'Preparing', detail: 'Order confirmed and being packed.' }
-  if (hours < 24) return { label: 'Dispatched', detail: 'Parcel has left our warehouse.' }
-  if (hours < 48) return { label: 'Out for delivery', detail: 'Courier is delivering your order today.' }
-  return { label: 'Delivered', detail: `Delivered on ${new Date(created + (48 * 60 * 60 * 1000)).toLocaleDateString()}` }
 }
 
 export default function Orders() {
@@ -187,9 +178,8 @@ export default function Orders() {
                 </div>
               </div>
 
-              <div className="rounded-md border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 mb-3">
-                <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">{getShipmentStatus(order.created_at).label}</p>
-                <p className="text-xs text-emerald-800 dark:text-emerald-300">{getShipmentStatus(order.created_at).detail}</p>
+              <div className="mb-3">
+                <OrderTrackingTimeline order={order} />
               </div>
 
               <div className="space-y-2">
