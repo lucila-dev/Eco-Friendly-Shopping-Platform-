@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../hooks/useCart'
 import { useProfile } from '../hooks/useProfile'
+import { isSupabaseConfigured } from '../lib/supabase'
 import { CartIcon, PersonIcon } from './Icons'
 
 /** Horizontal padding + max width so lines don’t stretch endlessly on large monitors. */
@@ -127,6 +128,17 @@ export default function Layout() {
           </nav>
         </div>
       </header>
+      {!isSupabaseConfigured && (
+        <div
+          className="bg-amber-100 dark:bg-amber-950/80 border-b border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-100 text-center text-xs sm:text-sm px-4 py-2"
+          role="status"
+        >
+          <strong className="font-semibold">Backend not configured.</strong> Add{' '}
+          <code className="rounded bg-amber-200/80 dark:bg-amber-900/60 px-1 py-0.5 text-[0.8em]">VITE_SUPABASE_URL</code> and{' '}
+          <code className="rounded bg-amber-200/80 dark:bg-amber-900/60 px-1 py-0.5 text-[0.8em]">VITE_SUPABASE_ANON_KEY</code> in
+          your host&apos;s environment variables, then redeploy.
+        </div>
+      )}
       <main
         className={`flex-1 text-stone-900 dark:text-stone-100 ${
           isAuthPage

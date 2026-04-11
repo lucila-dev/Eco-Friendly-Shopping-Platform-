@@ -3,7 +3,18 @@ import { createClient } from '@supabase/supabase-js'
 export const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '')
 export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
+/** True when real project URL + anon key are set (e.g. Vercel env vars). */
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
+
+/**
+ * Supabase v2+ throws if `createClient` gets an empty URL, which would crash the whole app
+ * before React mounts (white screen) when env vars are missing on the host.
+ * Placeholders keep the shell loadable; all real calls still fail until env is set.
+ */
+const clientUrl = supabaseUrl || 'https://missing-env-placeholder.supabase.co'
+const clientKey = supabaseAnonKey || 'sb-publishable-placeholder-not-a-real-key'
+
+export const supabase = createClient(clientUrl, clientKey)
 
 /**
  * Deletes the current user via Edge Function `delete-account` (uses service role on the server).
