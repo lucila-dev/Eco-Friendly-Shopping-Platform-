@@ -7,17 +7,17 @@ export default function CartItem({ item, onUpdate, onRemove }) {
   if (!product) return null
 
   return (
-    <div className="flex gap-4 py-4 border-b border-stone-200 dark:border-stone-600 last:border-0">
+    <div className="flex gap-3 py-3 border-b border-stone-200 dark:border-stone-600 last:border-0">
       <Link
         to={`/products/${product.slug}`}
-        className="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-stone-100 dark:bg-stone-800"
+        className="shrink-0 w-[4.5rem] h-[4.5rem] rounded-lg overflow-hidden bg-stone-100 dark:bg-stone-800"
       >
         <img src={getProductImage(product)} alt={product.name} className="h-full w-full object-cover object-center" loading="lazy" />
       </Link>
       <div className="flex-1 min-w-0">
         <Link
           to={`/products/${product.slug}`}
-          className="font-medium text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400"
+          className="text-sm font-medium text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400"
         >
           {product.name}
         </Link>
@@ -52,7 +52,7 @@ export default function CartItem({ item, onUpdate, onRemove }) {
           </button>
         </div>
       </div>
-      <div className="text-right font-medium text-stone-800 dark:text-stone-100">
+      <div className="text-right text-sm font-medium text-stone-800 dark:text-stone-100 tabular-nums">
         ${(item.quantity * Number(product.price)).toFixed(2)}
       </div>
     </div>

@@ -155,7 +155,7 @@ export default function Orders() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Track your orders</h1>
+      <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-4">Track your orders</h1>
       {orders.length === 0 ? (
         <p className="text-stone-600 dark:text-stone-400">No orders yet. <Link className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline" to="/products">Start shopping</Link>.</p>
       ) : (

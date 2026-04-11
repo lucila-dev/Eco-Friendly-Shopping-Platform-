@@ -175,7 +175,7 @@ export default function ProductDetail() {
   const productUse = useMemo(() => getProductUseLabel(product), [product])
   const sizeGuide = useMemo(() => getSizeGuide(product), [product])
 
-  if (loading) return <p className="text-stone-500 dark:text-stone-400 text-lg py-4">Loading...</p>
+  if (loading) return <p className="text-stone-500 dark:text-stone-400 text-sm py-3">Loading...</p>
   if (!product) return <p className="text-stone-600">Product not found. <Link to="/products" className="text-emerald-600 hover:underline">Back to products</Link></p>
 
   const displayImage = getProductImage(product)
@@ -185,11 +185,11 @@ export default function ProductDetail() {
   const toggleInfo = (key) => setOpenInfo((prev) => ({ ...prev, [key]: !prev[key] }))
 
   return (
-    <div className="w-full py-4 sm:py-5">
+    <div className="w-full py-3 sm:py-4">
       <div className="grid w-full max-w-none grid-cols-1 items-stretch gap-x-4 gap-y-4 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4">
         <Link
           to={categoryLink}
-          className="col-span-full block text-lg text-stone-600 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400"
+          className="col-span-full block text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400"
         >
           ← Back to Category
         </Link>
@@ -207,28 +207,28 @@ export default function ProductDetail() {
         </div>
 
         <div className="min-h-0 min-w-0 w-full space-y-2 sm:space-y-3 self-stretch">
-          <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-4 py-1.5 text-base font-semibold text-emerald-700 dark:text-emerald-300">
+          <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
             Sustainability Score: {score100}/100
           </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-bold text-stone-800 dark:text-stone-100 leading-tight">{product.name}</h1>
-          <div className="flex flex-wrap items-center gap-3 mt-1">
-            <p className="text-4xl sm:text-5xl text-emerald-700 dark:text-emerald-400 font-bold">${Number(product.price).toFixed(2)}</p>
-            <span className="text-base px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium">In stock</span>
-            <span className="text-base px-3 py-1.5 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 font-medium">{productUse}</span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 leading-tight">{product.name}</h1>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <p className="text-2xl sm:text-3xl text-emerald-700 dark:text-emerald-400 font-bold tabular-nums">${Number(product.price).toFixed(2)}</p>
+            <span className="text-sm px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium">In stock</span>
+            <span className="text-sm px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 font-medium">{productUse}</span>
           </div>
-          <p className="text-stone-700 dark:text-stone-300 text-lg sm:text-xl leading-relaxed">{product.description || 'No description provided yet.'}</p>
+          <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg leading-relaxed">{product.description || 'No description provided yet.'}</p>
 
           {sizeGuide && (
-            <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 bg-emerald-100/35 dark:bg-emerald-950/30 p-4 sm:p-5">
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-lg">{sizeGuide.title}</h3>
-              <p className="mt-1 text-base text-stone-600 dark:text-stone-400 leading-relaxed">{sizeGuide.description}</p>
+            <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 bg-emerald-100/35 dark:bg-emerald-950/30 p-3 sm:p-4">
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-base">{sizeGuide.title}</h3>
+              <p className="mt-1 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">{sizeGuide.description}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {sizeGuide.options.map((size) => (
                   <button
                     key={size}
                     type="button"
                     onClick={() => setSelectedSize(size)}
-                    className={`rounded-md border px-4 py-2 text-base font-medium ${
+                    className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
                       selectedSize === size
                         ? 'border-emerald-500 bg-emerald-100 text-emerald-700'
                         : 'border-stone-300 bg-emerald-50 text-stone-700 hover:border-emerald-300'
@@ -242,14 +242,14 @@ export default function ProductDetail() {
                 <button
                   type="button"
                   onClick={() => setShowSizeMeasurements((v) => !v)}
-                  className="inline-flex items-center rounded-md border border-stone-300/80 dark:border-stone-600 bg-emerald-100/40 dark:bg-emerald-900/30 px-4 py-2 text-base font-medium text-stone-700 dark:text-stone-200 hover:border-emerald-400"
+                  className="inline-flex items-center rounded-md border border-stone-300/80 dark:border-stone-600 bg-emerald-100/40 dark:bg-emerald-900/30 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-200 hover:border-emerald-400"
                 >
                   {showSizeMeasurements ? 'Hide measurements' : 'View measurements'}
                 </button>
               </div>
               <div className={`${showSizeMeasurements ? 'mt-4' : 'mt-0'} overflow-x-auto`}>
                 {showSizeMeasurements && (
-                  <table className="min-w-full text-base">
+                  <table className="min-w-full text-sm">
                     <thead>
                       <tr className="text-left text-stone-600 border-b border-stone-200">
                         {sizeGuide.columns.map((col) => (
@@ -300,7 +300,7 @@ export default function ProductDetail() {
           >
             <ul className="mt-2 space-y-2">
               {sustainabilityReasons.map((reason) => (
-                <li key={reason} className="text-base sm:text-lg text-stone-700 dark:text-stone-300 leading-relaxed">✓ {reason}</li>
+                <li key={reason} className="text-sm sm:text-base text-stone-700 dark:text-stone-300 leading-relaxed">✓ {reason}</li>
               ))}
             </ul>
           </InfoAccordion>
@@ -312,17 +312,17 @@ export default function ProductDetail() {
             titleClassName="text-sky-800"
           >
             <div className="mt-3">
-              <div className="flex items-center justify-between text-base text-stone-600 dark:text-stone-400">
+              <div className="flex items-center justify-between text-sm text-stone-600 dark:text-stone-400">
                 <span>Sustainability Score</span>
-                <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-lg">{score100}/100</span>
+                <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-base">{score100}/100</span>
               </div>
               <div className="mt-1.5 h-3 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
                 <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${score100}%` }} />
               </div>
             </div>
             <div className="mt-2 rounded-md border border-sky-200/70 bg-sky-100/35 p-3">
-              <p className="text-base font-semibold text-sky-900 dark:text-sky-200">Carbon Footprint Savings</p>
-              <p className="text-lg text-stone-700 dark:text-stone-300 mt-2 leading-relaxed">
+              <p className="text-sm font-semibold text-sky-900 dark:text-sky-200">Carbon Footprint Savings</p>
+              <p className="text-base text-stone-700 dark:text-stone-300 mt-1.5 leading-relaxed">
                 This product saves approximately <span className="font-semibold text-emerald-700">{carbonSaving.toFixed(1)} kg CO2</span> compared to traditional alternatives.
               </p>
             </div>
@@ -344,7 +344,7 @@ export default function ProductDetail() {
           </InfoAccordion>
         </div>
       </div>
-      <div className="mt-4 sm:mt-5 border-t border-emerald-200/50 pt-4 sm:pt-5">
+      <div className="mt-3 sm:mt-4 border-t border-emerald-200/50 pt-3 sm:pt-4">
         <ReviewList productId={product.id} productName={product.name} key={`${product.id}-${reviewVersion}`} />
         <ReviewForm productId={product.id} canReview={canReview} onSubmitted={() => setReviewVersion((v) => v + 1)} />
       </div>
@@ -354,15 +354,15 @@ export default function ProductDetail() {
 
 function InfoAccordion({ title, open, onToggle, className = '', titleClassName = '', children }) {
   return (
-    <section className={`rounded-xl border px-4 py-3 sm:px-5 sm:py-4 ${className}`}>
+    <section className={`rounded-xl border px-3 py-2.5 sm:px-4 sm:py-3 ${className}`}>
       <button
         type="button"
         onClick={onToggle}
         className="w-full flex items-center justify-between text-left py-1 gap-3"
         aria-expanded={open}
       >
-        <h3 className={`font-semibold text-lg sm:text-xl ${titleClassName}`}>{title}</h3>
-        <span className={`text-stone-600 dark:text-stone-400 text-xl leading-none shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}>⌄</span>
+        <h3 className={`font-semibold text-base sm:text-lg ${titleClassName}`}>{title}</h3>
+        <span className={`text-stone-600 dark:text-stone-400 text-lg leading-none shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}>⌄</span>
       </button>
       {open && <div className="mt-3">{children}</div>}
     </section>
@@ -407,16 +407,16 @@ function AddToCartButton({ product, isAuthenticated, requiresSize = false, selec
           <button
             type="button"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="px-3 py-2.5 text-stone-700 hover:bg-stone-50 text-base"
+            className="px-2.5 py-2 text-stone-700 hover:bg-stone-50 text-sm"
             aria-label="Decrease quantity"
           >
             -
           </button>
-          <span className="w-10 text-center text-base font-medium text-stone-700">{qty}</span>
+          <span className="w-9 text-center text-sm font-medium text-stone-700">{qty}</span>
           <button
             type="button"
             onClick={() => setQty((q) => Math.min(9, q + 1))}
-            className="px-3 py-2.5 text-stone-700 hover:bg-stone-50 text-base"
+            className="px-2.5 py-2 text-stone-700 hover:bg-stone-50 text-sm"
             aria-label="Increase quantity"
           >
             +
@@ -427,23 +427,23 @@ function AddToCartButton({ product, isAuthenticated, requiresSize = false, selec
             type="button"
             onClick={handleAdd}
             disabled={adding || (requiresSize && !selectedSize)}
-            className="flex-1 px-6 py-3 bg-emerald-600 text-white text-base font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50"
           >
             {adding ? 'Adding...' : done ? 'Added to Cart' : 'Add to Cart'}
           </button>
         ) : (
-          <Link to="/login" className="flex-1 px-6 py-3 bg-emerald-600 text-white text-center text-base font-semibold rounded-lg hover:bg-emerald-700">
+          <Link to="/login" className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-center text-sm font-semibold rounded-lg hover:bg-emerald-700">
             Sign In to Add
           </Link>
         )}
       </div>
       {done && isAuthenticated && (
-        <Link to="/cart" className="inline-block mt-2 text-emerald-600 hover:underline text-base">
+        <Link to="/cart" className="inline-block mt-2 text-emerald-600 hover:underline text-sm">
           View cart
         </Link>
       )}
       {requiresSize && !selectedSize && (
-        <p className="mt-2 text-base text-stone-600 dark:text-stone-400">Choose a size to add this item to cart.</p>
+        <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">Choose a size to add this item to cart.</p>
       )}
     </div>
   )

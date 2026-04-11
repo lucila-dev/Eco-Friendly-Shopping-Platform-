@@ -154,7 +154,7 @@ export default function Checkout() {
   if (items.length === 0 && !submitting) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-stone-800 mb-4">Checkout</h1>
+        <h1 className="text-xl font-bold text-stone-800 mb-3">Checkout</h1>
         <p className="text-stone-600">Your cart is empty. Add items before checkout.</p>
       </div>
     )
@@ -164,9 +164,9 @@ export default function Checkout() {
   const finalTotal = total + deliveryFee
 
   return (
-    <div className="max-w-lg rounded-2xl border border-emerald-200 bg-white/90 p-5 shadow-sm">
-      <h1 className="text-2xl font-bold text-stone-800 mb-6">Checkout</h1>
-      <p className="text-stone-600 mb-6">
+    <div className="max-w-lg rounded-2xl border border-emerald-200 bg-white/90 p-4 sm:p-5 shadow-sm">
+      <h1 className="text-xl font-bold text-stone-800 mb-4">Checkout</h1>
+      <p className="text-stone-600 text-sm mb-4">
         Checkout – loyalty credits use your account balance. Card fields below are for display only; no card is charged.
       </p>
       <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 mb-5 text-sm">
@@ -174,7 +174,7 @@ export default function Checkout() {
         <p className="text-stone-700">Delivery: {deliveryFee === 0 ? 'Free' : `$${deliveryFee.toFixed(2)}`}</p>
         <p className="text-stone-800 font-semibold mt-1">Total to pay: ${finalTotal.toFixed(2)}</p>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <h2 className="font-semibold text-stone-800 mb-3">Payment details</h2>
           <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 mb-3">
@@ -336,7 +336,7 @@ export default function Checkout() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+          className="w-full py-2.5 text-sm bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50"
         >
           {submitting ? 'Placing order...' : 'Place order'}
         </button>

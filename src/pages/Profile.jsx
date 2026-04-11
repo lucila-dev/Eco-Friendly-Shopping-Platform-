@@ -58,8 +58,8 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-3xl mx-auto flex justify-center py-16">
-        <p className="text-stone-500 dark:text-stone-400 text-lg">Loading profile...</p>
+      <div className="w-full max-w-3xl mx-auto flex justify-center py-10">
+        <p className="text-stone-500 dark:text-stone-400 text-sm">Loading profile...</p>
       </div>
     )
   }
@@ -162,22 +162,22 @@ export default function Profile() {
   })
 
   const shortcutClass =
-    'group flex flex-col items-center justify-center gap-2 rounded-xl border border-emerald-100 dark:border-emerald-800/70 bg-white dark:bg-stone-900 px-4 py-5 text-center shadow-sm transition hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-stone-800/80 hover:shadow'
+    'group flex flex-col items-center justify-center gap-1.5 rounded-xl border border-emerald-100 dark:border-emerald-800/70 bg-white dark:bg-stone-900 px-3 py-4 text-center shadow-sm transition hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-stone-800/80 hover:shadow'
 
   return (
     <div className="w-full max-w-3xl mx-auto pb-8">
-      <header className="text-center mb-8 sm:mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Your profile</h1>
-        <p className="mt-3 text-stone-600 dark:text-stone-300 max-w-md mx-auto leading-relaxed">
+      <header className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Your profile</h1>
+        <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-md mx-auto leading-relaxed">
           Update how you appear on EcoShop, check your loyalty balance, and jump back to shopping or your activity.
         </p>
       </header>
 
       <section className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-sm overflow-hidden">
         <div className="h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" aria-hidden />
-        <div className="p-6 sm:p-8 lg:p-10">
+        <div className="p-5 sm:p-6 lg:p-8">
           <div className="flex flex-col items-center text-center">
-            <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36">
               <img
                 src={avatarSrc}
                 alt={`${displayName} avatar`}
@@ -199,17 +199,17 @@ export default function Profile() {
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
                 disabled={uploadingAvatar}
-                className="absolute bottom-0 right-0 flex h-11 w-11 items-center justify-center rounded-full border-[3px] border-white dark:border-stone-900 bg-emerald-600 text-xl font-light leading-none text-white shadow-md hover:bg-emerald-700 disabled:opacity-50"
+                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white dark:border-stone-900 bg-emerald-600 text-lg font-light leading-none text-white shadow-md hover:bg-emerald-700 disabled:opacity-50"
                 aria-label="Change profile photo"
               >
                 {uploadingAvatar ? '…' : '+'}
               </button>
             </div>
-            <p className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-100 mt-6">{displayName}</p>
+            <p className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-100 mt-4">{displayName}</p>
             <p className="text-stone-600 dark:text-stone-400 mt-2 text-sm sm:text-base break-all max-w-md">{user?.email}</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8 sm:mt-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-6 sm:mt-8">
             <div className="rounded-xl border border-stone-100 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/60 px-4 py-4 text-center">
               <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Member since</p>
               <p className="text-sm font-semibold text-stone-800 dark:text-stone-100 mt-1.5 leading-snug">{memberSinceLabel}</p>
@@ -227,22 +227,22 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-6 sm:p-8 shadow-lg border border-emerald-500/40 text-center sm:text-left">
+          <div className="mt-6 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-5 sm:p-6 shadow-lg border border-emerald-500/40 text-center sm:text-left">
             <p className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-emerald-100/90">EcoShop loyalty</p>
-            <p className="text-3xl sm:text-4xl font-bold mt-2 tabular-nums text-center sm:text-left">
+            <p className="text-2xl sm:text-3xl font-bold mt-1.5 tabular-nums text-center sm:text-left">
               {loyaltyBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })} pts
             </p>
-            <p className="text-base sm:text-lg text-emerald-50 mt-3 leading-snug">
+            <p className="text-sm sm:text-base text-emerald-50 mt-2 leading-snug">
               {LOYALTY_POINTS_PER_DOLLAR} points = {formatMoneyUsd(1)} when redeemed at checkout.
             </p>
-            <p className="text-base font-medium mt-2">
+            <p className="text-sm font-medium mt-1.5">
               Balance worth about <span className="tabular-nums">{formatMoneyUsd(redeemApproxUsd)}</span> off eligible orders.
             </p>
           </div>
 
-          <div className="mt-10 pt-8 border-t border-stone-200 dark:border-stone-700">
-            <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 text-center sm:text-left mb-5">Edit your details</h2>
-            <form onSubmit={saveProfile} className="space-y-5 max-w-lg mx-auto sm:mx-0">
+          <div className="mt-8 pt-6 border-t border-stone-200 dark:border-stone-700">
+            <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100 text-center sm:text-left mb-4">Edit your details</h2>
+            <form onSubmit={saveProfile} className="space-y-4 max-w-lg mx-auto sm:mx-0">
               <div>
                 <label htmlFor="displayName" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
                   Display name
@@ -252,44 +252,44 @@ export default function Profile() {
                   type="text"
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
-                  className="w-full px-4 py-3 text-base border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 placeholder:text-stone-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 placeholder:text-stone-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white text-base font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-50"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-50"
                 >
                   {savingProfile ? 'Saving...' : 'Save profile'}
                 </button>
               </div>
-              {profileMessage && <p className="text-base text-red-700 dark:text-red-400">{profileMessage}</p>}
+              {profileMessage && <p className="text-sm text-red-700 dark:text-red-400">{profileMessage}</p>}
             </form>
           </div>
         </div>
       </section>
 
-      <section className="mt-10" aria-label="Quick links">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 text-center mb-4">Quick links</h2>
+      <section className="mt-8" aria-label="Quick links">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 text-center mb-3">Quick links</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Link to="/products" className={shortcutClass}>
-            <CartIcon className="w-7 h-7 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+            <CartIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
             <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Shop</span>
             <span className="text-xs text-stone-500 dark:text-stone-400">Browse products</span>
           </Link>
           <Link to="/dashboard" className={shortcutClass}>
-            <LeafIcon className="w-7 h-7 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+            <LeafIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
             <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Impact</span>
             <span className="text-xs text-stone-500 dark:text-stone-400">Your dashboard</span>
           </Link>
           <Link to="/orders" className={shortcutClass}>
-            <TruckIcon className="w-7 h-7 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+            <TruckIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
             <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Orders</span>
             <span className="text-xs text-stone-500 dark:text-stone-400">Track shipments</span>
           </Link>
           <Link to="/wishlist" className={shortcutClass}>
-            <span className="text-2xl" aria-hidden>
+            <span className="text-xl" aria-hidden>
               ♡
             </span>
             <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Wishlist</span>
@@ -298,7 +298,7 @@ export default function Profile() {
         </div>
       </section>
 
-      <p className="mt-10 text-center text-sm text-stone-500 dark:text-stone-400 max-w-lg mx-auto leading-relaxed px-2">
+      <p className="mt-8 text-center text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-lg mx-auto leading-relaxed px-2">
         Earn more points with every purchase, then apply them at checkout to support a lower-impact basket.
       </p>
     </div>

@@ -7,7 +7,7 @@ import { MonitorIcon, MoonIcon, SunIcon } from '../components/Icons'
 const CONFIRM_PHRASE = 'DELETE'
 
 const themeShortcutClass =
-  'flex flex-col items-center justify-center gap-2 rounded-xl border px-3 py-4 text-center shadow-sm transition'
+  'flex flex-col items-center justify-center gap-1.5 rounded-xl border px-3 py-3 text-center shadow-sm transition'
 
 function ToggleRow({ id, label, description, checked, onChange, disabled }) {
   return (
@@ -87,10 +87,10 @@ export default function Settings() {
   ]
 
   return (
-    <div className="w-full max-w-3xl mx-auto pb-8">
-      <header className="text-center mb-8 sm:mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Settings</h1>
-        <p className="mt-3 text-stone-600 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
+    <div className="w-full max-w-3xl mx-auto pb-6">
+      <header className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Settings</h1>
+        <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
           Adjust how EcoShop looks and behaves. Account deletion is permanent—use it only if you want to remove your
           login and stored activity.
         </p>
@@ -98,7 +98,7 @@ export default function Settings() {
 
       <section className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-sm overflow-hidden">
         <div className="h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" aria-hidden />
-        <div className="p-6 sm:p-8 lg:p-10">
+        <div className="p-5 sm:p-6 lg:p-8">
           <div>
             <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Appearance</h2>
             <p className="text-stone-600 dark:text-stone-400 text-sm mt-2">Theme applies on this browser only and is saved locally.</p>
@@ -118,7 +118,7 @@ export default function Settings() {
                         : 'border-emerald-100 dark:border-stone-600 bg-white dark:bg-stone-800/80 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200'
                     }`}
                   >
-                    <Icon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    <Icon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     <span className="text-sm font-semibold">{label}</span>
                   </button>
                 )
@@ -131,8 +131,8 @@ export default function Settings() {
             </p>
           </div>
 
-          <div className="mt-10 pt-8 border-t border-stone-200 dark:border-stone-700">
-            <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Accessibility</h2>
+          <div className="mt-8 pt-6 border-t border-stone-200 dark:border-stone-700">
+            <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">Accessibility</h2>
             <p className="text-stone-600 dark:text-stone-400 text-sm">Tweaks that make the site easier to use.</p>
             <div className="mt-4">
               <ToggleRow
@@ -152,8 +152,8 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="mt-10 pt-8 border-t border-stone-200 dark:border-stone-700">
-            <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Account</h2>
+          <div className="mt-8 pt-6 border-t border-stone-200 dark:border-stone-700">
+            <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">Account</h2>
             <p className="text-stone-600 dark:text-stone-400 text-sm mt-2">
               Signed in as <span className="font-medium text-stone-900 dark:text-stone-100">{email || '—'}</span>
             </p>
@@ -168,9 +168,9 @@ export default function Settings() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/30 shadow-sm overflow-hidden">
-        <div className="p-6 sm:p-8 lg:p-10">
-          <h2 className="text-lg font-semibold text-red-900 dark:text-red-300">Delete account</h2>
+      <section className="mt-8 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/30 shadow-sm overflow-hidden">
+        <div className="p-5 sm:p-6 lg:p-8">
+          <h2 className="text-base font-semibold text-red-900 dark:text-red-300">Delete account</h2>
           <p className="text-stone-700 dark:text-stone-300 text-sm mt-3 leading-relaxed">
             This removes your Supabase Auth user. With your schema, related rows (profile, cart, orders, reviews) should
             cascade delete. You cannot undo this.

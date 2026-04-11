@@ -52,7 +52,7 @@ export default function AdminProducts() {
   if (profileLoading || !canManageProducts) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6">Developer Product Management</h1>
+        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Developer Product Management</h1>
         {!profileLoading && !canManageProducts && (
           <p className="text-stone-600 dark:text-stone-300">
             Access denied. Dev tools is only available to accounts on the project allowlist.
@@ -107,7 +107,7 @@ export default function AdminProducts() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
-        <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100">Developer Product Management</h1>
+        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Developer Product Management</h1>
         <Link
           to="/admin/products/new"
           className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
