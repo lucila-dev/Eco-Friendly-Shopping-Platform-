@@ -64,12 +64,17 @@ export function augmentOrdersWithPresentationHistory(userId, realOrders = [], ca
   const { minimumSyntheticOrders = null } = options
   const joinMs = parseMemberSince(memberSince)
   const realRaw = realOrders ?? []
-  const real = clampRealOrderDatesForDisplay(realRaw, joinMs)
-  const padToTarget = Math.max(0, PRESENTATION_TARGET_ORDER_COUNT - real.length)
+  const padToTarget = Math.max(0, PRESENTATION_TARGET_ORDER_COUNT - realRaw.length)
   const needed =
     minimumSyntheticOrders != null
       ? Math.max(padToTarget, minimumSyntheticOrders)
       : padToTarget
+  /*
+   * Only clamp real order dates when we are padding with synthetic demo orders.
+   * Otherwise (normal app: real DB orders only), keep created_at as stored — e.g. SQL-seeded
+   * history spread over months must not be collapsed to “just after signup”.
+   */
+  const real = needed > 0 ? clampRealOrderDatesForDisplay(realRaw, joinMs) : realRaw
   if (needed === 0) {
     return {
       displayOrders: [...real].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
