@@ -44,14 +44,15 @@ BEGIN
   END IF;
 
   FOR i IN 1..36 LOOP
-    created_ts := CASE
-      WHEN i <= 12 THEN
-        now() - (i * interval '50 minutes') - (random() * interval '25 minutes')
-      WHEN i <= 24 THEN
-        now() - ((i - 6) * interval '5 hours') - (random() * interval '2 hours')
-      ELSE
-        now() - ((10 + (i * 3) + random() * 20)::int * interval '1 day')
-    END;
+    /*
+     * Spread from “just now” (order 1) to ~100 days ago (order 36), with jitter so
+     * dates aren’t identical. Previous version never set created_at — all rows used DEFAULT now().
+     */
+    created_ts :=
+      now()
+      - (((i - 1)::numeric / 35.0) * interval '100 days')
+      - (random() * interval '20 hours')
+      - ((random() * 90)::int * interval '1 minute');
 
     ship := CASE WHEN random() < 0.38 THEN 0::numeric ELSE 4.99::numeric END;
 
@@ -62,7 +63,8 @@ BEGIN
       shipping_amount,
       shipping_name,
       shipping_address,
-      shipping_email
+      shipping_email,
+      created_at
     ) VALUES (
       uid,
       'completed',
@@ -70,7 +72,8 @@ BEGIN
       ship,
       'EcoShop customer',
       '1 Sustainable Street',
-      target_email
+      target_email,
+      created_ts
     )
     RETURNING id INTO oid;
 
