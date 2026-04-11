@@ -1,7 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 
-export const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '')
-export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+/** Strip whitespace and accidental quotes from Vercel/dashboard pastes. */
+function normalizeEnv(v) {
+  if (v == null) return ''
+  let s = String(v).trim()
+  if (
+    (s.startsWith('"') && s.endsWith('"')) ||
+    (s.startsWith("'") && s.endsWith("'"))
+  ) {
+    s = s.slice(1, -1).trim()
+  }
+  return s
+}
+
+const rawUrl = normalizeEnv(import.meta.env.VITE_SUPABASE_URL)
+const rawKey = normalizeEnv(import.meta.env.VITE_SUPABASE_ANON_KEY)
+
+export const supabaseUrl = rawUrl.replace(/\/$/, '')
+export const supabaseAnonKey = rawKey
 
 /** True when real project URL + anon key are set (e.g. Vercel env vars). */
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
@@ -15,6 +31,18 @@ const clientUrl = supabaseUrl || 'https://missing-env-placeholder.supabase.co'
 const clientKey = supabaseAnonKey || 'sb-publishable-placeholder-not-a-real-key'
 
 export const supabase = createClient(clientUrl, clientKey)
+
+/** Turn low-level fetch/parse failures into actionable copy for hosted builds. */
+export function mapSupabaseAuthError(err) {
+  if (!err) return err
+  const msg = String(err.message || err)
+  if (/unexpected end of json input/i.test(msg) || /failed to execute ['"]json['"] on ['"]response['"]/i.test(msg)) {
+    return new Error(
+      'Could not reach Supabase (empty or invalid response). In Vercel → Environment Variables, set VITE_SUPABASE_URL to your Project URL from Supabase → Settings → API (exactly https://YOUR-REF.supabase.co, no /rest path), paste the anon public key for VITE_SUPABASE_ANON_KEY, save, then Redeploy. Remove any spaces or quote marks around values.'
+    )
+  }
+  return err
+}
 
 /**
  * Deletes the current user via Edge Function `delete-account` (uses service role on the server).
