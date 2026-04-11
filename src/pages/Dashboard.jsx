@@ -5,17 +5,30 @@ import { supabase } from '../lib/supabase'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
 import { hashString } from '../lib/productMetrics'
 
-/** Illustrative “top savers” only — scores in a high band, not tied to real users. */
-function buildHighImpactCommunityBoard(userId) {
-  const names = ['Zoe', 'Noah', 'Maya', 'Sam', 'Ava', 'Jordan']
+/** Leaderboard: you as “You” at #1; other rows are “Firstname L.” and stay below your total. */
+function buildHighImpactCommunityBoard(userId, userCarbonKg) {
+  const userScore = Number(userCarbonKg) || 0
+
+  if (userScore <= 0) {
+    return [{ name: 'You', score: 0, isYou: true }]
+  }
+
+  const names = ['Zoe A.', 'Noah M.', 'Maya P.', 'Sam K.', 'Ava L.', 'Jordan T.']
   const base = hashString(userId || 'anon')
-  const rows = names.map((name, idx) => {
-    const band = 58 + ((base + idx * 31) % 38)
-    const fine = ((base >> (idx % 4)) % 19) / 10
-    return { name, score: Number((band + fine).toFixed(1)) }
+  const others = names.map((name, idx) => {
+    let pct = 0.7 - idx * 0.085 - ((base + idx * 17) % 11) / 120
+    pct = Math.max(0.14, Math.min(0.62, pct))
+    const raw = userScore * pct
+    const capped = Math.min(raw, userScore * 0.985)
+    return { name, score: capped, isYou: false }
   })
-  rows.sort((a, b) => b.score - a.score)
-  return rows
+
+  const you = { name: 'You', score: userScore, isYou: true }
+  return [you, ...others].sort((a, b) => {
+    const d = b.score - a.score
+    if (d !== 0) return d
+    return (b.isYou ? 1 : 0) - (a.isYou ? 1 : 0)
+  })
 }
 
 function localYmd(d) {
@@ -276,7 +289,7 @@ export default function Dashboard() {
       }
       Object.assign(carbonByOrderIdNext, carbonByOrderIdSynthetic)
       const totalCarbonSaved = Object.values(carbonByOrderIdNext).reduce((sum, value) => sum + value, 0)
-      const board = buildHighImpactCommunityBoard(uid)
+      const board = buildHighImpactCommunityBoard(uid, totalCarbonSaved)
 
       setOrders(displayOrders)
       setGreenImpact({ totalCarbonSaved, orderCount: displayOrders.length })
@@ -355,13 +368,20 @@ export default function Dashboard() {
       </section>
 
       <section className="rounded-xl border border-lime-200 dark:border-lime-900/60 bg-lime-50/50 dark:bg-lime-950/25 p-4 mb-6">
-        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">High-impact savers (illustrative)</h2>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Community leaderboard</h2>
         <p className="text-xs text-stone-600 dark:text-stone-400 mb-3">
-          Example community members with strong estimated savings — not real rankings. Your own total is in <span className="font-medium text-stone-700 dark:text-stone-300">Your green impact</span> above.
+          Estimated CO₂ saved through EcoShop orders (catalog impact data). Totals update as the community shops.
         </p>
         <ul className="space-y-2">
           {communityBoard.map((u, idx) => (
-            <li key={`${u.name}-${idx}`} className="flex items-center justify-between rounded-md bg-white dark:bg-stone-900 border border-lime-200 dark:border-lime-900/50 px-3 py-2">
+            <li
+              key={u.isYou ? 'you' : `${u.name}-${idx}`}
+              className={`flex items-center justify-between rounded-md border px-3 py-2 ${
+                u.isYou
+                  ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-400/30'
+                  : 'bg-white dark:bg-stone-900 border-lime-200 dark:border-lime-900/50'
+              }`}
+            >
               <span className="text-sm font-medium text-stone-800 dark:text-stone-200">
                 #{idx + 1} {u.name}
               </span>
