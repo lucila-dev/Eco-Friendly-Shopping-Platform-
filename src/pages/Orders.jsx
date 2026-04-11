@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { getProductImage } from '../lib/productImageOverrides'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
+import { STANDARD_DELIVERY_FEE } from '../lib/shipping'
 import OrderTrackingTimeline from '../components/OrderTrackingTimeline'
 
 const PRODUCT_ID_CHUNK = 120
@@ -173,7 +174,7 @@ export default function Orders() {
                   <p className="text-sm text-stone-600 dark:text-stone-400">{new Date(order.created_at).toLocaleString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">${total.toFixed(2)}</p>
+                  <p className="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">£{total.toFixed(2)}</p>
                   <p className="text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400">{order.status}</p>
                 </div>
               </div>
@@ -218,8 +219,8 @@ export default function Orders() {
                       )}
                     </div>
                     <div className="text-xs text-stone-600 dark:text-stone-400 shrink-0 text-right tabular-nums">
-                      <span className="block text-stone-500 dark:text-stone-500">×{item.quantity} @ ${unit.toFixed(2)}</span>
-                      <span className="font-medium text-stone-800 dark:text-stone-200">${lineTotal.toFixed(2)}</span>
+                      <span className="block text-stone-500 dark:text-stone-500">×{item.quantity} @ £{unit.toFixed(2)}</span>
+                      <span className="font-medium text-stone-800 dark:text-stone-200">£{lineTotal.toFixed(2)}</span>
                     </div>
                   </div>
                   )
@@ -229,17 +230,26 @@ export default function Orders() {
                   <div className="border-t border-stone-200 dark:border-stone-700 pt-3 mt-3 space-y-1.5 text-sm">
                     <div className="flex justify-between text-stone-700 dark:text-stone-300">
                       <span>Subtotal (items)</span>
-                      <span className="tabular-nums">${subtotal.toFixed(2)}</span>
+                      <span className="tabular-nums">£{subtotal.toFixed(2)}</span>
                     </div>
-                    {shipping > 0 && (
-                      <div className="flex justify-between text-stone-600">
-                        <span>{hasRecordedShip ? 'Delivery' : 'Delivery & other (inferred)'}</span>
-                        <span className="tabular-nums">${shipping.toFixed(2)}</span>
-                      </div>
-                    )}
+                    <div className="flex justify-between text-stone-600 dark:text-stone-400">
+                      <span>{hasRecordedShip ? 'Delivery' : 'Delivery & other (inferred)'}</span>
+                      <span className="tabular-nums text-right inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5">
+                        {shipping <= 0 ? (
+                          <>
+                            <span className="line-through text-stone-500 dark:text-stone-500">
+                              £{STANDARD_DELIVERY_FEE.toFixed(2)}
+                            </span>
+                            <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Free</span>
+                          </>
+                        ) : (
+                          `£${shipping.toFixed(2)}`
+                        )}
+                      </span>
+                    </div>
                     <div className="flex justify-between font-semibold text-stone-900 dark:text-stone-100 pt-1 border-t border-stone-100 dark:border-stone-700">
                       <span>Order total</span>
-                      <span className="tabular-nums">${total.toFixed(2)}</span>
+                      <span className="tabular-nums">£{total.toFixed(2)}</span>
                     </div>
                     {mismatch && (
                       <p className="text-xs text-amber-800 pt-1">

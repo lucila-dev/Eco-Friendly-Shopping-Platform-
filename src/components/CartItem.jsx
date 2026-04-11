@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { useCart } from '../hooks/useCart'
 import { getProductImage } from '../lib/productImageOverrides'
 
 export default function CartItem({ item, onUpdate, onRemove }) {
@@ -24,7 +23,7 @@ export default function CartItem({ item, onUpdate, onRemove }) {
         {item.size && (
           <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Size: {item.size}</p>
         )}
-        <p className="text-emerald-700 dark:text-emerald-400 font-medium">${Number(product.price).toFixed(2)} each</p>
+        <p className="text-emerald-700 dark:text-emerald-400 font-medium">£{Number(product.price).toFixed(2)} each</p>
         <div className="flex items-center gap-2 mt-1">
           <button
             type="button"
@@ -53,7 +52,7 @@ export default function CartItem({ item, onUpdate, onRemove }) {
         </div>
       </div>
       <div className="text-right text-sm font-medium text-stone-800 dark:text-stone-100 tabular-nums">
-        ${(item.quantity * Number(product.price)).toFixed(2)}
+        £{(item.quantity * Number(product.price)).toFixed(2)}
       </div>
     </div>
   )

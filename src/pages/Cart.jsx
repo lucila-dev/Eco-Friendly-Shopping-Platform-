@@ -2,10 +2,11 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import CartItem from '../components/CartItem'
+import { FREE_SHIPPING_MIN_SUBTOTAL, getDeliveryFee, STANDARD_DELIVERY_FEE } from '../lib/shipping'
 
 export default function Cart() {
   const { items, loading, updateQuantity, removeItem, total } = useCart()
-  const deliveryFee = total >= 50 ? 0 : 4.99
+  const deliveryFee = getDeliveryFee(total)
   const finalTotal = total + deliveryFee
   useEffect(() => {
     document.title = 'Cart – EcoShop'
@@ -38,12 +39,23 @@ export default function Cart() {
           </div>
           <div className="mt-5 flex items-center justify-between border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/40 rounded-xl p-3 sm:p-4">
             <div>
-              <p className="text-base font-semibold text-stone-800 dark:text-stone-100">Subtotal: ${total.toFixed(2)}</p>
+              <p className="text-base font-semibold text-stone-800 dark:text-stone-100">Subtotal: £{total.toFixed(2)}</p>
               <p className="text-sm text-stone-500 dark:text-stone-400">
-                Delivery: {deliveryFee === 0 ? 'Free' : `$${deliveryFee.toFixed(2)}`}
+                Delivery:{' '}
+                {deliveryFee === 0 ? (
+                  <>
+                    <span className="line-through text-stone-500 dark:text-stone-500 tabular-nums">
+                      £{STANDARD_DELIVERY_FEE.toFixed(2)}
+                    </span>{' '}
+                    <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Free</span>
+                    <span className="text-stone-500 dark:text-stone-500"> (orders £{FREE_SHIPPING_MIN_SUBTOTAL}+)</span>
+                  </>
+                ) : (
+                  `£${deliveryFee.toFixed(2)}`
+                )}
               </p>
               <p className="text-sm text-stone-700 dark:text-stone-300 font-medium mt-1">
-                Estimated total: ${finalTotal.toFixed(2)}
+                Estimated total: £{finalTotal.toFixed(2)}
               </p>
             </div>
             <div className="text-right">

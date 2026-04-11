@@ -12,8 +12,8 @@
           var dark =
             pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
           document.documentElement.classList.toggle('dark', dark)
-          document.documentElement.classList.toggle('ecoshop-reduce-motion', localStorage.getItem('ecoshop-reduced-motion') === '1')
           document.documentElement.classList.toggle('ecoshop-comfortable-text', localStorage.getItem('ecoshop-large-text') === '1')
+          document.documentElement.classList.toggle('ecoshop-spacious-catalog', localStorage.getItem('ecoshop-spacious-catalog') === '1')
         } catch (e) {}
       })()
     </script>

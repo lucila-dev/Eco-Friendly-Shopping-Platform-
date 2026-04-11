@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../hooks/useCart'
+import { FREE_SHIPPING_MIN_SUBTOTAL, getDeliveryFee, STANDARD_DELIVERY_FEE } from '../lib/shipping'
 
 export default function Checkout() {
   const { user } = useAuth()
@@ -76,7 +77,7 @@ export default function Checkout() {
 
     const rows = cartWithProducts.data ?? []
     const subtotal = rows.reduce((sum, r) => sum + r.quantity * (r.products?.price ?? 0), 0)
-    const deliveryFee = subtotal >= 50 ? 0 : 4.99
+    const deliveryFee = getDeliveryFee(subtotal)
     const totalAmount = subtotal + deliveryFee
 
     if (paymentMethod === 'loyalty' && loyaltyCredits < totalAmount) {
@@ -160,7 +161,7 @@ export default function Checkout() {
     )
   }
 
-  const deliveryFee = total >= 50 ? 0 : 4.99
+  const deliveryFee = getDeliveryFee(total)
   const finalTotal = total + deliveryFee
 
   return (
@@ -170,9 +171,20 @@ export default function Checkout() {
         Checkout – loyalty credits use your account balance. Card fields below are for display only; no card is charged.
       </p>
       <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 mb-5 text-sm">
-        <p className="text-stone-700">Subtotal: ${total.toFixed(2)}</p>
-        <p className="text-stone-700">Delivery: {deliveryFee === 0 ? 'Free' : `$${deliveryFee.toFixed(2)}`}</p>
-        <p className="text-stone-800 font-semibold mt-1">Total to pay: ${finalTotal.toFixed(2)}</p>
+        <p className="text-stone-700">Subtotal: £{total.toFixed(2)}</p>
+        <p className="text-stone-700">
+          Delivery:{' '}
+          {deliveryFee === 0 ? (
+            <>
+              <span className="line-through text-stone-500 tabular-nums">£{STANDARD_DELIVERY_FEE.toFixed(2)}</span>{' '}
+              <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Free</span>
+              <span className="text-stone-600"> (orders £{FREE_SHIPPING_MIN_SUBTOTAL}+)</span>
+            </>
+          ) : (
+            `£${deliveryFee.toFixed(2)}`
+          )}
+        </p>
+        <p className="text-stone-800 font-semibold mt-1">Total to pay: £{finalTotal.toFixed(2)}</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -331,7 +343,7 @@ export default function Checkout() {
           <input type="checkbox" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="mt-0.5" />
           <span>I agree to the delivery, returns, and privacy policies.</span>
         </label>
-        <p className="text-stone-700 font-medium">Total: ${finalTotal.toFixed(2)}</p>
+        <p className="text-stone-700 font-medium">Total: £{finalTotal.toFixed(2)}</p>
         {error && <p className="text-red-600 text-sm">{error}</p>}
         <button
           type="submit"

@@ -73,9 +73,9 @@ export default function ProductCard({ product }) {
           <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100 line-clamp-2 transition-colors group-hover:text-emerald-700 dark:group-hover:text-emerald-400 leading-snug">{name}</h2>
           <p className="text-sm text-stone-700 dark:text-stone-300 mt-1.5 line-clamp-1 leading-normal">{materials || 'Eco-friendly materials'}</p>
           <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <p className="text-emerald-700 dark:text-emerald-400 font-bold text-lg tabular-nums">${Number(price).toFixed(2)}</p>
+            <p className="text-emerald-700 dark:text-emerald-400 font-bold text-lg tabular-nums">£{Number(price).toFixed(2)}</p>
             {discountPercent > 0 && (
-              <p className="text-sm text-stone-500 dark:text-stone-400 line-through tabular-nums">${originalPrice.toFixed(2)}</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 line-through tabular-nums">£{originalPrice.toFixed(2)}</p>
             )}
           </div>
           <div className="mt-2 flex items-center justify-between text-sm font-medium text-stone-700 dark:text-stone-300 gap-2 tabular-nums">

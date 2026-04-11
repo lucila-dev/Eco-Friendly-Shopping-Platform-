@@ -167,6 +167,14 @@ export default function Profile() {
   return (
     <div className="w-full max-w-3xl mx-auto pb-8">
       <header className="text-center mb-6 sm:mb-8">
+        <p className="mb-2">
+          <Link
+            to="/account"
+            className="text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+          >
+            ← Your account
+          </Link>
+        </p>
         <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Your profile</h1>
         <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-md mx-auto leading-relaxed">
           Update how you appear on EcoShop, check your loyalty balance, and jump back to shopping or your activity.

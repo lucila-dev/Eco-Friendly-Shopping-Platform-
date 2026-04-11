@@ -205,7 +205,7 @@ export default function AdminProducts() {
                       </Link>
                     </div>
                   </td>
-                  <td className="p-3 text-stone-600 dark:text-stone-300">${Number(p.price).toFixed(2)}</td>
+                  <td className="p-3 text-stone-600 dark:text-stone-300">£{Number(p.price).toFixed(2)}</td>
                   <td className="p-3 text-stone-600 dark:text-stone-300">{p.sustainability_score ?? '–'}/10</td>
                   <td className="p-3 text-stone-600 dark:text-stone-300">
                     {categories.find((c) => c.id === p.category_id)?.name ?? '–'}

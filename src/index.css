@@ -24,15 +24,23 @@ body {
   color: #ecfdf5;
 }
 
-html.ecoshop-reduce-motion *,
-html.ecoshop-reduce-motion *::before,
-html.ecoshop-reduce-motion *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-  scroll-behavior: auto !important;
+html.ecoshop-comfortable-text {
+  font-size: 112.5%;
 }
 
-html.ecoshop-comfortable-text {
-  font-size: 106.25%;
+/* Wider gaps on product & category grids when “Roomier layout” is on in Settings */
+html.ecoshop-spacious-catalog .ecoshop-product-grid {
+  gap: 1.125rem;
+}
+
+@media (min-width: 640px) {
+  html.ecoshop-spacious-catalog .ecoshop-product-grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  html.ecoshop-spacious-catalog .ecoshop-product-grid {
+    gap: 2rem;
+  }
 }

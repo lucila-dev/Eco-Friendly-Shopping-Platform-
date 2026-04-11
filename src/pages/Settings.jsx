@@ -43,7 +43,7 @@ function ToggleRow({ id, label, description, checked, onChange, disabled }) {
 
 export default function Settings() {
   const { user, deleteAccount } = useAuth()
-  const { theme, setTheme, resolvedTheme, reducedMotion, setReducedMotion, comfortableText, setComfortableText } =
+  const { theme, setTheme, resolvedTheme, comfortableText, setComfortableText, spaciousCatalog, setSpaciousCatalog } =
     useTheme()
   const navigate = useNavigate()
   const [confirmText, setConfirmText] = useState('')
@@ -89,10 +89,17 @@ export default function Settings() {
   return (
     <div className="w-full max-w-3xl mx-auto pb-6">
       <header className="text-center mb-6 sm:mb-8">
+        <p className="mb-2">
+          <Link
+            to="/account"
+            className="text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+          >
+            ← Your account
+          </Link>
+        </p>
         <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Settings</h1>
         <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
-          Adjust how EcoShop looks and behaves. Account deletion is permanent—use it only if you want to remove your
-          login and stored activity.
+          Adjust how EcoShop looks and behaves.
         </p>
       </header>
 
@@ -132,22 +139,24 @@ export default function Settings() {
           </div>
 
           <div className="mt-8 pt-6 border-t border-stone-200 dark:border-stone-700">
-            <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">Accessibility</h2>
-            <p className="text-stone-600 dark:text-stone-400 text-sm">Tweaks that make the site easier to use.</p>
+            <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">Shopping preferences</h2>
+            <p className="text-stone-600 dark:text-stone-400 text-sm">
+              Make browsing products, prices, and checkout easier on your eyes.
+            </p>
             <div className="mt-4">
               <ToggleRow
-                id="pref-reduce-motion"
-                label="Reduce motion"
-                description="Shortens animations and transitions."
-                checked={reducedMotion}
-                onChange={setReducedMotion}
-              />
-              <ToggleRow
                 id="pref-comfortable-text"
-                label="Larger default text"
-                description="Slightly increases base font size for reading."
+                label="Larger text"
+                description="Increases text size across the shop so names, prices, and descriptions are easier to read."
                 checked={comfortableText}
                 onChange={setComfortableText}
+              />
+              <ToggleRow
+                id="pref-spacious-catalog"
+                label="Roomier product layout"
+                description="Adds more space between items on product lists, your wishlist, and category cards on the home page."
+                checked={spaciousCatalog}
+                onChange={setSpaciousCatalog}
               />
             </div>
           </div>
@@ -172,54 +181,9 @@ export default function Settings() {
         <div className="p-5 sm:p-6 lg:p-8">
           <h2 className="text-base font-semibold text-red-900 dark:text-red-300">Delete account</h2>
           <p className="text-stone-700 dark:text-stone-300 text-sm mt-3 leading-relaxed">
-            This removes your Supabase Auth user. With your schema, related rows (profile, cart, orders, reviews) should
-            cascade delete. You cannot undo this.
+            Permanently close your EcoShop account. You will lose access to your profile, orders, wishlist, and reviews.
+            This cannot be undone.
           </p>
-
-          <div className="mt-6 rounded-xl border border-stone-200 dark:border-stone-700 bg-white/80 dark:bg-stone-900/90 p-4 text-sm text-stone-600 dark:text-stone-300 space-y-3">
-            <div>
-              <p className="font-medium text-stone-900 dark:text-stone-100">In-app deletion uses an Edge Function (included in this repo)</p>
-              <p className="mt-1.5">
-                One-time setup: install the{' '}
-                <a
-                  href="https://supabase.com/docs/guides/cli"
-                  className="text-emerald-700 dark:text-emerald-400 font-medium hover:underline"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Supabase CLI
-                </a>
-                , then from the project folder run{' '}
-                <code className="text-xs bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 px-1 py-0.5 rounded">supabase link</code>,{' '}
-                <code className="text-xs bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 px-1 py-0.5 rounded">supabase secrets set SERVICE_ROLE_KEY=…</code>{' '}
-                (paste the <strong>service_role</strong> JWT from Dashboard → Project Settings → API; names starting with{' '}
-                <code className="text-xs bg-stone-100 dark:bg-stone-800 px-1 rounded">SUPABASE_</code> are not allowed), then{' '}
-                <code className="text-xs bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 px-1 py-0.5 rounded">supabase functions deploy delete-account</code>
-                . Code lives in <code className="text-xs bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 px-1 rounded">supabase/functions/delete-account/</code>.
-              </p>
-            </div>
-            <div>
-              <p className="font-medium text-stone-900 dark:text-stone-100">Or delete manually in the dashboard</p>
-              <ol className="list-decimal list-inside space-y-1.5 pl-1 mt-1.5">
-                <li>
-                  Open{' '}
-                  <a
-                    href="https://supabase.com/dashboard"
-                    className="text-emerald-700 dark:text-emerald-400 font-medium hover:underline"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    supabase.com/dashboard
-                  </a>{' '}
-                  → your project → Authentication → Users.
-                </li>
-                <li>Find the user → menu → Delete user.</li>
-              </ol>
-            </div>
-            <p className="text-stone-500 dark:text-stone-500 pt-1">
-              Never put the service role key in the frontend or in chat—only in CLI secrets or server environment.
-            </p>
-          </div>
 
           <div className="mt-6 space-y-4 max-w-lg">
             <div>

@@ -1,9 +1,9 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../hooks/useCart'
-import { useProfile } from '../hooks/useProfile'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { CartIcon, PersonIcon } from './Icons'
+import AccountDropdown from './AccountDropdown'
 
 /** Horizontal padding + max width so lines don’t stretch endlessly on large monitors. */
 const contentPad = 'px-4 sm:px-6 lg:px-8'
@@ -18,7 +18,6 @@ const navLinkActiveClass =
 export default function Layout() {
   const { signOut, isAuthenticated } = useAuth()
   const { items } = useCart()
-  const { canManageProducts } = useProfile()
   const location = useLocation()
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isProductDetail = /^\/products\/[^/]+$/.test(location.pathname)
@@ -40,7 +39,7 @@ export default function Layout() {
             : 'bg-stone-50 dark:bg-stone-900'
       }`}
     >
-      <header className="border-b border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-white via-emerald-50 to-teal-50 dark:from-stone-900 dark:via-emerald-950/50 dark:to-stone-900 shadow-sm sticky top-0 z-10">
+      <header className="border-b border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-white via-emerald-50 to-teal-50 dark:from-stone-900 dark:via-emerald-950/50 dark:to-stone-900 shadow-sm sticky top-0 z-20">
         <div className={`${contentWidth} ${contentPad} py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3`}>
           <Link
             to="/"
@@ -61,50 +60,29 @@ export default function Layout() {
             </Link>
             <Link
               to="/cart"
-              className={`relative inline-flex items-center justify-center ${navLinkClass} !px-2`}
-              aria-label="Shopping cart"
+              className={`relative inline-flex items-center gap-1.5 ${navLinkClass}`}
             >
-              <CartIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+              <CartIcon className="w-5 h-5 shrink-0" aria-hidden />
+              <span>Cart</span>
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-5 px-1 flex items-center justify-center bg-emerald-600 text-white text-[0.65rem] font-semibold rounded-full leading-none">
+                <span className="min-w-[1.125rem] h-5 px-1 flex items-center justify-center bg-emerald-600 text-white text-[0.65rem] font-semibold rounded-full leading-none">
                   {cartCount}
                 </span>
               )}
             </Link>
-            {isAuthenticated && (
-              <Link to="/wishlist" className={navLinkClass}>
-                Wishlist
-              </Link>
-            )}
-            {isAuthenticated && (
-              <Link to="/dashboard" className={navLinkClass}>
-                Dashboard
-              </Link>
-            )}
-            {canManageProducts && (
-              <Link to="/admin/products" className={navLinkClass}>
-                Dev tools
-              </Link>
-            )}
             {isAuthenticated ? (
               <>
-                <Link to="/settings" className={navLinkClass}>
-                  Settings
+                <Link to="/dashboard" className={navLinkClass}>
+                  Dashboard
                 </Link>
-                <Link
-                  to="/profile"
-                  className={`inline-flex items-center justify-center ${navLinkClass} !px-2`}
-                  aria-label="Profile"
-                >
-                  <PersonIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                </Link>
+                <AccountDropdown />
                 <button
                   type="button"
                   onClick={() => signOut()}
                   className="text-sm sm:text-[0.9375rem] font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-1.5 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                   aria-label="Log out"
                 >
-                  Logout
+                  Log out
                 </button>
               </>
             ) : (

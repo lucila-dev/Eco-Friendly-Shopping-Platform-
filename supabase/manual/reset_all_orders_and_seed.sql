@@ -1,15 +1,15 @@
--- Many sample orders + line items for YOUR account (Track orders + dashboard).
--- Run in Supabase Dashboard → SQL Editor (uses postgres; bypasses RLS).
+-- Wipe EVERY order (all users), then insert fresh sample orders for ONE account.
+-- Run in Supabase Dashboard → SQL Editor as postgres (bypasses RLS).
 --
--- 0) Adds orders.shipping_amount if missing (same as migrations/007_order_shipping_amount.sql).
--- 1) Change target_email to the address you use to log into EcoShop.
--- 2) Run the whole script once.
--- 3) Optional: to avoid duplicates, delete your existing orders first:
---    DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id = (SELECT id FROM auth.users WHERE lower(trim(email)) = lower(trim('YOUR_EMAIL'))));
---    DELETE FROM orders WHERE user_id = (SELECT id FROM auth.users WHERE lower(trim(email)) = lower(trim('YOUR_EMAIL')));
+-- 1) Set target_email to the account that should get the new orders.
+-- 2) Run the entire script once.
+--
+-- WARNING: TRUNCATE removes all rows from orders and order_items for the whole project.
 
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS shipping_amount decimal(10,2) NOT NULL DEFAULT 0;
+
+TRUNCATE TABLE order_items, orders CASCADE;
 
 DO $$
 DECLARE
@@ -43,11 +43,8 @@ BEGIN
     RAISE EXCEPTION 'No products found. Run supabase/seed.sql (or your catalog) first.';
   END IF;
 
+  /*12 orders over ~90 days — enough for demos without crowding the daily CO₂ chart */
   FOR i IN 1..12 LOOP
-    /*
-     * Spread from “just now” (order 1) to ~90 days ago (order 12), with jitter so
-     * dates aren’t identical — fewer points keeps dashboard charts readable.
-     */
     created_ts :=
       now()
       - (((i - 1)::numeric / 11.0) * interval '90 days')
@@ -106,9 +103,10 @@ BEGIN
     ship := CASE WHEN subtotal >= 100 THEN 0::numeric ELSE 4.99::numeric END;
 
     UPDATE orders
-    SET
-      total_amount = round(subtotal + ship, 2),
+    SET      total_amount = round(subtotal + ship, 2),
       shipping_amount = ship
     WHERE id = oid;
   END LOOP;
+
+  RAISE NOTICE 'Inserted 12 orders for %.', target_email;
 END $$;

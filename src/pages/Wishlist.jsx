@@ -43,7 +43,7 @@ export default function Wishlist() {
           No saved items yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline">Browse products</Link>
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {products.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       )}

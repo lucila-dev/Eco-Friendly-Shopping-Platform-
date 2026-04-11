@@ -12,6 +12,7 @@ const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Profile = lazy(() => import('./pages/Profile'))
 const Settings = lazy(() => import('./pages/Settings'))
+const Account = lazy(() => import('./pages/Account'))
 const Orders = lazy(() => import('./pages/Orders'))
 const Wishlist = lazy(() => import('./pages/Wishlist'))
 const About = lazy(() => import('./pages/About'))
@@ -43,6 +44,7 @@ function App() {
           <Route path="orders" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Orders /></Suspense></ProtectedRoute>} />
           <Route path="wishlist" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Wishlist /></Suspense></ProtectedRoute>} />
           <Route path="about" element={<Suspense fallback={<PageFallback />}><About /></Suspense>} />
+          <Route path="account" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Account /></Suspense></ProtectedRoute>} />
           <Route path="dashboard" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Dashboard /></Suspense></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Profile /></Suspense></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute><Suspense fallback={<PageFallback />}><Settings /></Suspense></ProtectedRoute>} />

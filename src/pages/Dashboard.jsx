@@ -412,7 +412,7 @@ export default function Dashboard() {
                     {new Date(order.created_at).toLocaleDateString()}
                   </span>
                 </div>
-                <span className="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">${Number(order.total_amount).toFixed(2)}</span>
+                <span className="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">£{Number(order.total_amount).toFixed(2)}</span>
               </li>
             ))}
           </ul>

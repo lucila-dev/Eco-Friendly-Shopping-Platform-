@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 const THEME_KEY = 'ecoshop-theme'
-const REDUCED_MOTION_KEY = 'ecoshop-reduced-motion'
 const LARGE_TEXT_KEY = 'ecoshop-large-text'
+const SPACIOUS_CATALOG_KEY = 'ecoshop-spacious-catalog'
 
 function readStoredTheme() {
   try {
@@ -36,8 +36,8 @@ const ThemeContext = createContext(null)
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(readStoredTheme)
   const [systemPrefersDark, setSystemPrefersDark] = useState(isDarkMediaQuery)
-  const [reducedMotion, setReducedMotionState] = useState(() => readStoredBool(REDUCED_MOTION_KEY))
   const [comfortableText, setComfortableTextState] = useState(() => readStoredBool(LARGE_TEXT_KEY))
+  const [spaciousCatalog, setSpaciousCatalogState] = useState(() => readStoredBool(SPACIOUS_CATALOG_KEY))
 
   useEffect(() => {
     applyDarkClass(theme)
@@ -51,15 +51,6 @@ export function ThemeProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    document.documentElement.classList.toggle('ecoshop-reduce-motion', reducedMotion)
-    try {
-      localStorage.setItem(REDUCED_MOTION_KEY, reducedMotion ? '1' : '0')
-    } catch {
-      /* ignore */
-    }
-  }, [reducedMotion])
-
-  useEffect(() => {
     document.documentElement.classList.toggle('ecoshop-comfortable-text', comfortableText)
     try {
       localStorage.setItem(LARGE_TEXT_KEY, comfortableText ? '1' : '0')
@@ -67,6 +58,15 @@ export function ThemeProvider({ children }) {
       /* ignore */
     }
   }, [comfortableText])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('ecoshop-spacious-catalog', spaciousCatalog)
+    try {
+      localStorage.setItem(SPACIOUS_CATALOG_KEY, spaciousCatalog ? '1' : '0')
+    } catch {
+      /* ignore */
+    }
+  }, [spaciousCatalog])
 
   const setTheme = useCallback((next) => {
     setThemeState(next)
@@ -78,12 +78,12 @@ export function ThemeProvider({ children }) {
     applyDarkClass(next)
   }, [])
 
-  const setReducedMotion = useCallback((value) => {
-    setReducedMotionState(Boolean(value))
-  }, [])
-
   const setComfortableText = useCallback((value) => {
     setComfortableTextState(Boolean(value))
+  }, [])
+
+  const setSpaciousCatalog = useCallback((value) => {
+    setSpaciousCatalogState(Boolean(value))
   }, [])
 
   const resolvedTheme = useMemo(() => {
@@ -97,12 +97,12 @@ export function ThemeProvider({ children }) {
       theme,
       resolvedTheme,
       setTheme,
-      reducedMotion,
-      setReducedMotion,
       comfortableText,
       setComfortableText,
+      spaciousCatalog,
+      setSpaciousCatalog,
     }),
-    [theme, resolvedTheme, setTheme, reducedMotion, setReducedMotion, comfortableText, setComfortableText],
+    [theme, resolvedTheme, setTheme, comfortableText, setComfortableText, spaciousCatalog, setSpaciousCatalog],
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
