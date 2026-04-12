@@ -136,11 +136,13 @@ export default function Layout() {
       >
         <Outlet />
       </main>
-      <footer className={`border-t border-emerald-200 dark:border-emerald-800/50 py-4 sm:py-5 mt-auto ${footerBg}`}>
-        <div className={`${contentWidth} ${contentPad} text-center text-stone-600 dark:text-stone-400 text-xs sm:text-sm`}>
-          EcoShop · Sustainable shopping for a greener future.
-        </div>
-      </footer>
+      {!isHome && (
+        <footer className={`border-t border-emerald-200 dark:border-emerald-800/50 py-4 sm:py-5 mt-auto ${footerBg}`}>
+          <div className={`${contentWidth} ${contentPad} text-center text-stone-600 dark:text-stone-400 text-xs sm:text-sm`}>
+            EcoShop · Sustainable shopping for a greener future.
+          </div>
+        </footer>
+      )}
     </div>
   )
 }

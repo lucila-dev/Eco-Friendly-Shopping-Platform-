@@ -42,33 +42,44 @@ const COMMITMENTS = [
   },
 ]
 
-const HOME_LINK_FOOTER_COLUMNS = [
+const HOME_FOOTER_COLUMNS = [
   {
-    items: [
-      { title: 'Shop all products', to: '/products', description: 'Browse the full sustainable catalogue and filters.' },
-      { title: 'Your basket', to: '/cart', description: 'Review items and head to checkout when you are ready.' },
-      { title: 'Wishlist', to: '/wishlist', description: 'Saved products you want to come back to.' },
+    heading: 'Here to help',
+    links: [
+      { label: 'Your account', to: '/account' },
+      { label: 'Your orders', to: '/orders' },
+      { label: 'Delivery & help', to: '/about' },
+      { label: 'Basket', to: '/cart' },
+      { label: 'Wishlist', to: '/wishlist' },
+      { label: 'Settings', to: '/settings' },
     ],
   },
   {
-    items: [
-      { title: 'Your orders', to: '/orders', description: 'Track deliveries and see past purchases.' },
-      { title: 'Dashboard', to: '/dashboard', description: 'Green impact summary and order highlights.' },
-      { title: 'Your account', to: '/account', description: 'Profile, settings, and quick links in one place.' },
+    heading: 'About',
+    links: [
+      { label: 'About EcoShop', to: '/about' },
+      { label: 'Privacy & cookies', to: '/about' },
+      { label: 'Conditions & delivery', to: '/about' },
+      { label: 'Sustainability claims', to: '/about' },
+      { label: 'All products', to: '/products' },
     ],
   },
   {
-    items: [
-      { title: 'Delivery & help', to: '/about', description: 'Shipping, returns, and answers to common questions.' },
-      { title: 'About EcoShop', to: '/about', description: 'How we curate products and what the scores mean.' },
-      { title: 'Settings', to: '/settings', description: 'Region, currency, text size, and theme.' },
+    heading: 'Ways to shop',
+    links: [
+      { label: 'Shop by category', to: '/products' },
+      { label: 'Dashboard', to: '/dashboard' },
+      { label: 'Green impact', to: '/dashboard' },
+      { label: 'Checkout', to: '/cart' },
     ],
   },
   {
-    items: [
-      { title: 'Sign in', to: '/login', description: 'Access orders, wishlist, and saved addresses.' },
-      { title: 'Create account', to: '/signup', description: 'Join EcoShop and start shopping sustainably.' },
-      { title: 'Contact', to: '/about', description: 'Reach our team through the help section.' },
+    heading: 'Account',
+    links: [
+      { label: 'Sign in', to: '/login' },
+      { label: 'Create account', to: '/signup' },
+      { label: 'Profile', to: '/profile' },
+      { label: 'Contact', to: '/about' },
     ],
   },
 ]
@@ -242,39 +253,48 @@ export default function Home() {
       </section>
 
       <footer
-        className="mt-14 sm:mt-16 rounded-2xl border border-emerald-200/90 dark:border-emerald-800/80 bg-white dark:bg-stone-900 shadow-sm dark:shadow-none overflow-hidden"
+        className="mt-14 sm:mt-16 border-t border-emerald-900/40 bg-emerald-950 text-stone-300"
+        style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}
         aria-label="Site directory"
       >
-        <div className="p-5 sm:p-6 lg:p-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
-            {HOME_LINK_FOOTER_COLUMNS.map((col, colIdx) => (
-              <div key={colIdx} className="space-y-6">
-                {col.items.map(({ title, to, description }) => (
-                  <Link key={`${colIdx}-${title}`} to={to} className="block group">
-                    <span className="block text-sm font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 group-hover:underline underline-offset-2 decoration-emerald-600/50">
-                      {title}
-                    </span>
-                    <span className="mt-1 block text-xs sm:text-[0.8125rem] leading-snug text-stone-600 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-300">
-                      {description}
-                    </span>
-                  </Link>
-                ))}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+            {HOME_FOOTER_COLUMNS.map((col) => (
+              <div key={col.heading}>
+                <h3 className="text-sm font-semibold text-white tracking-tight mb-4">
+                  {col.heading}
+                </h3>
+                <ul className="space-y-2.5">
+                  {col.links.map(({ label, to }) => (
+                    <li key={`${col.heading}-${label}`}>
+                      <Link
+                        to={to}
+                        className="text-sm text-emerald-100/90 hover:text-white hover:underline underline-offset-2 decoration-emerald-400/60"
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
-          <div className="mt-10 pt-8 border-t border-emerald-100 dark:border-emerald-800/70 text-center text-xs sm:text-sm text-stone-600 dark:text-stone-400 space-y-3">
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <Link to="/about" className="hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline underline-offset-2">
+          <div className="mt-12 pt-8 border-t border-emerald-900/60 text-center text-xs sm:text-sm text-stone-400 space-y-3">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              <Link to="/about" className="text-emerald-200/80 hover:text-white hover:underline underline-offset-2">
                 Conditions & delivery
               </Link>
-              <Link to="/about" className="hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline underline-offset-2">
+              <Link to="/about" className="text-emerald-200/80 hover:text-white hover:underline underline-offset-2">
                 Privacy & cookies
               </Link>
-              <Link to="/about" className="hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline underline-offset-2">
+              <Link to="/about" className="text-emerald-200/80 hover:text-white hover:underline underline-offset-2">
                 Sustainability claims
               </Link>
             </div>
-            <p className="text-stone-500 dark:text-stone-500">
+            <p className="text-stone-500 max-w-xl mx-auto">
+              EcoShop · Sustainable shopping for a greener future.
+            </p>
+            <p className="text-stone-500">
               © {new Date().getFullYear()} EcoShop. Demo store for coursework.
             </p>
           </div>
