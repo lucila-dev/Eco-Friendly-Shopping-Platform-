@@ -48,7 +48,8 @@ const HOME_FOOTER_COLUMNS = [
     links: [
       { label: 'Your account', to: '/account' },
       { label: 'Your orders', to: '/orders' },
-      { label: 'Delivery & help', to: '/about' },
+      { label: 'Delivery & help', to: '/about#delivery' },
+      { label: 'Common questions', to: '/about#questions' },
       { label: 'Basket', to: '/cart' },
       { label: 'Wishlist', to: '/wishlist' },
       { label: 'Settings', to: '/settings' },
@@ -57,10 +58,12 @@ const HOME_FOOTER_COLUMNS = [
   {
     heading: 'About',
     links: [
-      { label: 'About EcoShop', to: '/about' },
-      { label: 'Privacy & cookies', to: '/about' },
-      { label: 'Conditions & delivery', to: '/about' },
-      { label: 'Sustainability claims', to: '/about' },
+      { label: 'About EcoShop', to: '/about#guarantee' },
+      { label: 'Privacy & cookies', to: '/about#policies' },
+      { label: 'Conditions & delivery', to: '/about#policies' },
+      { label: 'Delivery details', to: '/about#delivery' },
+      { label: 'Sustainability claims', to: '/about#certifications' },
+      { label: 'Shopping basics', to: '/about#essentials' },
       { label: 'All products', to: '/products' },
     ],
   },
@@ -68,9 +71,10 @@ const HOME_FOOTER_COLUMNS = [
     heading: 'Ways to shop',
     links: [
       { label: 'Shop by category', to: '/products' },
+      { label: 'Quick links', to: '/about#help' },
       { label: 'Dashboard', to: '/dashboard' },
-      { label: 'Green impact', to: '/dashboard' },
-      { label: 'Checkout', to: '/cart' },
+      { label: 'Green impact', to: '/about#guarantee' },
+      { label: 'Checkout', to: '/checkout' },
     ],
   },
   {
@@ -79,7 +83,7 @@ const HOME_FOOTER_COLUMNS = [
       { label: 'Sign in', to: '/login' },
       { label: 'Create account', to: '/signup' },
       { label: 'Profile', to: '/profile' },
-      { label: 'Contact', to: '/about' },
+      { label: 'Contact', to: '/about#contact' },
     ],
   },
 ]
@@ -253,7 +257,7 @@ export default function Home() {
       </section>
 
       <footer
-        className="mt-14 sm:mt-16 border-t border-emerald-900/40 bg-emerald-950 text-stone-300"
+        className="mt-14 sm:mt-16 bg-gradient-to-r from-emerald-700 via-emerald-800 to-teal-800 text-white dark:from-emerald-950 dark:via-emerald-900 dark:to-emerald-950 dark:text-emerald-50 border-t border-emerald-600/50 dark:border-emerald-800/90 shadow-sm"
         style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}
         aria-label="Site directory"
       >
@@ -269,7 +273,7 @@ export default function Home() {
                     <li key={`${col.heading}-${label}`}>
                       <Link
                         to={to}
-                        className="text-sm text-emerald-100/90 hover:text-white hover:underline underline-offset-2 decoration-emerald-400/60"
+                        className="text-sm text-emerald-50/95 hover:text-white hover:underline underline-offset-2"
                       >
                         {label}
                       </Link>
@@ -279,23 +283,20 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="mt-12 pt-8 border-t border-emerald-900/60 text-center text-xs sm:text-sm text-stone-400 space-y-3">
+          <div className="mt-12 pt-8 border-t border-white/20 text-center text-xs sm:text-sm text-emerald-100/85 space-y-3">
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-              <Link to="/about" className="text-emerald-200/80 hover:text-white hover:underline underline-offset-2">
+              <Link to="/about#delivery" className="hover:text-white hover:underline underline-offset-2">
                 Conditions & delivery
               </Link>
-              <Link to="/about" className="text-emerald-200/80 hover:text-white hover:underline underline-offset-2">
+              <Link to="/about#policies" className="hover:text-white hover:underline underline-offset-2">
                 Privacy & cookies
               </Link>
-              <Link to="/about" className="text-emerald-200/80 hover:text-white hover:underline underline-offset-2">
+              <Link to="/about#certifications" className="hover:text-white hover:underline underline-offset-2">
                 Sustainability claims
               </Link>
             </div>
-            <p className="text-stone-500 max-w-xl mx-auto">
-              EcoShop · Sustainable shopping for a greener future.
-            </p>
-            <p className="text-stone-500">
-              © {new Date().getFullYear()} EcoShop. Demo store for coursework.
+            <p className="text-emerald-100/90">
+              © {new Date().getFullYear()} EcoShop · Sustainable shopping for a greener future.
             </p>
           </div>
         </div>
