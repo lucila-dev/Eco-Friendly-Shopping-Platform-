@@ -4,6 +4,7 @@ import { useCart } from '../hooks/useCart'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { CartIcon, PersonIcon } from './Icons'
 import AccountDropdown from './AccountDropdown'
+import HomeAnnouncementBar from './HomeAnnouncementBar'
 
 /** Horizontal padding + max width so lines don’t stretch endlessly on large monitors. */
 const contentPad = 'px-4 sm:px-6 lg:px-8'
@@ -29,6 +30,7 @@ export default function Layout() {
       ? 'bg-emerald-50/85 dark:bg-emerald-950/40'
       : 'bg-gradient-to-r from-white to-emerald-50 dark:from-stone-900 dark:to-emerald-950/30'
   const cartCount = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
+  const isHome = location.pathname === '/'
 
   return (
     <div
@@ -40,6 +42,7 @@ export default function Layout() {
             : 'bg-stone-50 dark:bg-stone-900'
       }`}
     >
+      {isHome && <HomeAnnouncementBar />}
       <header className="border-b border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-white via-emerald-50 to-teal-50 dark:from-stone-900 dark:via-emerald-950/50 dark:to-stone-900 shadow-sm sticky top-0 z-20">
         <div className={`${contentWidth} ${contentPad} py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3`}>
           <Link

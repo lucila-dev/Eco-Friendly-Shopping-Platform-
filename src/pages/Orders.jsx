@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { getProductImage } from '../lib/productImageOverrides'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
+import { GIFT_WRAP_FEE, parsePromoReceiptFromShippingAddress } from '../lib/checkoutPromo'
 import { STANDARD_DELIVERY_FEE } from '../lib/shipping'
 import OrderTrackingTimeline from '../components/OrderTrackingTimeline'
 import { useFormatPrice } from '../hooks/useFormatPrice'
@@ -159,14 +160,29 @@ export default function Orders() {
             const items = asLineItemList(order.order_items)
             const subtotal = items.reduce((s, i) => s + i.quantity * Number(i.price_at_order), 0)
             const total = Number(order.total_amount)
+            const addr = order.shipping_address ?? ''
+            const promoReceipt = parsePromoReceiptFromShippingAddress(addr)
+            const promoDiscount =
+              promoReceipt?.totalSaved != null && !Number.isNaN(Number(promoReceipt.totalSaved))
+                ? Number(promoReceipt.totalSaved)
+                : 0
+            const hasGiftWrap = typeof addr === 'string' && addr.includes('Gift wrap')
+            const giftWrapFee = hasGiftWrap ? GIFT_WRAP_FEE : 0
+            const merchandiseAfterDiscount = Math.max(0, subtotal - promoDiscount)
+
             const recordedShip = order.shipping_amount
             const hasRecordedShip = recordedShip != null && recordedShip !== '' && !Number.isNaN(Number(recordedShip))
             const shipping = hasRecordedShip
               ? Number(recordedShip)
-              : items.length > 0 && total > subtotal + 0.01
-                ? Math.max(0, Number((total - subtotal).toFixed(2)))
+              : items.length > 0
+                ? Math.max(
+                    0,
+                    Number((total - merchandiseAfterDiscount - giftWrapFee).toFixed(2)),
+                  )
                 : 0
-            const expected = subtotal + shipping
+
+            const expected =
+              merchandiseAfterDiscount + shipping + giftWrapFee
             const mismatch = items.length > 0 && Math.abs(expected - total) > 0.05
 
             return (
@@ -236,8 +252,20 @@ export default function Orders() {
                       <span>Subtotal (items)</span>
                       <span className="tabular-nums">{format(subtotal)}</span>
                     </div>
+                    {promoDiscount > 0 && (
+                      <div className="flex justify-between text-emerald-700 dark:text-emerald-400">
+                        <span>Discount (promotions)</span>
+                        <span className="tabular-nums">−{format(promoDiscount)}</span>
+                      </div>
+                    )}
+                    {giftWrapFee > 0 && (
+                      <div className="flex justify-between text-stone-700 dark:text-stone-300">
+                        <span>Gift wrap</span>
+                        <span className="tabular-nums">{format(giftWrapFee)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-stone-600 dark:text-stone-400">
-                      <span>{hasRecordedShip ? 'Delivery' : 'Delivery & other (inferred)'}</span>
+                      <span>{hasRecordedShip ? 'Delivery' : 'Delivery (inferred if not stored)'}</span>
                       <span className="tabular-nums text-right inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5">
                         {shipping <= 0 ? (
                           <>
