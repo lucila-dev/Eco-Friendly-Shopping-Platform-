@@ -45,7 +45,7 @@ export default function AccountDropdown() {
           role="dialog"
           aria-label="Your account"
         >
-          <AccountHubPanel heading="h2" onNavigate={() => setOpen(false)} />
+          <AccountHubPanel heading="h2" onNavigate={() => setOpen(false)} inlineDevTools />
         </div>
       )}
     </div>

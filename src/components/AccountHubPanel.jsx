@@ -60,7 +60,7 @@ const CARDS = [
   },
 ]
 
-export default function AccountHubPanel({ onNavigate, heading = 'h1' }) {
+export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevTools = false }) {
   const { user } = useAuth()
   const { canManageProducts } = useProfile()
   const email = user?.email ?? ''
@@ -98,40 +98,80 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1' }) {
           </Link>
         ))}
         {canManageProducts && (
-          <>
-            <Link to="/admin/products" className={cardClass} onClick={() => onNavigate?.()}>
+          <div className={`${cardClass} cursor-default`}>
+            <div
+              className={`relative shrink-0 rounded-full outline-none ${inlineDevTools ? '' : 'group/devmenu'}`}
+              tabIndex={inlineDevTools ? undefined : 0}
+            >
               <span
-                className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-200/80 dark:ring-emerald-800/80 group-hover:ring-emerald-400/60 dark:group-hover:ring-emerald-600/50"
-                aria-hidden
+                className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-200/80 dark:ring-emerald-800/80 ${
+                  inlineDevTools
+                    ? ''
+                    : 'cursor-pointer group-hover/devmenu:ring-emerald-400/60 dark:group-hover/devmenu:ring-emerald-600/50 group-focus-visible/devmenu:ring-emerald-500'
+                }`}
+                aria-label={inlineDevTools ? 'Dev tools' : 'Dev tools: open menu'}
+                title="Dev tools"
               >
-                <DevToolsIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+                <DevToolsIcon className={`w-6 h-6 sm:w-7 sm:h-7 ${inlineDevTools ? '' : 'pointer-events-none'}`} aria-hidden />
               </span>
-              <div className="min-w-0 flex flex-col flex-1">
-                <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
-                  Dev tools · Products
-                </span>
-                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-3 flex-1">
-                  Add, edit, and remove items in the shop catalogue.
-                </p>
-              </div>
-            </Link>
-            <Link to="/admin/categories" className={cardClass} onClick={() => onNavigate?.()}>
-              <span
-                className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-200/80 dark:ring-emerald-800/80 group-hover:ring-emerald-400/60 dark:group-hover:ring-emerald-600/50"
-                aria-hidden
+              {!inlineDevTools && (
+                <div
+                  className="pointer-events-none invisible absolute left-0 top-full z-30 hidden min-w-[13rem] pt-2 opacity-0 transition-[opacity,visibility] duration-150 sm:block
+                    group-hover/devmenu:pointer-events-auto group-hover/devmenu:visible group-hover/devmenu:opacity-100
+                    group-focus-within/devmenu:pointer-events-auto group-focus-within/devmenu:visible group-focus-within/devmenu:opacity-100"
+                  role="menu"
+                  aria-label="Dev tools"
+                >
+                  <div className="rounded-lg border border-stone-200 bg-white py-1 shadow-lg dark:border-stone-600 dark:bg-stone-900">
+                    <Link
+                      role="menuitem"
+                      to="/admin/products"
+                      className="block px-4 py-2.5 text-sm font-medium text-stone-800 hover:bg-emerald-50 dark:text-stone-100 dark:hover:bg-emerald-950/50"
+                      onClick={() => onNavigate?.()}
+                    >
+                      Products
+                    </Link>
+                    <Link
+                      role="menuitem"
+                      to="/admin/categories"
+                      className="block px-4 py-2.5 text-sm font-medium text-stone-800 hover:bg-emerald-50 dark:text-stone-100 dark:hover:bg-emerald-950/50"
+                      onClick={() => onNavigate?.()}
+                    >
+                      Category images
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex flex-1 flex-col">
+              <span className="text-base font-semibold text-stone-900 dark:text-stone-100 sm:text-lg">
+                Dev tools
+              </span>
+              <p className="mt-1 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+                {inlineDevTools
+                  ? 'Products and category images:'
+                  : 'Hover the icon for products or category images. On a phone, use the links below.'}
+              </p>
+              <div
+                className={`mt-3 flex flex-col gap-2 border-t border-stone-200 pt-3 dark:border-stone-600 ${inlineDevTools ? '' : 'sm:hidden'}`}
               >
-                <DevToolsIcon className="w-6 h-6 sm:w-7 sm:h-7" />
-              </span>
-              <div className="min-w-0 flex flex-col flex-1">
-                <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
-                  Dev tools · Category images
-                </span>
-                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-3 flex-1">
-                  Photos and framing for the category cards on Home.
-                </p>
+                <Link
+                  to="/admin/products"
+                  className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                  onClick={() => onNavigate?.()}
+                >
+                  Products →
+                </Link>
+                <Link
+                  to="/admin/categories"
+                  className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                  onClick={() => onNavigate?.()}
+                >
+                  Category images →
+                </Link>
               </div>
-            </Link>
-          </>
+            </div>
+          </div>
         )}
       </div>
     </>
