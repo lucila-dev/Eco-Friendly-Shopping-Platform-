@@ -1,12 +1,38 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import AccountHubPanel from './AccountHubPanel'
 
 const btnClass =
   'inline-flex items-center gap-1 text-sm sm:text-[0.9375rem] font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 px-1.5 py-1.5 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 
+const MOBILE_MAX = 639
+
 export default function AccountDropdown() {
   const [open, setOpen] = useState(false)
+  const [fixedPanelTop, setFixedPanelTop] = useState(undefined)
   const wrapRef = useRef(null)
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setFixedPanelTop(undefined)
+      return
+    }
+    const updateTop = () => {
+      if (typeof window === 'undefined' || window.innerWidth > MOBILE_MAX) {
+        setFixedPanelTop(undefined)
+        return
+      }
+      const btn = wrapRef.current?.querySelector('button')
+      if (!btn) return
+      setFixedPanelTop(btn.getBoundingClientRect().bottom + 8)
+    }
+    updateTop()
+    window.addEventListener('scroll', updateTop, true)
+    window.addEventListener('resize', updateTop)
+    return () => {
+      window.removeEventListener('scroll', updateTop, true)
+      window.removeEventListener('resize', updateTop)
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -41,7 +67,8 @@ export default function AccountDropdown() {
 
       {open && (
         <div
-          className="absolute z-40 mt-2 w-[min(calc(100vw-1rem),36rem)] sm:w-[min(calc(100vw-2rem),40rem)] lg:w-[42rem] left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 rounded-2xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 shadow-xl ring-1 ring-stone-900/5 dark:ring-white/10 max-h-[min(85vh,42rem)] overflow-y-auto overscroll-contain p-4 sm:p-6"
+          className="z-[100] rounded-2xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 shadow-xl ring-1 ring-stone-900/5 dark:ring-white/10 max-h-[min(85vh,42rem)] overflow-y-auto overscroll-contain p-4 sm:p-6 max-sm:fixed max-sm:left-3 max-sm:right-3 max-sm:w-auto sm:absolute sm:mt-2 sm:right-0 sm:left-auto sm:w-[min(calc(100vw-2rem),40rem)] lg:w-[42rem]"
+          style={fixedPanelTop != null ? { top: fixedPanelTop } : undefined}
           role="dialog"
           aria-label="Your account"
         >
