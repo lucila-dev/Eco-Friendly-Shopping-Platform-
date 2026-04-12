@@ -42,6 +42,37 @@ const COMMITMENTS = [
   },
 ]
 
+const HOME_LINK_FOOTER_COLUMNS = [
+  {
+    items: [
+      { title: 'Shop all products', to: '/products', description: 'Browse the full sustainable catalogue and filters.' },
+      { title: 'Your basket', to: '/cart', description: 'Review items and head to checkout when you are ready.' },
+      { title: 'Wishlist', to: '/wishlist', description: 'Saved products you want to come back to.' },
+    ],
+  },
+  {
+    items: [
+      { title: 'Your orders', to: '/orders', description: 'Track deliveries and see past purchases.' },
+      { title: 'Dashboard', to: '/dashboard', description: 'Green impact summary and order highlights.' },
+      { title: 'Your account', to: '/account', description: 'Profile, settings, and quick links in one place.' },
+    ],
+  },
+  {
+    items: [
+      { title: 'Delivery & help', to: '/about', description: 'Shipping, returns, and answers to common questions.' },
+      { title: 'About EcoShop', to: '/about', description: 'How we curate products and what the scores mean.' },
+      { title: 'Settings', to: '/settings', description: 'Region, currency, text size, and theme.' },
+    ],
+  },
+  {
+    items: [
+      { title: 'Sign in', to: '/login', description: 'Access orders, wishlist, and saved addresses.' },
+      { title: 'Create account', to: '/signup', description: 'Join EcoShop and start shopping sustainably.' },
+      { title: 'Contact', to: '/about', description: 'Reach our team through the help section.' },
+    ],
+  },
+]
+
 const CATEGORY_ITEM_TAGS = {
   fashion: ['T-Shirts', 'Pants', 'Dresses'],
   home: ['Kitchenware', 'Bedding', 'Office'],
@@ -209,6 +240,45 @@ export default function Home() {
           <p className="text-stone-500 dark:text-stone-400">No categories yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 hover:underline">Browse all products</Link>.</p>
         )}
       </section>
+
+      <footer
+        className="mt-14 sm:mt-16 bg-[#131a22] text-stone-100"
+        style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}
+        aria-label="Site directory"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+            {HOME_LINK_FOOTER_COLUMNS.map((col, colIdx) => (
+              <div key={colIdx} className="space-y-6">
+                {col.items.map(({ title, to, description }) => (
+                  <Link key={`${colIdx}-${title}`} to={to} className="block group">
+                    <span className="block text-sm font-semibold text-white group-hover:underline decoration-stone-400 underline-offset-2">
+                      {title}
+                    </span>
+                    <span className="mt-1 block text-xs sm:text-[0.8125rem] leading-snug text-stone-400 group-hover:text-stone-300">
+                      {description}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 pt-8 border-t border-stone-600/80 text-center text-xs sm:text-sm text-stone-400 space-y-3">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <Link to="/about" className="hover:text-stone-200 hover:underline underline-offset-2">
+                Conditions & delivery
+              </Link>
+              <Link to="/about" className="hover:text-stone-200 hover:underline underline-offset-2">
+                Privacy & cookies
+              </Link>
+              <Link to="/about" className="hover:text-stone-200 hover:underline underline-offset-2">
+                Sustainability claims
+              </Link>
+            </div>
+            <p className="text-stone-500">© {new Date().getFullYear()} EcoShop. Demo store for coursework.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
