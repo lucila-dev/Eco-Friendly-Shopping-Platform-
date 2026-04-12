@@ -12,7 +12,6 @@ export default function AdminProductForm() {
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
-  const [selectedImageFile, setSelectedImageFile] = useState(null)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     name: '',
@@ -78,7 +77,9 @@ export default function AdminProductForm() {
       category_id: form.category_id || null,
       sustainability_score: form.sustainability_score ? parseInt(form.sustainability_score, 10) : null,
       materials: form.materials.trim() || null,
-      carbon_footprint_saving_kg: form.carbon_footprint_saving_kg ? parseFloat(form.carbon_footprint_saving_kg) : null,
+      carbon_footprint_saving_kg: form.carbon_footprint_saving_kg
+        ? parseFloat(String(form.carbon_footprint_saving_kg).replace(',', '.'))
+        : null,
     }
 
     if (isNew) {
@@ -102,16 +103,13 @@ export default function AdminProductForm() {
     setSaving(false)
   }
 
-  const handleImageUpload = async () => {
-    if (!selectedImageFile) {
-      setError('Select an image file first.')
-      return
-    }
+  const handleImageUpload = async (file) => {
+    if (!file) return
 
     setError('')
     setUploadingImage(true)
 
-    const fileExt = selectedImageFile.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const safeSlug = (form.slug || form.name || 'product')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
@@ -121,7 +119,7 @@ export default function AdminProductForm() {
     const { error: uploadError } = await supabase
       .storage
       .from('product-images')
-      .upload(filePath, selectedImageFile, { upsert: false })
+      .upload(filePath, file, { upsert: false })
 
     if (uploadError) {
       setError(`Image upload failed: ${uploadError.message}`)
@@ -185,26 +183,20 @@ export default function AdminProductForm() {
               />
             )}
             <div className="mt-2 p-2 rounded-md border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900/80">
-              <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1">Or upload image file</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/webp"
-                  onChange={(e) => setSelectedImageFile(e.target.files?.[0] ?? null)}
-                  className="block w-full text-xs text-stone-600 dark:text-stone-400 file:mr-2 file:rounded file:border-0 file:bg-emerald-600 file:px-2 file:py-1 file:text-white hover:file:bg-emerald-700"
-                />
-                <button
-                  type="button"
-                  onClick={handleImageUpload}
-                  disabled={uploadingImage || !selectedImageFile}
-                  className="shrink-0 px-3 py-1.5 text-xs bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50"
-                >
-                  {uploadingImage ? 'Uploading...' : 'Upload'}
-                </button>
-              </div>
-              <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
-                Uploads to Supabase Storage bucket <code className="text-stone-700 dark:text-stone-300">product-images</code>.
-              </p>
+              <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1">
+                {uploadingImage ? 'Uploading…' : 'Or upload image file'}
+              </label>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                disabled={uploadingImage}
+                onChange={(e) => {
+                  const picked = e.target.files?.[0] ?? null
+                  e.target.value = ''
+                  if (picked) void handleImageUpload(picked)
+                }}
+                className="block w-full text-xs text-stone-600 dark:text-stone-400 file:mr-2 file:rounded file:border-0 file:bg-emerald-600 file:px-2 file:py-1 file:text-white hover:file:bg-emerald-700 disabled:opacity-50"
+              />
             </div>
           </div>
         </div>
@@ -224,7 +216,20 @@ export default function AdminProductForm() {
           </div>
           <div>
             <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Carbon footprint saving (kg)</label>
-            <input type="number" min="0" step="0.1" value={form.carbon_footprint_saving_kg} onChange={(e) => setForm((f) => ({ ...f, carbon_footprint_saving_kg: e.target.value }))} className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              inputMode="decimal"
+              value={form.carbon_footprint_saving_kg}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  carbon_footprint_saving_kg: e.target.value.replace(',', '.'),
+                }))
+              }
+              className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500"
+            />
           </div>
         </div>
         <div>
