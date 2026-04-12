@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { FREE_SHIPPING_MIN_SUBTOTAL } from '../lib/shipping'
 import {
   SUPPORT_EMAIL,
@@ -54,9 +55,16 @@ function HeroStat({ title, detail }) {
   )
 }
 
+function sectionIdFromHash(hash) {
+  const id = String(hash || '').replace(/^#/, '')
+  return SECTIONS.some((s) => s.id === id) ? id : null
+}
+
 export default function About() {
   const { format } = useFormatPrice()
-  const [activeSection, setActiveSection] = useState('guarantee')
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [activeSection, setActiveSection] = useState(() => sectionIdFromHash(location.hash) ?? 'guarantee')
   const [country, setCountry] = useState('UK')
   const [shippingType, setShippingType] = useState('standard')
   const [openPolicy, setOpenPolicy] = useState('returns')
@@ -70,6 +78,11 @@ export default function About() {
     document.title = 'About | EcoShop'
     return () => { document.title = 'EcoShop | Sustainable Shopping' }
   }, [])
+
+  useEffect(() => {
+    const id = sectionIdFromHash(location.hash)
+    if (id) setActiveSection(id)
+  }, [location.hash])
 
   useEffect(() => {
     if (!liveChatOpen) return
@@ -130,7 +143,10 @@ export default function About() {
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => setActiveSection(s.id)}
+                  onClick={() => {
+                    setActiveSection(s.id)
+                    navigate({ pathname: '/about', hash: s.id }, { replace: true })
+                  }}
                   aria-pressed={activeSection === s.id}
                   className={activeSection === s.id ? navActive : navInactive}
                 >
@@ -148,8 +164,7 @@ export default function About() {
               aria-hidden
             />
             <header className="relative mx-auto mb-6 max-w-5xl border-b border-emerald-200/60 dark:border-emerald-800/70 pb-4 text-center">
-              <p className="text-xs font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">Current section</p>
-              <h2 className="mt-1.5 text-xl font-bold text-emerald-950 dark:text-emerald-100 sm:text-2xl">
+              <h2 className="text-xl font-bold text-emerald-950 dark:text-emerald-100 sm:text-2xl">
                 {activeMeta?.title ?? activeMeta?.label}
               </h2>
               <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base leading-relaxed text-stone-700 dark:text-stone-300">
