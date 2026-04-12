@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from '../lib/supabase'
 import { CartIcon, PersonIcon } from './Icons'
 import AccountDropdown from './AccountDropdown'
 import HomeAnnouncementBar from './HomeAnnouncementBar'
+import SiteFooter from './SiteFooter'
 
 const contentPad = 'px-4 sm:px-6 lg:px-8'
 const contentWidth = 'max-w-7xl mx-auto w-full'
@@ -22,11 +23,6 @@ export default function Layout() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isProductDetail = /^\/products\/[^/]+$/.test(location.pathname)
   const mainHorizontalPadding = isAuthPage ? 'px-0' : contentPad
-  const footerBg = isAuthPage
-    ? 'bg-emerald-100/40 dark:bg-emerald-950/50'
-    : isProductDetail
-      ? 'bg-emerald-50/85 dark:bg-emerald-950/40'
-      : 'bg-gradient-to-r from-white to-emerald-50 dark:from-stone-900 dark:to-emerald-950/30'
   const cartCount = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
   const isHome = location.pathname === '/'
 
@@ -131,20 +127,12 @@ export default function Layout() {
         className={`flex-1 text-stone-900 dark:text-stone-100 ${
           isAuthPage
             ? 'w-full max-w-none mx-0 px-0 py-0'
-            : `${contentWidth} ${mainHorizontalPadding} ${
-                isHome ? 'pt-4 sm:pt-6 pb-0' : 'py-4 sm:py-6'
-              }`
+            : `${contentWidth} ${mainHorizontalPadding} py-4 sm:py-6`
         } ${!isAuthPage ? 'text-sm sm:text-base leading-relaxed' : ''}`}
       >
         <Outlet />
       </main>
-      {!isHome && (
-        <footer className={`border-t border-emerald-200 dark:border-emerald-800/50 py-4 sm:py-5 mt-auto ${footerBg}`}>
-          <div className={`${contentWidth} ${contentPad} text-center text-stone-600 dark:text-stone-400 text-xs sm:text-sm`}>
-            EcoShop · Sustainable shopping for a greener future.
-          </div>
-        </footer>
-      )}
+      <SiteFooter />
     </div>
   )
 }

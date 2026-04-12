@@ -6,6 +6,7 @@ import {
   categoryIdsForProductFilter,
   categoriesForProductListPills,
 } from '../lib/storefrontCategoryMerge'
+import { productGridStrideForWidth, productGridStrideViewport } from '../lib/productGridStride'
 
 function usePageTitle(title) {
   useEffect(() => {
@@ -30,6 +31,14 @@ export default function ProductList() {
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest')
   const [loading, setLoading] = useState(true)
   const [totalMatching, setTotalMatching] = useState(null)
+  const [gridStride, setGridStride] = useState(() => productGridStrideViewport())
+  const [visibleCount, setVisibleCount] = useState(() => productGridStrideViewport())
+
+  useEffect(() => {
+    const onResize = () => setGridStride(productGridStrideForWidth(window.innerWidth))
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   useEffect(() => {
     async function fetchCategories() {
@@ -69,6 +78,7 @@ export default function ProductList() {
         setLoading(true)
         setProducts([])
         setTotalMatching(null)
+        setVisibleCount(0)
         return
       }
 
@@ -110,8 +120,11 @@ export default function ProductList() {
         setLoading(false)
         return
       }
-      setProducts(data ?? [])
+      const rows = data ?? []
+      setProducts(rows)
       setTotalMatching(typeof count === 'number' ? count : null)
+      const stride = productGridStrideForWidth(typeof window !== 'undefined' ? window.innerWidth : 1024)
+      setVisibleCount(Math.min(stride, rows.length))
       setLoading(false)
     }
     fetchProducts()
@@ -148,9 +161,11 @@ export default function ProductList() {
         <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Products</h1>
         {!loading && totalMatching != null && (
           <p className="text-sm font-medium text-stone-700 dark:text-stone-300 tabular-nums">
-            {totalMatching > MAX_ROWS
-              ? `Showing ${products.length} of ${totalMatching} products`
-              : `${totalMatching} product${totalMatching === 1 ? '' : 's'}`}
+            {visibleCount < products.length
+              ? `Showing ${Math.min(visibleCount, products.length)} of ${products.length}`
+              : totalMatching > MAX_ROWS
+                ? `Showing ${products.length} of ${totalMatching} products`
+                : `${totalMatching} product${totalMatching === 1 ? '' : 's'}`}
           </p>
         )}
       </div>
@@ -259,10 +274,24 @@ export default function ProductList() {
       </div>
 
       <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {products.map((product) => (
+        {products.slice(0, visibleCount).map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
+      {!loading && products.length > visibleCount && (
+        <div className="flex justify-center mt-6 sm:mt-8">
+          <button
+            type="button"
+            onClick={() => setVisibleCount((c) => Math.min(c + gridStride, products.length))}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border border-emerald-700/30 transition-colors"
+          >
+            Show more
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+      )}
       {loading && <p className="text-center text-stone-600 dark:text-stone-400 text-sm font-medium py-4">Loading...</p>}
       {!loading && products.length === 0 && (
         <p className="text-stone-700 dark:text-stone-300 text-sm py-6 leading-relaxed max-w-prose">No products found. Try different filters or search.</p>
