@@ -242,20 +242,19 @@ export default function Home() {
       </section>
 
       <footer
-        className="mt-14 sm:mt-16 bg-[#131a22] text-stone-100"
-        style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}
+        className="mt-14 sm:mt-16 rounded-2xl border border-emerald-200/90 dark:border-emerald-800/80 bg-white dark:bg-stone-900 shadow-sm dark:shadow-none overflow-hidden"
         aria-label="Site directory"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <div className="p-5 sm:p-6 lg:p-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
             {HOME_LINK_FOOTER_COLUMNS.map((col, colIdx) => (
               <div key={colIdx} className="space-y-6">
                 {col.items.map(({ title, to, description }) => (
                   <Link key={`${colIdx}-${title}`} to={to} className="block group">
-                    <span className="block text-sm font-semibold text-white group-hover:underline decoration-stone-400 underline-offset-2">
+                    <span className="block text-sm font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 group-hover:underline underline-offset-2 decoration-emerald-600/50">
                       {title}
                     </span>
-                    <span className="mt-1 block text-xs sm:text-[0.8125rem] leading-snug text-stone-400 group-hover:text-stone-300">
+                    <span className="mt-1 block text-xs sm:text-[0.8125rem] leading-snug text-stone-600 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-300">
                       {description}
                     </span>
                   </Link>
@@ -263,19 +262,21 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="mt-10 pt-8 border-t border-stone-600/80 text-center text-xs sm:text-sm text-stone-400 space-y-3">
+          <div className="mt-10 pt-8 border-t border-emerald-100 dark:border-emerald-800/70 text-center text-xs sm:text-sm text-stone-600 dark:text-stone-400 space-y-3">
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <Link to="/about" className="hover:text-stone-200 hover:underline underline-offset-2">
+              <Link to="/about" className="hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline underline-offset-2">
                 Conditions & delivery
               </Link>
-              <Link to="/about" className="hover:text-stone-200 hover:underline underline-offset-2">
+              <Link to="/about" className="hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline underline-offset-2">
                 Privacy & cookies
               </Link>
-              <Link to="/about" className="hover:text-stone-200 hover:underline underline-offset-2">
+              <Link to="/about" className="hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline underline-offset-2">
                 Sustainability claims
               </Link>
             </div>
-            <p className="text-stone-500">© {new Date().getFullYear()} EcoShop. Demo store for coursework.</p>
+            <p className="text-stone-500 dark:text-stone-500">
+              © {new Date().getFullYear()} EcoShop. Demo store for coursework.
+            </p>
           </div>
         </div>
       </footer>
