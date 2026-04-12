@@ -152,9 +152,56 @@ function startOfWeekMonday(d) {
   return date
 }
 
+/** Flat zero series so the CO₂ chart still renders when there are no orders yet. */
+function buildPlaceholderImpactSeries(granularity) {
+  const now = new Date()
+  if (granularity === 'day') {
+    const points = []
+    for (let i = 13; i >= 0; i -= 1) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i)
+      const key = localYmd(d)
+      const [yy, mm, dd] = key.split('-').map(Number)
+      const label = new Date(yy, mm - 1, dd).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      points.push({ label, value: 0, key })
+    }
+    return points
+  }
+  if (granularity === 'week') {
+    const points = []
+    const monday = startOfWeekMonday(now)
+    for (let i = 7; i >= 0; i -= 1) {
+      const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() - i * 7)
+      const key = localYmd(d)
+      const [yy, mm, dd] = key.split('-').map(Number)
+      const wStart = new Date(yy, mm - 1, dd)
+      const wEnd = new Date(wStart)
+      wEnd.setDate(wEnd.getDate() + 6)
+      const opts = { month: 'short', day: 'numeric' }
+      const label = `${wStart.toLocaleDateString(undefined, opts)} to ${wEnd.toLocaleDateString(undefined, opts)}`
+      points.push({ label, value: 0, key })
+    }
+    return points
+  }
+  if (granularity === 'month') {
+    const points = []
+    for (let i = 5; i >= 0; i -= 1) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      const label = d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' })
+      points.push({ label, value: 0, key })
+    }
+    return points
+  }
+  const y0 = now.getFullYear()
+  return [0, 1, 2].map((j) => {
+    const y = String(y0 - (2 - j))
+    return { label: y, value: 0, key: y }
+  })
+}
+
 function buildImpactSeries(displayOrders, carbonByOrderId, granularity) {
   const list = displayOrders ?? []
-  if (!list.length) return []
+  if (!list.length) return buildPlaceholderImpactSeries(granularity)
 
   const sums = {}
   for (const o of list) {
@@ -441,45 +488,43 @@ export default function Dashboard() {
         <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mt-2">
           Your contribution to the environment through your purchases is shown above.
         </p>
-        {chartData.length > 0 && (
-          <div className="mt-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-              <p className="text-base font-semibold text-stone-800 dark:text-stone-200">Estimated CO₂ saved over time</p>
-              <div
-                className="flex flex-wrap rounded-lg border border-emerald-200/80 dark:border-emerald-800 bg-white dark:bg-stone-900 p-1 shadow-sm"
-                role="group"
-                aria-label="Chart time grouping"
-              >
-                {[
-                  { id: 'day', label: 'By day' },
-                  { id: 'week', label: 'By week' },
-                  { id: 'month', label: 'By month' },
-                  { id: 'year', label: 'By year' },
-                ].map(({ id, label }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setChartGranularity(id)}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${
-                      chartGranularity === id
-                        ? 'bg-emerald-600 text-white shadow'
-                        : 'text-stone-600 dark:text-stone-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/60'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <p className="text-sm text-stone-600 dark:text-stone-400 mb-3">
-              Switch grouping for day-by-day noise, weekly rollups (weeks start Monday), monthly totals, or yearly totals.
-              Empty days/weeks/months show as 0 kg.
-            </p>
-            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-stone-900/90 p-4 md:p-5 overflow-x-auto">
-              <Co2LineChart data={chartData} periodDescription={chartPeriodDescription} />
+        <div className="mt-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+            <p className="text-base font-semibold text-stone-800 dark:text-stone-200">Estimated CO₂ saved over time</p>
+            <div
+              className="flex flex-wrap rounded-lg border border-emerald-200/80 dark:border-emerald-800 bg-white dark:bg-stone-900 p-1 shadow-sm"
+              role="group"
+              aria-label="Chart time grouping"
+            >
+              {[
+                { id: 'day', label: 'By day' },
+                { id: 'week', label: 'By week' },
+                { id: 'month', label: 'By month' },
+                { id: 'year', label: 'By year' },
+              ].map(({ id, label }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setChartGranularity(id)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${
+                    chartGranularity === id
+                      ? 'bg-emerald-600 text-white shadow'
+                      : 'text-stone-600 dark:text-stone-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/60'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
-        )}
+          <p className="text-sm text-stone-600 dark:text-stone-400 mb-3">
+            Switch grouping for day-by-day noise, weekly rollups (weeks start Monday), monthly totals, or yearly totals.
+            Empty days/weeks/months show as 0 kg.
+          </p>
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-stone-900/90 p-4 md:p-5 overflow-x-auto">
+            <Co2LineChart data={chartData} periodDescription={chartPeriodDescription} />
+          </div>
+        </div>
       </section>
 
       <section className="rounded-xl border border-lime-200 dark:border-lime-900/60 bg-lime-50/50 dark:bg-lime-950/25 p-4 mb-6">
