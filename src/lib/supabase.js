@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
 
-/** Strip whitespace and accidental quotes from Vercel/dashboard pastes. */
 function normalizeEnv(v) {
   if (v == null) return ''
   let s = String(v).trim()
@@ -19,37 +18,24 @@ const rawKey = normalizeEnv(import.meta.env.VITE_SUPABASE_ANON_KEY)
 export const supabaseUrl = rawUrl.replace(/\/$/, '')
 export const supabaseAnonKey = rawKey
 
-/** True when real project URL + anon key are set (e.g. Vercel env vars). */
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
 
-/**
- * Supabase v2+ throws if `createClient` gets an empty URL, which would crash the whole app
- * before React mounts (white screen) when env vars are missing on the host.
- * Placeholders keep the shell loadable; all real calls still fail until env is set.
- */
 const clientUrl = supabaseUrl || 'https://missing-env-placeholder.supabase.co'
 const clientKey = supabaseAnonKey || 'sb-publishable-placeholder-not-a-real-key'
 
 export const supabase = createClient(clientUrl, clientKey)
 
-/** Turn low-level fetch/parse failures into actionable copy for hosted builds. */
 export function mapSupabaseAuthError(err) {
   if (!err) return err
   const msg = String(err.message || err)
   if (/unexpected end of json input/i.test(msg) || /failed to execute ['"]json['"] on ['"]response['"]/i.test(msg)) {
     return new Error(
-      'Could not reach Supabase (empty or invalid response). In Vercel → Environment Variables, set VITE_SUPABASE_URL to your Project URL from Supabase → Settings → API (exactly https://YOUR-REF.supabase.co, no /rest path), paste the anon public key for VITE_SUPABASE_ANON_KEY, save, then Redeploy. Remove any spaces or quote marks around values.'
+      'Could not reach Supabase. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment, then rebuild.'
     )
   }
   return err
 }
 
-/**
- * Deletes the current user via Edge Function `delete-account` (uses service role on the server).
- * Deploy: `supabase functions deploy delete-account` after `supabase secrets set SERVICE_ROLE_KEY=...` (service_role JWT; SUPABASE_* is reserved).
- *
- * @param {{ email: string, password: string }} credentials – re-check password for a fresh session.
- */
 export async function deleteCurrentAuthUser({ email, password }) {
   if (!supabaseUrl || !supabaseAnonKey) {
     return { error: new Error('Supabase is not configured.') }
@@ -96,11 +82,9 @@ export async function deleteCurrentAuthUser({ email, password }) {
       else if (j?.error_description) message = j.error_description
       else if (typeof j?.message === 'string') message = j.message
     } catch {
-      /* keep default */
     }
     if (res.status === 404) {
-      message +=
-        ' The delete-account Edge Function is not deployed. From your machine: install the Supabase CLI, run `supabase link`, `supabase secrets set SERVICE_ROLE_KEY=…` (service_role JWT), then `supabase functions deploy delete-account`. See supabase/functions/delete-account/index.ts.'
+      message += ' Account delete needs the delete-account function in supabase/functions.'
     }
     return { error: new Error(message) }
   }
@@ -109,7 +93,6 @@ export async function deleteCurrentAuthUser({ email, password }) {
     localStorage.removeItem(`ecoshop-wishlist-${userId}`)
     localStorage.removeItem(`ecoshop_profile_avatar_${userId}`)
   } catch {
-    /* ignore */
   }
 
   await supabase.auth.signOut({ scope: 'local' })

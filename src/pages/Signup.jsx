@@ -30,8 +30,8 @@ export default function Signup() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    document.title = 'Create account – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = 'Create account · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
 
   const handleSubmit = async (e) => {

@@ -11,8 +11,8 @@ export default function Cart() {
   const deliveryFee = getDeliveryFee(total)
   const finalTotal = total + deliveryFee
   useEffect(() => {
-    document.title = 'Cart – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = 'Cart · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
 
   if (loading) return <p className="text-stone-500 dark:text-stone-400">Loading cart...</p>

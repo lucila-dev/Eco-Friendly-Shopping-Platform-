@@ -32,8 +32,8 @@ export default function Login() {
   const from = location.state?.from?.pathname || '/'
 
   useEffect(() => {
-    document.title = forgotMode ? 'Reset password – EcoShop' : 'Sign in – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = forgotMode ? 'Reset password · EcoShop' : 'Sign in · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [forgotMode])
 
   const handleSubmit = async (e) => {

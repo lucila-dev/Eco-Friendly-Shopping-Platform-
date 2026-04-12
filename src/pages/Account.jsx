@@ -3,9 +3,9 @@ import AccountHubPanel from '../components/AccountHubPanel'
 
 export default function Account() {
   useEffect(() => {
-    document.title = 'Your account – EcoShop'
+    document.title = 'Your account · EcoShop'
     return () => {
-      document.title = 'EcoShop – Sustainable Shopping'
+      document.title = 'EcoShop · Sustainable Shopping'
     }
   }, [])
 

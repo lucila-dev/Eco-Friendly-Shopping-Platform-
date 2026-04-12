@@ -82,7 +82,6 @@ function getSustainabilityReasons(product, materials) {
   return reasons.slice(0, 4)
 }
 
-/** EcoShop-only programme names (fictional marketplace tiers — not third-party cert claims). */
 function ecoShopImpactClass(score) {
   const s = Number(score)
   if (!Number.isFinite(s) || s <= 0) return 'Bronze'
@@ -91,10 +90,6 @@ function ecoShopImpactClass(score) {
   return 'Bronze'
 }
 
-/**
- * Badges: EcoShop-branded “programmes” (store tiers) plus compact tags when the listing
- * mentions known standards or material themes. Capped at four; internal badges stay first.
- */
 function getCertificationDisplay(product, materials) {
   const raw = `${product?.name || ''} ${product?.description || ''} ${(materials || []).join(' ')}`.toLowerCase()
   const impactClass = ecoShopImpactClass(product?.sustainability_score)
@@ -213,8 +208,8 @@ export default function ProductDetail() {
   const displayName = formatCatalogProductName(product?.name ?? '')
 
   useEffect(() => {
-    document.title = product ? `${displayName || product.name} – EcoShop` : 'EcoShop – Sustainable Shopping'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = product ? `${displayName || product.name} · EcoShop` : 'EcoShop · Sustainable Shopping'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [product?.name, displayName])
 
   useEffect(() => {
@@ -313,7 +308,6 @@ export default function ProductDetail() {
         </Link>
 
         <div className="flex h-full min-h-0 w-full min-w-0 flex-col self-stretch max-lg:items-center lg:min-h-0">
-          {/* object-cover fills the frame (no letterboxing); crops edges if aspect ratio differs. */}
           <div className="aspect-square w-full max-w-[30rem] shrink-0 overflow-hidden rounded-xl border border-emerald-100 bg-stone-100 lg:aspect-auto lg:h-full lg:min-h-0 lg:w-full lg:max-w-none lg:flex-1">
             <img
               src={displayImage}
@@ -334,7 +328,9 @@ export default function ProductDetail() {
             <span className="text-sm px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium">In stock</span>
             <span className="text-sm px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 font-medium">{productUse}</span>
           </div>
-          <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg leading-relaxed">{product.description || 'No description provided yet.'}</p>
+          {product.description?.trim() ? (
+            <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg leading-relaxed">{product.description.trim()}</p>
+          ) : null}
 
           {sizeGuide && (
             <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 bg-emerald-100/35 dark:bg-emerald-950/30 p-3 sm:p-4">

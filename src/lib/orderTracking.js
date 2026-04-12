@@ -1,11 +1,10 @@
 import { hashString } from './productMetrics'
 
-/** Shipment milestones shown on Track orders (deterministic progression from order time + id). */
 export const ORDER_TRACKING_STEPS = [
   {
     key: 'confirmed',
     label: 'Order confirmed',
-    detail: 'Payment received — we are getting your eco-friendly items ready.',
+    detail: 'Payment received. We are getting your eco friendly items ready.',
   },
   {
     key: 'processing',
@@ -30,24 +29,16 @@ export const ORDER_TRACKING_STEPS = [
   {
     key: 'delivered',
     label: 'Delivered',
-    detail: 'Parcel handed off — thank you for shopping sustainably.',
+    detail: 'Parcel handed off. Thank you for shopping sustainably.',
   },
 ]
 
-/**
- * Simulated logistics timeline: progress advances with hours since order, with per-order pacing
- * so different orders show different stages when placed on the same day.
- *
- * @param {{ id: string, created_at: string }} order
- * @returns {{ steps: Array<{ key: string, label: string, detail: string, status: 'complete' | 'current' | 'pending' }>, summary: string }}
- */
 export function getOrderTrackingTimeline(order) {
   const created = new Date(order.created_at).getTime()
   const now = Date.now()
   const hoursSince = Math.max(0, (now - created) / (1000 * 60 * 60))
 
   const idHash = hashString(String(order.id ?? ''))
-  /** ~4–8h per stage; varies by order id so routes diverge */
   const hoursPerStage = 4 + (idHash % 41) / 20
   const jitter = (idHash % 47) / 100
   const progress = hoursSince / hoursPerStage + jitter
@@ -71,7 +62,7 @@ export function getOrderTrackingTimeline(order) {
 
   const current = steps.find((s) => s.status === 'current')
   const summary = allDelivered
-    ? 'Delivered — all milestones complete.'
+    ? 'Delivered. All milestones complete.'
     : current
       ? `${current.label}: ${current.detail}`
       : 'Tracking will update as your parcel moves.'

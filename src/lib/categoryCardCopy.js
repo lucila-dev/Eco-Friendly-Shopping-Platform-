@@ -1,4 +1,3 @@
-/** Subtitle for category cards: drop a description that only repeats the heading. */
 export function categoryCardDescription(cat) {
   const name = cat?.name?.trim() ?? ''
   const description = cat?.description?.trim() ?? ''
@@ -10,7 +9,6 @@ export function categoryCardDescription(cat) {
   return description
 }
 
-/** True when the slug is just the URL form of the display name (avoid showing both as duplicate titles). */
 export function displayNameMatchesCategorySlug(name, slug) {
   const s = String(slug ?? '').toLowerCase().trim()
   if (!s) return true

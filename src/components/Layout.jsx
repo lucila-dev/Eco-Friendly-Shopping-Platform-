@@ -6,11 +6,9 @@ import { CartIcon, PersonIcon } from './Icons'
 import AccountDropdown from './AccountDropdown'
 import HomeAnnouncementBar from './HomeAnnouncementBar'
 
-/** Horizontal padding + max width so lines don’t stretch endlessly on large monitors. */
 const contentPad = 'px-4 sm:px-6 lg:px-8'
 const contentWidth = 'max-w-7xl mx-auto w-full'
 
-/** Header nav — compact scale so bar doesn’t dominate the viewport. */
 const navLinkClass =
   'text-sm sm:text-[0.9375rem] font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 px-1.5 py-1.5 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 const navLinkActiveClass =
@@ -140,7 +138,7 @@ export default function Layout() {
       </main>
       <footer className={`border-t border-emerald-200 dark:border-emerald-800/50 py-4 sm:py-5 mt-auto ${footerBg}`}>
         <div className={`${contentWidth} ${contentPad} text-center text-stone-600 dark:text-stone-400 text-xs sm:text-sm`}>
-          EcoShop – Sustainable shopping for a greener future.
+          EcoShop · Sustainable shopping for a greener future.
         </div>
       </footer>
     </div>

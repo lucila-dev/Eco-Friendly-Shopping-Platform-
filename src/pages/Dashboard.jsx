@@ -8,7 +8,6 @@ import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 import { SUPPORT_EMAIL } from '../lib/supportContact'
 
-/** Leaderboard: you as “You” at #1; other rows are “Firstname L.” and stay below your total. */
 function buildHighImpactCommunityBoard(userId, userCarbonKg) {
   const userScore = Number(userCarbonKg) || 0
 
@@ -41,7 +40,6 @@ function localYmd(d) {
   return `${y}-${m}-${day}`
 }
 
-/** Monday-based week (ISO-style); key is the Monday date in local time. */
 function startOfWeekMonday(d) {
   const date = new Date(d.getFullYear(), d.getMonth(), d.getDate())
   const dow = date.getDay()
@@ -50,10 +48,6 @@ function startOfWeekMonday(d) {
   return date
 }
 
-/**
- * @param {'day' | 'week' | 'month' | 'year'} granularity
- * @returns {{ label: string, value: number, key: string }[]}
- */
 function buildImpactSeries(displayOrders, carbonByOrderId, granularity) {
   const list = displayOrders ?? []
   if (!list.length) return []
@@ -118,7 +112,7 @@ function buildImpactSeries(displayOrders, carbonByOrderId, granularity) {
       const wEnd = new Date(wStart)
       wEnd.setDate(wEnd.getDate() + 6)
       const opts = { month: 'short', day: 'numeric' }
-      label = `${wStart.toLocaleDateString(undefined, opts)} – ${wEnd.toLocaleDateString(undefined, opts)}`
+      label = `${wStart.toLocaleDateString(undefined, opts)} to ${wEnd.toLocaleDateString(undefined, opts)}`
     } else if (granularity === 'month') {
       const [yy, mm] = key.split('-').map(Number)
       label = new Date(yy, mm - 1, 1).toLocaleDateString(undefined, { month: 'short', year: '2-digit' })
@@ -242,8 +236,8 @@ export default function Dashboard() {
           : 'by year'
 
   useEffect(() => {
-    document.title = 'Dashboard – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = 'Dashboard · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
 
   useEffect(() => {
@@ -315,7 +309,6 @@ export default function Dashboard() {
     <div>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-4">Your dashboard</h1>
 
-      {/* Green impact */}
       <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/50 dark:bg-emerald-950/35 p-5 md:p-6 mb-5 shadow-sm">
         <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">Your green impact</h2>
         <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mb-1.5">
@@ -395,7 +388,6 @@ export default function Dashboard() {
         </ul>
       </section>
 
-      {/* Order history */}
       <section className="mb-6 rounded-xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/30 dark:bg-teal-950/25 p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Purchase history</h2>
@@ -423,7 +415,6 @@ export default function Dashboard() {
         )}
       </section>
 
-      {/* My reviews */}
       <section className="rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/30 dark:bg-indigo-950/30 p-4">
         <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-4">Your reviews</h2>
         {myReviews.length === 0 ? (

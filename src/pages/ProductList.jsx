@@ -10,15 +10,14 @@ import {
 function usePageTitle(title) {
   useEffect(() => {
     document.title = title
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [title])
 }
 
-/** PostgREST range is inclusive; one request fits typical seeded catalogs (~hundreds of rows). */
 const MAX_ROWS = 1000
 
 export default function ProductList() {
-  usePageTitle('Products – EcoShop')
+  usePageTitle('Products · EcoShop')
   const [searchParams, setSearchParams] = useSearchParams()
   const categorySlug = searchParams.get('category') || ''
   const [products, setProducts] = useState([])
@@ -42,7 +41,6 @@ export default function ProductList() {
     fetchCategories()
   }, [])
 
-  /** URL is source of truth when it changes (e.g. category links from Home). Avoid stale filters after in-app navigation. */
   useEffect(() => {
     setSearch(searchParams.get('q') || '')
     setPriceMin(searchParams.get('priceMin') || '')
@@ -58,7 +56,6 @@ export default function ProductList() {
     searchParams.get('category'),
   ])
 
-  /** null = no category filter; undefined = wait until categories load when URL has ?category= */
   const resolvedCategoryIds = useMemo(() => {
     if (!categorySlug) return null
     if (categoriesLoading) return undefined
@@ -158,7 +155,6 @@ export default function ProductList() {
         )}
       </div>
 
-      {/* Search — capped width so fields aren’t a full-screen strip; text stays text-base for legibility */}
       <div className="max-w-5xl rounded-xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-white to-emerald-50 dark:from-stone-900 dark:to-emerald-950/40 p-2.5 sm:p-3 mb-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full min-w-[12rem] max-w-md flex-1">
@@ -209,8 +205,8 @@ export default function ProductList() {
                 max="10"
                 value={scoreMin}
                 onChange={(e) => setScoreMin(e.target.value)}
-                placeholder="1–10"
-                title="Minimum sustainability score (1–10)"
+                placeholder="1 to 10"
+                title="Minimum sustainability score (1 to 10)"
                 className="w-20 px-2 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -242,7 +238,6 @@ export default function ProductList() {
         </p>
       </div>
 
-      {/* Category pills */}
       <div className="flex flex-wrap gap-2 mb-4">
         <button
           type="button"

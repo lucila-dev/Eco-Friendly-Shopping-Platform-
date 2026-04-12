@@ -27,8 +27,8 @@ export default function AdminProductForm() {
   })
 
   useEffect(() => {
-    document.title = isNew ? 'Add product – EcoShop' : 'Edit product – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = isNew ? 'Add product · EcoShop' : 'Edit product · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [isNew, id])
 
   useEffect(() => {
@@ -219,7 +219,7 @@ export default function AdminProductForm() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Sustainability score (1–10)</label>
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Sustainability score (1 to 10)</label>
             <input type="number" min="1" max="10" value={form.sustainability_score} onChange={(e) => setForm((f) => ({ ...f, sustainability_score: e.target.value }))} className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
           </div>
           <div>

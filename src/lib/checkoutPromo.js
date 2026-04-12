@@ -1,10 +1,7 @@
-/** Gift wrap add-on (included in order total when selected). */
 export const GIFT_WRAP_FEE = 4.99
 
-/** Maximum total discount when stacking multiple codes (share of merchandise subtotal). */
 export const MAX_COMBINED_DISCOUNT_FRACTION = 0.3
 
-/** Normalized promo key for comparison and storage. */
 export function normalizePromoCode(raw) {
   return String(raw ?? '')
     .trim()
@@ -12,13 +9,6 @@ export function normalizePromoCode(raw) {
     .replace(/\s+/g, '')
 }
 
-/**
- * Sum discounts from multiple codes (each evaluated against the full merchandise subtotal).
- * Total discount is capped at the subtotal, then capped at {@link MAX_COMBINED_DISCOUNT_FRACTION} of subtotal.
- * Duplicate codes in the list are ignored.
- * @param {string[]} codes
- * @param {number} subtotal
- */
 export function totalDiscountForCodes(codes, subtotal) {
   const s = Math.max(0, Number(subtotal) || 0)
   if (!codes?.length || s === 0) return 0
@@ -36,12 +26,6 @@ export function totalDiscountForCodes(codes, subtotal) {
   return Math.min(uncapped, maxCombined)
 }
 
-/**
- * Promo codes — evaluated client-side; re-run when cart subtotal changes.
- * @param {string} rawCode
- * @param {number} subtotal merchandise subtotal before delivery / wrap / discount
- * @returns {{ ok: true, discount: number, label: string } | { ok: false, error: string }}
- */
 export function evaluatePromoCode(rawCode, subtotal) {
   const s = Math.max(0, Number(subtotal) || 0)
   const code = normalizePromoCode(rawCode)
@@ -66,7 +50,6 @@ export function evaluatePromoCode(rawCode, subtotal) {
   return { ok: false, error: 'Invalid or expired code' }
 }
 
-/** Short offer text for receipts (e.g. ECO10 → "10% off"). */
 export function promoOfferSummary(code) {
   const c = normalizePromoCode(code)
   if (c === 'ECO10') return '10% off'
@@ -75,10 +58,6 @@ export function promoOfferSummary(code) {
   return 'Promotion'
 }
 
-/**
- * Per-code lines for receipts: offer label + allocated amount after the 30% combined cap.
- * @returns {{ code: string, offer: string, amount: number }[]}
- */
 export function getPromoReceiptBreakdown(codes, subtotal) {
   const s = Math.max(0, Number(subtotal) || 0)
   const seen = new Set()
@@ -117,9 +96,6 @@ export function getPromoReceiptBreakdown(codes, subtotal) {
 const PROMO_RECEIPT_START = '[PROMO]'
 const PROMO_RECEIPT_END = '[/PROMO]'
 
-/**
- * Appends a machine-readable promo receipt blob for {@link parsePromoReceiptFromShippingAddress}.
- */
 export function appendPromoReceiptToShippingAddress(address, breakdown, totalSaved) {
   if (!address || !breakdown?.length || totalSaved <= 0) return address
   const payload = JSON.stringify({
@@ -130,7 +106,6 @@ export function appendPromoReceiptToShippingAddress(address, breakdown, totalSav
   return `${address}\n\n${PROMO_RECEIPT_START}${payload}${PROMO_RECEIPT_END}`
 }
 
-/** @returns {{ v: number, lines: { code: string, offer: string, amount: number }[], totalSaved: number } | null} */
 export function parsePromoReceiptFromShippingAddress(text) {
   if (!text || typeof text !== 'string') return null
   const i = text.indexOf(PROMO_RECEIPT_START)
@@ -146,7 +121,6 @@ export function parsePromoReceiptFromShippingAddress(text) {
   }
 }
 
-/** Street/city part of shipping_address without the embedded promo blob. */
 export function shippingAddressWithoutPromoReceipt(text) {
   if (!text || typeof text !== 'string') return ''
   const i = text.indexOf(PROMO_RECEIPT_START)

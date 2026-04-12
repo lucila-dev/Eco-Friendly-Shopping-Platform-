@@ -1,4 +1,3 @@
-/** EcoShop loyalty: points redeem at checkout (rate similar to typical grocery programmes). */
 export const LOYALTY_POINTS_PER_DOLLAR = 200
 
 export function loyaltyCreditsToMoney(credits) {

@@ -21,8 +21,8 @@ export default function AdminProducts() {
   const [bulkDeleting, setBulkDeleting] = useState(false)
 
   useEffect(() => {
-    document.title = 'Manage products – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = 'Manage products · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
 
   useEffect(() => {
@@ -109,23 +109,23 @@ export default function AdminProducts() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
-        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Developer Product Management</h1>
-        <Link
-          to="/admin/products/new"
-          className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
-        >
-          Add product
-        </Link>
-      </div>
+      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Developer Product Management</h1>
       <section
         id="category-images"
         ref={categorySectionRef}
-        className="mb-8 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900/90 p-4 sm:p-5 shadow-sm dark:shadow-none"
+        className="mb-6 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900/90 p-4 sm:p-5 shadow-sm dark:shadow-none"
       >
         <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3 sm:mb-4">Category images</h2>
         <AdminCategoryImagesPanel />
       </section>
+      <div className="mb-6">
+        <Link
+          to="/admin/products/new"
+          className="inline-flex px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
+        >
+          Add product
+        </Link>
+      </div>
       <div className="mb-4">
         <label htmlFor="dev-product-search" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
           Search product to edit
@@ -209,9 +209,11 @@ export default function AdminProducts() {
                     </div>
                   </td>
                   <td className="p-3 text-stone-600 dark:text-stone-300">{format(Number(p.price))}</td>
-                  <td className="p-3 text-stone-600 dark:text-stone-300">{p.sustainability_score ?? '–'}/10</td>
                   <td className="p-3 text-stone-600 dark:text-stone-300">
-                    {categories.find((c) => c.id === p.category_id)?.name ?? '–'}
+                    {p.sustainability_score != null ? `${p.sustainability_score}/10` : 'n/a'}
+                  </td>
+                  <td className="p-3 text-stone-600 dark:text-stone-300">
+                    {categories.find((c) => c.id === p.category_id)?.name ?? 'n/a'}
                   </td>
                   <td className="p-3 text-right">
                     <Link

@@ -1,10 +1,6 @@
 import { hashString } from './productMetrics'
 import { getProductImage } from './productImageOverrides'
 
-/**
- * Demo orders are disabled (0). Padding used to invent fake purchase history and mismatched prices;
- * only real `orders` rows should appear for the signed-in user.
- */
 export const PRESENTATION_TARGET_ORDER_COUNT = 0
 
 const FALLBACK_CATALOG = [
@@ -40,7 +36,6 @@ function parseMemberSince(memberSince) {
   return Number.isFinite(d.getTime()) ? d.getTime() : null
 }
 
-/** Real rows from DB may predate a re-seeded account — never show earlier than signup. */
 function clampRealOrderDatesForDisplay(orders, joinMs) {
   if (joinMs == null) return orders
   const nowMs = Date.now()
@@ -55,11 +50,6 @@ function clampRealOrderDatesForDisplay(orders, joinMs) {
   })
 }
 
-/**
- * @param {string|null|undefined} memberSince - auth user `created_at` (ISO); synthetic history stays after this.
- * @param {{ minimumSyntheticOrders?: number }} [options] - If set (e.g. track page), always generate at least this many demo orders in addition to all real ones.
- * @returns {{ displayOrders: object[], syntheticItemsByOrderId: Record<string, object[]>, carbonByOrderIdSynthetic: Record<string, number> }}
- */
 export function augmentOrdersWithPresentationHistory(userId, realOrders = [], catalog = [], memberSince = null, options = {}) {
   const { minimumSyntheticOrders = null } = options
   const joinMs = parseMemberSince(memberSince)
@@ -69,11 +59,6 @@ export function augmentOrdersWithPresentationHistory(userId, realOrders = [], ca
     minimumSyntheticOrders != null
       ? Math.max(padToTarget, minimumSyntheticOrders)
       : padToTarget
-  /*
-   * Only clamp real order dates when we are padding with synthetic demo orders.
-   * Otherwise (normal app: real DB orders only), keep created_at as stored — e.g. SQL-seeded
-   * history spread over months must not be collapsed to “just after signup”.
-   */
   const real = needed > 0 ? clampRealOrderDatesForDisplay(realRaw, joinMs) : realRaw
   if (needed === 0) {
     return {

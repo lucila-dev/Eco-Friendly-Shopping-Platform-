@@ -1,16 +1,11 @@
-/**
- * Product prices in the database are GBP. Display in other currencies uses * indicative rates only (not live FX).
- */
 export const DISPLAY_CURRENCIES = ['GBP', 'USD', 'EUR']
 
-/** Multiply GBP amount to get display currency (approximate). */
 export const RATES_FROM_GBP = {
   GBP: 1,
   USD: 1.27,
   EUR: 1.17,
 }
 
-/** Country/region for date/number formatting (ISO3166-1 alpha-2). */
 export const REGION_OPTIONS = [
   { value: 'GB', label: 'United Kingdom' },
   { value: 'IE', label: 'Ireland' },
@@ -70,12 +65,6 @@ export function convertGbpToDisplay(amountGbp, currency) {
   return (Number(amountGbp) || 0) * rate
 }
 
-/**
- * @param {number} amountGbp
- * @param {string} currency  GBP | USD | EUR
- * @param {string} [locale]
- */
-/** Convert a USD amount to GBP using the same indicative rate as {@link RATES_FROM_GBP}. */
 export function usdToGbpApprox(usd) {
   return (Number(usd) || 0) / RATES_FROM_GBP.USD
 }

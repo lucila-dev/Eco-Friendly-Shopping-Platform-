@@ -453,7 +453,7 @@ export default function Checkout() {
 
           <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-1">Gift options</h2>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">Optional — we use plastic-free, recycled wrap.</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">Optional. We use plastic free, recycled wrap.</p>
             <div className="space-y-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
@@ -494,7 +494,7 @@ export default function Checkout() {
                 <span className="text-sm text-stone-700 dark:text-stone-300">
                   <span className="font-medium text-stone-800 dark:text-stone-100">Add sustainable gift wrap</span>
                   <span className="block text-stone-500 dark:text-stone-400 mt-0.5 tabular-nums">
-                    {format(GIFT_WRAP_FEE)} — recycled paper, twine, and a gift tag.
+                    {format(GIFT_WRAP_FEE)}: recycled paper, twine, and a gift tag.
                   </span>
                 </span>
               </label>

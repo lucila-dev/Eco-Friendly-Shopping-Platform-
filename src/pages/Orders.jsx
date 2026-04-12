@@ -12,7 +12,6 @@ import { useFormatPrice } from '../hooks/useFormatPrice'
 
 const PRODUCT_ID_CHUNK = 120
 
-/** PostgREST can return one-to-many embeds as a single object; always work with an array. */
 function asLineItemList(raw) {
   if (raw == null) return []
   return Array.isArray(raw) ? raw : [raw]
@@ -30,10 +29,6 @@ function normalizeSampleLineItems(orderId, lines) {
   }))
 }
 
-/**
- * Load line items without embedding `products` — nested selects can collapse rows.
- * Uses `*` so a missing migration column (e.g. selected_size) does not zero out the whole query.
- */
 async function fetchLineItemsByOrder(orderIds) {
   if (orderIds.length === 0) return {}
 
@@ -88,8 +83,8 @@ export default function Orders() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    document.title = 'Track orders – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = 'Track orders · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
 
   useEffect(() => {

@@ -1,5 +1,3 @@
-// Simple inline SVGs for header and UI (no external deps)
-
 export function LeafIcon({ className = 'w-6 h-6' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -40,7 +38,6 @@ export function PersonIcon({ className = 'w-5 h-5' }) {
   )
 }
 
-/** Bar chart with trend — dashboard, CO₂ / impact snapshot. */
 export function ImpactChartIcon({ className = 'w-5 h-5' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -53,7 +50,6 @@ export function ImpactChartIcon({ className = 'w-5 h-5' }) {
   )
 }
 
-/** Angle brackets — developer / admin catalog tools (not end-user settings). */
 export function DevToolsIcon({ className = 'w-5 h-5' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -63,7 +59,6 @@ export function DevToolsIcon({ className = 'w-5 h-5' }) {
   )
 }
 
-/** Cog / gear — account settings. */
 export function GearIcon({ className = 'w-5 h-5' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -162,7 +157,6 @@ export function HeartIcon({ className = 'w-5 h-5' }) {
   )
 }
 
-/** Wallet — loyalty / store credit checkout option. */
 export function PaymentLoyaltyIcon({ className = 'w-9 h-9' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -173,7 +167,6 @@ export function PaymentLoyaltyIcon({ className = 'w-9 h-9' }) {
   )
 }
 
-/** Visa / Mastercard / Amex marks (decorative). */
 export function PaymentCardBrandsMark({ className = 'h-8 w-[4.75rem]' }) {
   return (
     <svg className={className} viewBox="0 0 76 28" aria-hidden>
@@ -192,7 +185,6 @@ export function PaymentCardBrandsMark({ className = 'h-8 w-[4.75rem]' }) {
   )
 }
 
-/** Apple Pay–style mark (decorative). */
 export function PaymentApplePayMark({ className = 'h-8 w-[5.5rem]' }) {
   return (
     <svg className={className} viewBox="0 0 90 28" aria-hidden>
@@ -212,7 +204,6 @@ export function PaymentApplePayMark({ className = 'h-8 w-[5.5rem]' }) {
   )
 }
 
-/** PayPal mark (decorative). */
 export function PaymentPayPalMark({ className = 'h-8 w-[5rem]' }) {
   return (
     <svg className={className} viewBox="0 0 80 28" aria-hidden>

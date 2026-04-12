@@ -17,7 +17,6 @@ function readAll() {
   }
 }
 
-/** Persist home-page category image + framing in the browser (no SQL required). */
 export function saveCategoryOverride(categoryId, { image_url, image_focus_y }) {
   const all = readAll()
   all[categoryId] = {
@@ -31,7 +30,6 @@ export function notifyCategoryHomeUpdated() {
   window.dispatchEvent(new CustomEvent('ecoshop_category_home'))
 }
 
-/** Merge API category row with saved browser overrides (overrides win when set). */
 export function mergeCategoryRowForHome(cat) {
   if (!cat?.id) return cat
   const o = readAll()[cat.id]

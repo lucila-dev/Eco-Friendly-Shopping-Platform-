@@ -10,8 +10,8 @@ export default function Wishlist() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    document.title = 'Wishlist – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = 'Wishlist · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
 
   useEffect(() => {

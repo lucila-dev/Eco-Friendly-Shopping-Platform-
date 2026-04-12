@@ -11,7 +11,6 @@ function readStoredTheme() {
     const v = localStorage.getItem(THEME_KEY)
     if (v === 'light' || v === 'dark' || v === 'system') return v
   } catch {
-    /* ignore */
   }
   return 'system'
 }
@@ -29,7 +28,6 @@ function readStoredRegion() {
     const v = localStorage.getItem(REGION_KEY)
     if (v && /^[A-Z]{2}$/i.test(v)) return v.toUpperCase()
   } catch {
-    /* ignore */
   }
   return 'GB'
 }
@@ -39,7 +37,6 @@ function readStoredCurrency() {
     const v = localStorage.getItem(CURRENCY_KEY)
     if (v && DISPLAY_CURRENCIES.includes(v)) return v
   } catch {
-    /* ignore */
   }
   return 'GBP'
 }
@@ -78,7 +75,6 @@ export function ThemeProvider({ children }) {
     try {
       localStorage.setItem(LARGE_TEXT_KEY, comfortableText ? '1' : '0')
     } catch {
-      /* ignore */
     }
   }, [comfortableText])
 
@@ -86,7 +82,6 @@ export function ThemeProvider({ children }) {
     try {
       localStorage.setItem(REGION_KEY, region)
     } catch {
-      /* ignore */
     }
   }, [region])
 
@@ -94,7 +89,6 @@ export function ThemeProvider({ children }) {
     try {
       localStorage.setItem(CURRENCY_KEY, displayCurrency)
     } catch {
-      /* ignore */
     }
   }, [displayCurrency])
 
@@ -103,7 +97,6 @@ export function ThemeProvider({ children }) {
     try {
       localStorage.setItem(THEME_KEY, next)
     } catch {
-      /* ignore */
     }
     applyDarkClass(next)
   }, [])

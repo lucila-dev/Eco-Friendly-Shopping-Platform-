@@ -60,10 +60,6 @@ const CARDS = [
   },
 ]
 
-/**
- * Shared account hub: title, email, and equal-size destination cards.
- * @param {{ onNavigate?: () => void, heading?: 'h1' | 'h2' }} props
- */
 export default function AccountHubPanel({ onNavigate, heading = 'h1' }) {
   const { user } = useAuth()
   const { canManageProducts } = useProfile()
@@ -78,7 +74,7 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1' }) {
         </TitleTag>
         <p className="mt-2 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
           Signed in as{' '}
-          <span className="font-medium text-stone-800 dark:text-stone-200">{email || '—'}</span>
+          <span className="font-medium text-stone-800 dark:text-stone-200">{email || 'n/a'}</span>
         </p>
       </header>
 
@@ -104,13 +100,13 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1' }) {
         {canManageProducts && (
           <Link to="/admin/products" className={cardClass} onClick={() => onNavigate?.()}>
             <span
-              className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 ring-2 ring-teal-200/80 dark:ring-teal-800/80"
+              className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-200/80 dark:ring-emerald-800/80 group-hover:ring-emerald-400/60 dark:group-hover:ring-emerald-600/50"
               aria-hidden
             >
               <DevToolsIcon className="w-6 h-6 sm:w-7 sm:h-7" />
             </span>
             <div className="min-w-0 flex flex-col flex-1">
-              <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-teal-800 dark:group-hover:text-teal-300">
+              <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
                 Dev tools
               </span>
               <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-3 flex-1">

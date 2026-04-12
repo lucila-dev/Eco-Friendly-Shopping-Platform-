@@ -5,9 +5,6 @@ import { FREE_SHIPPING_MIN_SUBTOTAL } from '../lib/shipping'
 const ROTATION_MS = 5500
 const FADE_MS = 320
 
-/**
- * Rotating promo strip (home page only): discount, free delivery threshold, cut-off for next-day.
- */
 export default function HomeAnnouncementBar() {
   const { format } = useFormatPrice()
 
@@ -17,7 +14,7 @@ export default function HomeAnnouncementBar() {
         10% off with code <span className="font-mono font-semibold text-emerald-100">ECO10</span> at checkout
       </>,
       <>Free delivery on orders over {format(FREE_SHIPPING_MIN_SUBTOTAL)}</>,
-      <>Order before 2pm Mon–Fri for next working day delivery</>,
+      <>Order before 2pm Mon to Fri for next working day delivery</>,
     ],
     [format],
   )

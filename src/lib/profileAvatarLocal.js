@@ -1,6 +1,5 @@
 const key = (userId) => `ecoshop_profile_avatar_${userId}`
 
-/** Browser-only avatar URL (https or data:), if Storage/DB unavailable. */
 export function getProfileAvatarLocal(userId) {
   if (!userId) return null
   try {
@@ -19,7 +18,6 @@ export function setProfileAvatarLocal(userId, url) {
     if (!t) localStorage.removeItem(key(userId))
     else localStorage.setItem(key(userId), t)
   } catch {
-    /* ignore quota */
   }
 }
 

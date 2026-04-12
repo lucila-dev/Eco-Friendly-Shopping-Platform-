@@ -27,8 +27,8 @@ export default function Profile() {
   const avatarInputRef = useRef(null)
 
   useEffect(() => {
-    document.title = 'Profile – EcoShop'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    document.title = 'Profile · EcoShop'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
 
   useEffect(() => {

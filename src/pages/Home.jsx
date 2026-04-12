@@ -60,7 +60,7 @@ export default function Home() {
   const [localVersion, setLocalVersion] = useState(0)
 
   useEffect(() => {
-    document.title = 'EcoShop – Sustainable Shopping'
+    document.title = 'EcoShop · Sustainable Shopping'
   }, [])
 
   useEffect(() => {
@@ -100,7 +100,6 @@ export default function Home() {
 
   return (
     <div>
-      {/* Hero */}
       <section className="relative rounded-2xl overflow-hidden mb-8 sm:mb-10">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50/90 to-teal-50/80 dark:from-emerald-950/80 dark:via-stone-900 dark:to-emerald-950/60" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1200')] bg-cover bg-center opacity-20 mix-blend-multiply dark:opacity-10 dark:mix-blend-soft-light" />
@@ -137,7 +136,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Our Environmental Commitment */}
       <section className="mb-8 sm:mb-10">
         <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 text-center mb-2">
           Our Environmental Commitment
@@ -163,7 +161,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories */}
       <section>
         <h2 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-1.5">Shop by category</h2>
         <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mb-5 max-w-2xl leading-relaxed">

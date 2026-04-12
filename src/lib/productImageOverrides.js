@@ -32,7 +32,6 @@ export const CATEGORY_DEFAULTS = {
 const CATEGORY_FALLBACK =
   'https://images.unsplash.com/photo-1473341308940-3f45f58a8327?w=1200'
 
-/** Cover image for category cards on Home (by category slug). */
 export function getCategoryImage(slug = '') {
   const s = String(slug ?? '').toLowerCase().trim()
   if (!s) return CATEGORY_FALLBACK

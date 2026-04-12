@@ -14,9 +14,9 @@ export default function OrderConfirmation() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    document.title = 'Order confirmation – EcoShop'
+    document.title = 'Order confirmation · EcoShop'
     return () => {
-      document.title = 'EcoShop – Sustainable Shopping'
+      document.title = 'EcoShop · Sustainable Shopping'
     }
   }, [])
 

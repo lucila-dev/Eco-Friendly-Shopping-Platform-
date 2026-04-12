@@ -21,10 +21,6 @@ function isMissingColumnError(error, column) {
   return false
 }
 
-/**
- * Push category image fields to Supabase, shrinking the payload if columns are missing
- * (schema not migrated — run supabase/migrations/004_category_images.sql).
- */
 async function persistCategoryRow(supabaseClient, catId, url, focus, flags) {
   let { supportsImageUrl, supportsFocusY } = flags
   const buildPayload = () => {

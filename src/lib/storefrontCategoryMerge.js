@@ -1,18 +1,9 @@
-/** Treat Garden and Outdoors as one storefront category (canonical slug: `outdoors`). */
-
 export const OUTDOOR_CANONICAL_SLUG = 'outdoors'
 export const OUTDOOR_GROUP_SLUGS = new Set(['garden', 'outdoors'])
 
-/** Home and Office are one storefront category (canonical slug: `home`). */
 export const HOME_CANONICAL_SLUG = 'home'
 export const HOME_GROUP_SLUGS = new Set(['home', 'office'])
 
-/**
- * Category UUIDs to filter products when URL uses garden or outdoors.
- * @param {string} slug - query ?category=
- * @param {Array<{ id: string, slug: string }>} categories
- * @returns {string[] | null} ids for .in() / .eq(), or null for all products
- */
 export function categoryIdsForProductFilter(slug, categories) {
   if (!slug?.trim()) return null
   const s = slug.trim().toLowerCase()
@@ -31,10 +22,6 @@ export function categoryIdsForProductFilter(slug, categories) {
   return cat ? [cat.id] : null
 }
 
-/**
- * Home grid: one card for Garden + Outdoors.
- * @param {Array<object>} list - already merged with localStorage (e.g. mergeCategoryRowForHome)
- */
 export function mergeGardenOutdoorsForHome(list) {
   const garden = list.find((c) => c.slug === 'garden')
   const outdoor = list.find((c) => c.slug === 'outdoors')
@@ -51,7 +38,7 @@ export function mergeGardenOutdoorsForHome(list) {
         ...outdoor,
         name: 'Garden & Outdoors',
         slug: OUTDOOR_CANONICAL_SLUG,
-        description: [outdoor.description, garden.description].filter(Boolean).join(' — ') || outdoor.description,
+        description: [outdoor.description, garden.description].filter(Boolean).join('. ') || outdoor.description,
         image_url,
         image_focus_y,
       },
@@ -63,10 +50,6 @@ export function mergeGardenOutdoorsForHome(list) {
   return list
 }
 
-/**
- * Home grid: one card for Home + Office (links use canonical slug `home`).
- * @param {Array<object>} list - e.g. after mergeCategoryRowForHome
- */
 export function mergeHomeOfficeForHome(list) {
   const home = list.find((c) => c.slug === 'home')
   const office = list.find((c) => c.slug === 'office')
@@ -83,7 +66,7 @@ export function mergeHomeOfficeForHome(list) {
         ...home,
         name: 'Home & Office',
         slug: HOME_CANONICAL_SLUG,
-        description: [home.description, office.description].filter(Boolean).join(' — ') || home.description,
+        description: [home.description, office.description].filter(Boolean).join('. ') || home.description,
         image_url,
         image_focus_y,
       },
@@ -98,9 +81,6 @@ export function mergeHomeOfficeForHome(list) {
   return list
 }
 
-/**
- * Product list pills: hide separate Garden when Outdoors exists; hide Office when Home exists; show merged labels.
- */
 export function categoriesForProductListPills(categories) {
   const hasGarden = categories.some((c) => c.slug === 'garden')
   let list = hasGarden ? categories.filter((c) => c.slug !== 'garden') : categories

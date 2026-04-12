@@ -1,4 +1,3 @@
-/** Deterministic hash for stable “related” picks per product slug. */
 export function hashSlug(str) {
   let h = 0
   const s = String(str || '')
@@ -6,11 +5,6 @@ export function hashSlug(str) {
   return Math.abs(h)
 }
 
-/**
- * Split same-category neighbours into two disjoint groups for “similar” vs “bought together”.
- * @param {Array<{id: string, slug: string}>} candidates
- * @param {string} currentSlug
- */
 export function pickRelatedSlices(candidates, currentSlug, opts = {}) {
   const similarCount = opts.similarCount ?? 4
   const togetherCount = opts.togetherCount ?? 3
