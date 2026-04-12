@@ -1,4 +1,3 @@
-/** 28 personal care — photo pool [56..83]. */
 export default {
   names: [
     'Natural Toothpaste Tabs',

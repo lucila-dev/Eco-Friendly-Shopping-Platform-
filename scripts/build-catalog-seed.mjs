@@ -1,10 +1,3 @@
-/**
- * Builds the generated-products SQL block (252 products, 28 per category).
- * Reads scripts/catalog-unsplash-pool.txt (252 lines: photo-… ids) and scripts/catalog-data/*.mjs.
- *
- * Usage: node scripts/build-catalog-seed.mjs
- *        — writes supabase/seed.sql, supabase/run-all.sql, supabase/manual/paste_catalog_refresh_supabase.sql
- */
 import { readFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';

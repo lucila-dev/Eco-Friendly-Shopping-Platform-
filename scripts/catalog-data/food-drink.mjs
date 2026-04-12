@@ -1,4 +1,3 @@
-/** 28 food & drink — photo pool [196..223]. */
 export default {
   names: [
     'Fair-Trade Organic Coffee',

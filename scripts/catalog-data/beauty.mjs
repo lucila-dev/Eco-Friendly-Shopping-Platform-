@@ -1,4 +1,3 @@
-/** 28 beauty — photo pool [112..139]. */
 export default {
   names: [
     'Refillable Lip Balm',

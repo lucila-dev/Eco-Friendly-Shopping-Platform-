@@ -1,4 +1,3 @@
-/** 28 tech — photo pool [224..251]. */
 export default {
   names: [
     'Recycled Phone Case',

@@ -1,4 +1,3 @@
-/** 28 home & office products — photo pool slice [28..55]. */
 export default {
   names: [
     'Recycled Glass Vase',

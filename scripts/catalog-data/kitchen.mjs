@@ -1,4 +1,3 @@
-/** 28 kitchen — photo pool [84..111]. */
 export default {
   names: [
     'Stainless Steel Straw Set',

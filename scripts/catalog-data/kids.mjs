@@ -1,4 +1,3 @@
-/** 28 kids — photo pool [168..195]. */
 export default {
   names: [
     'Organic Baby Onesie',

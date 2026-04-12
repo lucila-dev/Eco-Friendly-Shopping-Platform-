@@ -1,4 +1,3 @@
-/** 28 unique fashion products — indices align with global photo pool slice [0..27]. */
 export default {
   names: [
     'Organic Cotton Tee',

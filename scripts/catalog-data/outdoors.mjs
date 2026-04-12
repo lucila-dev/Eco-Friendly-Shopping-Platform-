@@ -1,4 +1,3 @@
-/** 28 garden & outdoors — photo pool [140..167]. */
 export default {
   names: [
     'Recycled Trail Backpack',
