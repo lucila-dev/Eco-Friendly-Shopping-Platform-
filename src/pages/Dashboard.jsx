@@ -3,29 +3,24 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
-import { hashString } from '../lib/productMetrics'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 import { SUPPORT_EMAIL } from '../lib/supportContact'
 
-function buildHighImpactCommunityBoard(userId, userCarbonKg) {
-  const userScore = Number(userCarbonKg) || 0
+/** Shared demo community totals (kg CO₂) — identical for every shopper; only “You” uses real data. */
+const COMMUNITY_LEADERBOARD_BASE = [
+  { name: 'Zoe A.', score: 24.8 },
+  { name: 'Noah M.', score: 21.3 },
+  { name: 'Maya P.', score: 18.6 },
+  { name: 'Sam K.', score: 15.2 },
+  { name: 'Ava L.', score: 12.9 },
+  { name: 'Jordan T.', score: 10.1 },
+]
 
-  if (userScore <= 0) {
-    return [{ name: 'You', score: 0, isYou: true }]
-  }
-
-  const names = ['Zoe A.', 'Noah M.', 'Maya P.', 'Sam K.', 'Ava L.', 'Jordan T.']
-  const base = hashString(userId || 'anon')
-  const others = names.map((name, idx) => {
-    let pct = 0.7 - idx * 0.085 - ((base + idx * 17) % 11) / 120
-    pct = Math.max(0.14, Math.min(0.62, pct))
-    const raw = userScore * pct
-    const capped = Math.min(raw, userScore * 0.985)
-    return { name, score: capped, isYou: false }
-  })
-
-  const you = { name: 'You', score: userScore, isYou: true }
+function buildHighImpactCommunityBoard(userCarbonKg) {
+  const userScore = Math.max(0, Number(userCarbonKg) || 0)
+  const others = COMMUNITY_LEADERBOARD_BASE.map(({ name, score }) => ({ name, score, isYou: false }))
+  const you = { name: 'You', score: Number(userScore.toFixed(2)), isYou: true }
   return [you, ...others].sort((a, b) => {
     const d = b.score - a.score
     if (d !== 0) return d
@@ -287,7 +282,7 @@ export default function Dashboard() {
       }
       Object.assign(carbonByOrderIdNext, carbonByOrderIdSynthetic)
       const totalCarbonSaved = Object.values(carbonByOrderIdNext).reduce((sum, value) => sum + value, 0)
-      const board = buildHighImpactCommunityBoard(uid, totalCarbonSaved)
+      const board = buildHighImpactCommunityBoard(totalCarbonSaved)
 
       setOrders(displayOrders)
       setGreenImpact({ totalCarbonSaved, orderCount: displayOrders.length })
@@ -367,7 +362,7 @@ export default function Dashboard() {
       <section className="rounded-xl border border-lime-200 dark:border-lime-900/60 bg-lime-50/50 dark:bg-lime-950/25 p-4 mb-6">
         <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Community leaderboard</h2>
         <p className="text-xs text-stone-600 dark:text-stone-400 mb-3">
-          Estimated CO₂ saved through EcoShop orders (catalog impact data). Totals update as the community shops.
+          Community totals are shared for everyone. Your row uses your own estimated CO₂ saved from orders; your rank changes as you shop.
         </p>
         <ul className="space-y-2">
           {communityBoard.map((u, idx) => (
