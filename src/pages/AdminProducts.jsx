@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatCatalogProductName } from '../lib/catalogProductName'
@@ -31,6 +31,15 @@ export default function AdminProducts() {
       categorySectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [location.hash])
+
+  useLayoutEffect(() => {
+    if (location.hash !== '#products') return
+    if (loading || profileLoading) return
+    if (!canManageProducts) return
+    const el = productsSectionRef.current
+    if (!el) return
+    el.scrollIntoView({ behavior: 'auto', block: 'start' })
+  }, [location.hash, location.pathname, loading, profileLoading, canManageProducts])
 
   useEffect(() => {
     async function fetch() {
@@ -122,7 +131,7 @@ export default function AdminProducts() {
       <section
         id="products"
         ref={productsSectionRef}
-        className="scroll-mt-4"
+        className="scroll-mt-28"
       >
       <div className="mb-6">
         <Link
