@@ -75,7 +75,7 @@ export default function ProductList() {
       setLoading(true)
       let query = supabase
         .from('products')
-        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg', { count: 'exact' })
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)', { count: 'exact' })
         .range(0, MAX_ROWS - 1)
 
       if (sortBy === 'price-asc') query = query.order('price', { ascending: true })

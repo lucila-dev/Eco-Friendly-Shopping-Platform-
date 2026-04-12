@@ -32,7 +32,7 @@ export default function AdminProductForm() {
 
   useEffect(() => {
     ;(async () => {
-      const { data } = await supabase.from('categories').select('id, name').order('name')
+      const { data } = await supabase.from('categories').select('id, name, slug').order('name')
       setCategories(data ?? [])
     })()
   }, [])
@@ -145,6 +145,16 @@ export default function AdminProductForm() {
 
   if (!isNew && loading) return <p className="text-stone-500 dark:text-stone-400">Loading...</p>
 
+  const selectedCategorySlug = categories.find((c) => c.id === form.category_id)?.slug
+  const materialsFieldLabel =
+    String(selectedCategorySlug ?? '').toLowerCase() === 'food-drink'
+      ? 'Ingredients used'
+      : 'Materials used'
+  const materialsPlaceholder =
+    String(selectedCategorySlug ?? '').toLowerCase() === 'food-drink'
+      ? 'e.g. Oats, maple syrup, coconut oil'
+      : 'e.g. Organic cotton, recycled polyester'
+
   return (
     <div className="max-w-2xl">
       <Link
@@ -233,8 +243,8 @@ export default function AdminProductForm() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Materials used</label>
-          <input type="text" value={form.materials} onChange={(e) => setForm((f) => ({ ...f, materials: e.target.value }))} placeholder="e.g. Organic cotton, recycled polyester" className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
+          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">{materialsFieldLabel}</label>
+          <input type="text" value={form.materials} onChange={(e) => setForm((f) => ({ ...f, materials: e.target.value }))} placeholder={materialsPlaceholder} className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
         </div>
         {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
         <button type="submit" disabled={saving} className="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50">
