@@ -1,17 +1,13 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useProfile } from '../hooks/useProfile'
 import { getProductImage } from '../lib/productImageOverrides'
-import AdminCategoryImagesPanel from '../components/AdminCategoryImagesPanel'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
 export default function AdminProducts() {
   const { format } = useFormatPrice()
-  const location = useLocation()
-  const categorySectionRef = useRef(null)
-  const productsSectionRef = useRef(null)
   const { canManageProducts, loading: profileLoading } = useProfile()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
@@ -25,52 +21,6 @@ export default function AdminProducts() {
     document.title = 'Manage products · EcoShop'
     return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
-
-  useEffect(() => {
-    if (location.hash === '#category-images' && categorySectionRef.current) {
-      categorySectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }, [location.hash])
-
-  useEffect(() => {
-    const wantsProducts =
-      location.hash === '#products' || location.state?.scrollToProducts === true
-    if (!wantsProducts) return
-    if (loading || profileLoading || !canManageProducts) return
-
-    const stickyOffsetPx = 112
-
-    const scrollOnce = () => {
-      const el = productsSectionRef.current
-      if (!el) return
-      const y = el.getBoundingClientRect().top + window.scrollY - stickyOffsetPx
-      window.scrollTo({ top: Math.max(0, y), behavior: 'auto' })
-    }
-
-    let cancelled = false
-    const run = () => {
-      if (!cancelled) scrollOnce()
-    }
-
-    run()
-    const raf1 = requestAnimationFrame(run)
-    const raf2 = requestAnimationFrame(() => requestAnimationFrame(run))
-    const timeouts = [0, 50, 120, 350].map((ms) => window.setTimeout(run, ms))
-
-    return () => {
-      cancelled = true
-      cancelAnimationFrame(raf1)
-      cancelAnimationFrame(raf2)
-      timeouts.forEach(clearTimeout)
-    }
-  }, [
-    location.key,
-    location.hash,
-    location.state,
-    loading,
-    profileLoading,
-    canManageProducts,
-  ])
 
   useEffect(() => {
     async function fetch() {
@@ -96,7 +46,7 @@ export default function AdminProducts() {
   if (profileLoading || !canManageProducts) {
     return (
       <div>
-        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Developer Product Management</h1>
+        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Products</h1>
         {!profileLoading && !canManageProducts && (
           <p className="text-stone-600 dark:text-stone-300">
             Access denied. Dev tools is only available to accounts on the project allowlist.
@@ -150,20 +100,16 @@ export default function AdminProducts() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Developer Product Management</h1>
-      <section
-        id="category-images"
-        ref={categorySectionRef}
-        className="mb-6 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900/90 p-4 sm:p-5 shadow-sm dark:shadow-none"
-      >
-        <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3 sm:mb-4">Category images</h2>
-        <AdminCategoryImagesPanel />
-      </section>
-      <section
-        id="products"
-        ref={productsSectionRef}
-        className="scroll-mt-28"
-      >
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Products</h1>
+        <Link
+          to="/admin/categories"
+          className="text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+        >
+          Category images →
+        </Link>
+      </div>
+      <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Add, edit, or remove catalogue items.</p>
       <div className="mb-6">
         <Link
           to="/admin/products/new"
@@ -289,7 +235,6 @@ export default function AdminProducts() {
       {!loading && products.length > 0 && filteredProducts.length === 0 && (
         <p className="text-stone-500 dark:text-stone-400 mt-4">No products match your search.</p>
       )}
-      </section>
     </div>
   )
 }

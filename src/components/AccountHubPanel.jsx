@@ -98,22 +98,40 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1' }) {
           </Link>
         ))}
         {canManageProducts && (
-          <Link to="/admin/products" className={cardClass} onClick={() => onNavigate?.()}>
-            <span
-              className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-200/80 dark:ring-emerald-800/80 group-hover:ring-emerald-400/60 dark:group-hover:ring-emerald-600/50"
-              aria-hidden
-            >
-              <DevToolsIcon className="w-6 h-6 sm:w-7 sm:h-7" />
-            </span>
-            <div className="min-w-0 flex flex-col flex-1">
-              <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
-                Dev tools
+          <>
+            <Link to="/admin/products" className={cardClass} onClick={() => onNavigate?.()}>
+              <span
+                className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-200/80 dark:ring-emerald-800/80 group-hover:ring-emerald-400/60 dark:group-hover:ring-emerald-600/50"
+                aria-hidden
+              >
+                <DevToolsIcon className="w-6 h-6 sm:w-7 sm:h-7" />
               </span>
-              <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-3 flex-1">
-                Manage products and catalog images.
-              </p>
-            </div>
-          </Link>
+              <div className="min-w-0 flex flex-col flex-1">
+                <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
+                  Dev tools · Products
+                </span>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-3 flex-1">
+                  Add, edit, and remove items in the shop catalogue.
+                </p>
+              </div>
+            </Link>
+            <Link to="/admin/categories" className={cardClass} onClick={() => onNavigate?.()}>
+              <span
+                className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-200/80 dark:ring-emerald-800/80 group-hover:ring-emerald-400/60 dark:group-hover:ring-emerald-600/50"
+                aria-hidden
+              >
+                <DevToolsIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+              </span>
+              <div className="min-w-0 flex flex-col flex-1">
+                <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
+                  Dev tools · Category images
+                </span>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-3 flex-1">
+                  Photos and framing for the category cards on Home.
+                </p>
+              </div>
+            </Link>
+          </>
         )}
       </div>
     </>
