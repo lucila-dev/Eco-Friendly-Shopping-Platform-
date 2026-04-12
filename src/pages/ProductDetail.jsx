@@ -7,6 +7,8 @@ import ReviewForm from '../components/ReviewForm'
 import { getProductImage } from '../lib/productImageOverrides'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
+import ProductCard from '../components/ProductCard'
+import { pickRelatedSlices } from '../lib/productRecommendations'
 
 function parseMaterialTags(materials) {
   if (!materials) return []
@@ -164,6 +166,9 @@ export default function ProductDetail() {
     why: false,
     impact: false,
   })
+  const [relatedSimilar, setRelatedSimilar] = useState([])
+  const [relatedTogether, setRelatedTogether] = useState([])
+  const [relatedLoading, setRelatedLoading] = useState(false)
   const { isAuthenticated } = useAuth()
   const { user } = useAuth()
 
@@ -207,6 +212,42 @@ export default function ProductDetail() {
     }
     checkPurchased()
   }, [user?.id, product?.id])
+
+  useEffect(() => {
+    if (!product?.category_id || !product?.id) {
+      setRelatedSimilar([])
+      setRelatedTogether([])
+      return
+    }
+    let cancelled = false
+    setRelatedLoading(true)
+    async function fetchRelated() {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg')
+        .eq('category_id', product.category_id)
+        .neq('id', product.id)
+        .limit(80)
+      if (cancelled) return
+      if (error || !data?.length) {
+        setRelatedSimilar([])
+        setRelatedTogether([])
+        setRelatedLoading(false)
+        return
+      }
+      const { similar, together } = pickRelatedSlices(data, product.slug, {
+        similarCount: 4,
+        togetherCount: 3,
+      })
+      setRelatedSimilar(similar)
+      setRelatedTogether(together)
+      setRelatedLoading(false)
+    }
+    fetchRelated()
+    return () => {
+      cancelled = true
+    }
+  }, [product?.id, product?.category_id, product?.slug])
 
   const materials = useMemo(() => parseMaterialTags(product?.materials), [product?.materials])
   const sustainabilityReasons = useMemo(() => getSustainabilityReasons(product, materials), [product, materials])
@@ -387,6 +428,58 @@ export default function ProductDetail() {
         <ReviewList productId={product.id} productName={displayName} key={`${product.id}-${reviewVersion}`} />
         <ReviewForm productId={product.id} canReview={canReview} onSubmitted={() => setReviewVersion((v) => v + 1)} />
       </div>
+
+      {(relatedLoading || relatedSimilar.length > 0 || relatedTogether.length > 0) && (
+        <div className="mt-10 sm:mt-12 space-y-10 sm:space-y-12 border-t border-stone-200 dark:border-stone-700 pt-8 sm:pt-10">
+          {relatedLoading && (
+            <p className="text-sm text-stone-500 dark:text-stone-400">Loading recommendations…</p>
+          )}
+
+          {!relatedLoading && relatedSimilar.length > 0 && (
+            <section className="w-full" aria-labelledby="related-similar-heading">
+              <div className="flex flex-wrap items-end justify-between gap-3 mb-4 sm:mb-5">
+                <div>
+                  <h2 id="related-similar-heading" className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
+                    You may also like
+                  </h2>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
+                    Similar items from {product.category?.name || 'this category'}.
+                  </p>
+                </div>
+                <Link
+                  to={categoryLink}
+                  className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:underline shrink-0"
+                >
+                  View all in category →
+                </Link>
+              </div>
+              <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                {relatedSimilar.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {!relatedLoading && relatedTogether.length > 0 && (
+            <section className="w-full" aria-labelledby="related-together-heading">
+              <div className="mb-4 sm:mb-5">
+                <h2 id="related-together-heading" className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
+                  Frequently bought together
+                </h2>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
+                  Popular pairings shoppers add alongside products like this one (same category).
+                </p>
+              </div>
+              <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-5xl">
+                {relatedTogether.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
     </div>
   )
 }
