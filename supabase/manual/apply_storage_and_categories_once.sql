@@ -1,7 +1,3 @@
--- Run ONCE in Supabase Dashboard → SQL Editor (combines migration 003 + 004 for convenience).
--- Requires public.dev_tools_allowlist from migration 008. Dev tools access: allowlist OR profiles.role
--- owner/developer/admin (see migration 009).
-
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('product-images', 'product-images', true)
 ON CONFLICT (id) DO UPDATE SET public = true;

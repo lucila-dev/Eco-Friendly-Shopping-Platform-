@@ -1,6 +1,3 @@
--- Merge Office into Home (single storefront category, slug stays `home`).
--- Add Food & Drink category. Safe to re-run.
-
 UPDATE products
 SET category_id = 'a1b2c3d4-0002-4000-8000-000000000002'
 WHERE category_id = 'a1b2c3d4-0008-4000-8000-000000000008';

@@ -1,6 +1,3 @@
--- Run in Supabase → SQL Editor (service role bypasses RLS on this table for INSERT).
--- Replace the placeholders with the four Auth user UUIDs (Authentication → Users).
-
 INSERT INTO public.dev_tools_allowlist (user_id) VALUES
   ('00000000-0000-0000-0000-000000000001'),
   ('00000000-0000-0000-0000-000000000002'),
