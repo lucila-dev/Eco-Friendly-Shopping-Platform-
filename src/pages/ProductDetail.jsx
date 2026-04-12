@@ -82,16 +82,54 @@ function getSustainabilityReasons(product, materials) {
   return reasons.slice(0, 4)
 }
 
-function getCertifications(product, materials) {
-  const text = `${product?.name || ''} ${materials.join(' ')}`.toLowerCase()
-  const certs = []
-  if (/organic/.test(text)) certs.push('Organic Content')
-  if (/recycled/.test(text)) certs.push('Recycled Content')
-  if (/cotton|textile|fabric/.test(text)) certs.push('Textile Standard')
-  if (/bamboo|wood|paper/.test(text)) certs.push('Responsible Sourcing')
-  if (/vegan|plant/.test(text)) certs.push('Vegan Friendly')
-  if (certs.length === 0) certs.push('Eco Reviewed')
-  return certs.slice(0, 3)
+/** EcoShop-only programme names (fictional marketplace tiers — not third-party cert claims). */
+function ecoShopImpactClass(score) {
+  const s = Number(score)
+  if (!Number.isFinite(s) || s <= 0) return 'Bronze'
+  if (s >= 8) return 'Gold'
+  if (s >= 6) return 'Silver'
+  return 'Bronze'
+}
+
+/**
+ * Badges: EcoShop-branded “programmes” (store tiers) plus compact tags when the listing
+ * mentions known standards or material themes. Capped at four; internal badges stay first.
+ */
+function getCertificationDisplay(product, materials) {
+  const raw = `${product?.name || ''} ${product?.description || ''} ${(materials || []).join(' ')}`.toLowerCase()
+  const impactClass = ecoShopImpactClass(product?.sustainability_score)
+
+  const core = [
+    'EcoShop Earth Quality Mark',
+    `EcoShop Impact Programme, ${impactClass} Class`,
+  ]
+
+  const standards = []
+  if (/\bgots\b|global organic textile/.test(raw)) standards.push('GOTS organic textile')
+  if (/\bfsc\b|fsc[\s-]*certified|fsc®/.test(raw)) standards.push('FSC® chain of custody')
+  if (/\bfairtrade\b|fair trade|fair-trade/.test(raw)) standards.push('Fairtrade sourcing')
+  if (/oeko-tex|oeko tex|standard 100 by oeko/.test(raw)) standards.push('OEKO-TEX® Standard 100')
+  if (/usda organic/.test(raw)) standards.push('USDA Organic')
+  if (/energy star|energystar/.test(raw)) standards.push('ENERGY STAR®')
+  if (/bluesign/.test(raw)) standards.push('bluesign® approved')
+  if (/cradle to cradle|cradle2cradle|c2c certified/.test(raw)) standards.push('Cradle to Cradle Certified®')
+  if (/b corp|b corporation|bcorp/.test(raw)) standards.push('B Corp Certified')
+
+  const hints = []
+  if (/recycled|post-consumer|pcr|rpet|ocean-bound/.test(raw)) hints.push('Recycled content profile')
+  const hasNamedOrganic = standards.some((s) => s.includes('GOTS') || s.includes('USDA'))
+  if ((/organic\b|bio-based/.test(raw)) && !hasNamedOrganic) hints.push('Organic & bio-based inputs')
+  if (/\bvegan\b|plant-based|plant based|cruelty-free/.test(raw) && !/\bhoney\b/.test(raw)) {
+    hints.push('Vegan formulation')
+  }
+  if (/compostable|home[\s-]*compost|industrially compostable|biodegradable/.test(raw)) {
+    hints.push('End-of-life: compostable options')
+  }
+
+  const rest = [...standards, ...hints]
+  const chips = [...core, ...rest].filter((x, i, a) => a.indexOf(x) === i).slice(0, 4)
+
+  return { chips }
 }
 
 function getSizeGuide(product) {
@@ -251,7 +289,7 @@ export default function ProductDetail() {
 
   const materials = useMemo(() => parseMaterialTags(product?.materials), [product?.materials])
   const sustainabilityReasons = useMemo(() => getSustainabilityReasons(product, materials), [product, materials])
-  const certifications = useMemo(() => getCertifications(product, materials), [product, materials])
+  const certificationChips = useMemo(() => getCertificationDisplay(product, materials).chips, [product, materials])
   const productUse = useMemo(() => getProductUseLabel(product), [product])
   const sizeGuide = useMemo(() => getSizeGuide(product), [product])
 
@@ -408,15 +446,18 @@ export default function ProductDetail() {
             </div>
           </InfoAccordion>
           <InfoAccordion
-            title="Certifications"
+            title="Certifications & standards"
             open={openInfo.certifications}
             onToggle={() => toggleInfo('certifications')}
             className="border-amber-300 bg-amber-50/60"
             titleClassName="text-amber-800"
           >
             <div className="flex flex-wrap gap-1.5">
-              {certifications.map((cert) => (
-                <span key={cert} className="inline-flex items-center rounded-md border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/40 px-3 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-200">
+              {certificationChips.map((cert) => (
+                <span
+                  key={cert}
+                  className="inline-flex items-center rounded-md border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/40 px-3 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-200"
+                >
                   {cert}
                 </span>
               ))}

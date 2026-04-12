@@ -162,3 +162,79 @@ export function HeartIcon({ className = 'w-5 h-5' }) {
   )
 }
 
+/** Wallet — loyalty / store credit checkout option. */
+export function PaymentLoyaltyIcon({ className = 'w-9 h-9' }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="M2 10h20" />
+      <circle cx="16.5" cy="14" r="1.25" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+/** Visa / Mastercard / Amex marks (decorative). */
+export function PaymentCardBrandsMark({ className = 'h-8 w-[4.75rem]' }) {
+  return (
+    <svg className={className} viewBox="0 0 76 28" aria-hidden>
+      <rect x="0" y="2" width="22" height="18" rx="2" fill="#1A1F71" />
+      <text x="3" y="14.5" fill="#fff" fontSize="7" fontWeight="700" fontFamily="system-ui, sans-serif">
+        VISA
+      </text>
+      <rect x="26" y="2" width="22" height="18" rx="2" fill="#fff" stroke="#e5e5e5" strokeWidth="0.5" />
+      <circle cx="35" cy="11" r="5" fill="#EB001B" opacity="0.95" />
+      <circle cx="41" cy="11" r="5" fill="#F79E1B" opacity="0.95" />
+      <rect x="52" y="2" width="22" height="18" rx="2" fill="#006FCF" />
+      <text x="54.5" y="14" fill="#fff" fontSize="5.5" fontWeight="700" fontFamily="system-ui, sans-serif">
+        AMEX
+      </text>
+    </svg>
+  )
+}
+
+/** Apple Pay–style mark (decorative). */
+export function PaymentApplePayMark({ className = 'h-8 w-[5.5rem]' }) {
+  return (
+    <svg className={className} viewBox="0 0 90 28" aria-hidden>
+      <rect x="0.5" y="0.5" width="89" height="27" rx="4" fill="#000" />
+      <text
+        x="45"
+        y="18.5"
+        fill="#fff"
+        fontSize="11"
+        fontWeight="600"
+        fontFamily="-apple-system, BlinkMacSystemFont, system-ui, sans-serif"
+        textAnchor="middle"
+      >
+        Apple Pay
+      </text>
+    </svg>
+  )
+}
+
+/** PayPal mark (decorative). */
+export function PaymentPayPalMark({ className = 'h-8 w-[5rem]' }) {
+  return (
+    <svg className={className} viewBox="0 0 80 28" aria-hidden>
+      <defs>
+        <linearGradient id="ecoPaypalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#0070BA" />
+          <stop offset="100%" stopColor="#003087" />
+        </linearGradient>
+      </defs>
+      <rect x="0.5" y="0.5" width="79" height="27" rx="4" fill="url(#ecoPaypalGrad)" />
+      <text
+        x="40"
+        y="18.5"
+        fill="#fff"
+        fontSize="11"
+        fontWeight="700"
+        fontFamily="system-ui, sans-serif"
+        textAnchor="middle"
+      >
+        PayPal
+      </text>
+    </svg>
+  )
+}
+

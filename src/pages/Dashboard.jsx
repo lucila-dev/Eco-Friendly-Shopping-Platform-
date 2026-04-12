@@ -6,6 +6,7 @@ import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
 import { hashString } from '../lib/productMetrics'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
+import { SUPPORT_EMAIL } from '../lib/supportContact'
 
 /** Leaderboard: you as “You” at #1; other rows are “Firstname L.” and stay below your total. */
 function buildHighImpactCommunityBoard(userId, userCarbonKg) {
@@ -448,7 +449,7 @@ export default function Dashboard() {
         <p className="text-sm text-stone-700 dark:text-stone-300 mb-3">Our support team can help with delivery updates, returns, and payment questions.</p>
         <div className="flex flex-wrap gap-2">
           <Link to="/about" className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">Open help center</Link>
-          <a href="mailto:support@ecoshop.example" className="px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-sm font-medium hover:bg-stone-200 dark:hover:bg-stone-700">Email support</a>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-sm font-medium hover:bg-stone-200 dark:hover:bg-stone-700">Email support</a>
         </div>
       </section>
     </div>

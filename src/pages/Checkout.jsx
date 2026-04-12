@@ -1,10 +1,41 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../hooks/useCart'
-import { FREE_SHIPPING_MIN_SUBTOTAL, getDeliveryFee, STANDARD_DELIVERY_FEE } from '../lib/shipping'
+import {
+  DELIVERY_OPTIONS,
+  FREE_SHIPPING_MIN_SUBTOTAL,
+  getDeliveryFee,
+  getDeliveryFeeForMethod,
+  STANDARD_DELIVERY_FEE,
+} from '../lib/shipping'
+import {
+  appendPromoReceiptToShippingAddress,
+  evaluatePromoCode,
+  getPromoReceiptBreakdown,
+  GIFT_WRAP_FEE,
+  normalizePromoCode,
+  promoOfferSummary,
+  totalDiscountForCodes,
+} from '../lib/checkoutPromo'
 import { useFormatPrice } from '../hooks/useFormatPrice'
+import {
+  PaymentApplePayMark,
+  PaymentCardBrandsMark,
+  PaymentLoyaltyIcon,
+  PaymentPayPalMark,
+} from '../components/Icons'
+
+const inputClass =
+  'w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-500'
+
+const PAYMENT_OPTIONS = [
+  { id: 'loyalty', title: 'Loyalty credits', description: 'Pay with your EcoShop balance', Mark: PaymentLoyaltyIcon },
+  { id: 'card', title: 'Credit or debit card', description: 'Visa, Mastercard, American Express', Mark: PaymentCardBrandsMark },
+  { id: 'apple_pay', title: 'Apple Pay', description: 'Fast checkout on supported devices', Mark: PaymentApplePayMark },
+  { id: 'paypal', title: 'PayPal', description: 'Pay with your PayPal account', Mark: PaymentPayPalMark },
+]
 
 export default function Checkout() {
   const { format } = useFormatPrice()
@@ -17,6 +48,13 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
+  const [promoInput, setPromoInput] = useState('')
+  const [appliedPromoCodes, setAppliedPromoCodes] = useState([])
+  const [promoMessage, setPromoMessage] = useState(null)
+  const [deliveryMethod, setDeliveryMethod] = useState('standard')
+  const [giftWrap, setGiftWrap] = useState(false)
+  const [isGift, setIsGift] = useState(false)
+  const [giftMessage, setGiftMessage] = useState('')
   const [form, setForm] = useState({
     shipping_name: '',
     shipping_email: user?.email ?? '',
@@ -28,6 +66,13 @@ export default function Checkout() {
     card_expiry: '',
     card_cvc: '',
   })
+
+  useEffect(() => {
+    document.title = 'Checkout | EcoShop'
+    return () => {
+      document.title = 'EcoShop | Sustainable Shopping'
+    }
+  }, [])
 
   useEffect(() => {
     async function fetchCredits() {
@@ -47,6 +92,51 @@ export default function Checkout() {
     fetchCredits()
   }, [user?.id])
 
+  const discountAmount = useMemo(
+    () => totalDiscountForCodes(appliedPromoCodes, total),
+    [appliedPromoCodes, total],
+  )
+
+  const discountedSubtotal = Math.max(0, total - discountAmount)
+  const deliveryFee = getDeliveryFeeForMethod(discountedSubtotal, deliveryMethod)
+  const giftWrapFee = giftWrap ? GIFT_WRAP_FEE : 0
+  const finalTotal = discountedSubtotal + deliveryFee + giftWrapFee
+
+  const applyPromo = () => {
+    setPromoMessage(null)
+    const normalized = normalizePromoCode(promoInput)
+    if (!normalized) {
+      setPromoMessage({ type: 'error', text: 'Enter a code' })
+      return
+    }
+    if (appliedPromoCodes.includes(normalized)) {
+      setPromoMessage({ type: 'error', text: 'That code is already applied.' })
+      return
+    }
+    const r = evaluatePromoCode(normalized, total)
+    if (!r.ok) {
+      setPromoMessage({ type: 'error', text: r.error })
+      return
+    }
+    setAppliedPromoCodes((prev) => [...prev, normalized])
+    setPromoInput('')
+    setPromoMessage({ type: 'ok', text: `${r.label} added.` })
+  }
+
+  const removePromoCode = (code) => {
+    setAppliedPromoCodes((prev) => prev.filter((c) => c !== code))
+    setPromoMessage(null)
+  }
+
+  const buildTotalsFromRows = (rows) => {
+    const subtotal = rows.reduce((sum, r) => sum + r.quantity * (r.products?.price ?? 0), 0)
+    const disc = totalDiscountForCodes(appliedPromoCodes, subtotal)
+    const afterDisc = Math.max(0, subtotal - disc)
+    const del = getDeliveryFeeForMethod(afterDisc, deliveryMethod)
+    const wrap = giftWrap ? GIFT_WRAP_FEE : 0
+    return { subtotal, discountAmount: disc, deliveryFee: del, giftWrapFee: wrap, totalAmount: afterDisc + del + wrap }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -57,6 +147,17 @@ export default function Checkout() {
     if (!acceptTerms) {
       setError('Please accept the terms to continue.')
       return
+    }
+    if (paymentMethod === 'card') {
+      const digits = form.card_number.replace(/\D/g, '')
+      if (digits.length < 12) {
+        setError('Enter a valid card number.')
+        return
+      }
+      if (!form.card_expiry?.trim() || !form.card_cvc?.trim()) {
+        setError('Enter card expiry and CVC.')
+        return
+      }
     }
     setSubmitting(true)
 
@@ -78,9 +179,16 @@ export default function Checkout() {
     }
 
     const rows = cartWithProducts.data ?? []
-    const subtotal = rows.reduce((sum, r) => sum + r.quantity * (r.products?.price ?? 0), 0)
-    const deliveryFee = getDeliveryFee(subtotal)
-    const totalAmount = subtotal + deliveryFee
+    const { totalAmount, deliveryFee: delFee, discountAmount: discAmt } = buildTotalsFromRows(rows)
+
+    const subtotalForPromo = rows.reduce((s, r) => s + r.quantity * (r.products?.price ?? 0), 0)
+    for (const code of appliedPromoCodes) {
+      if (!evaluatePromoCode(code, subtotalForPromo).ok) {
+        setError('A promo code is not valid for your current cart.')
+        setSubmitting(false)
+        return
+      }
+    }
 
     if (paymentMethod === 'loyalty' && loyaltyCredits < totalAmount) {
       setError('Not enough loyalty credits for this checkout.')
@@ -88,22 +196,42 @@ export default function Checkout() {
       return
     }
 
+    const deliveryTitle = DELIVERY_OPTIONS.find((o) => o.id === deliveryMethod)?.title ?? deliveryMethod
+    const giftNote = [
+      `Delivery: ${deliveryTitle}`,
+      isGift && 'Gift order',
+      giftWrap && 'Gift wrap',
+      giftMessage.trim() && `Message: ${giftMessage.trim()}`,
+    ]
+      .filter(Boolean)
+      .join(' · ')
+    const addressLines = [
+      form.shipping_address_line_1,
+      form.shipping_address_line_2,
+      `${form.shipping_city} ${form.shipping_postcode}`.trim(),
+    ].filter(Boolean)
+    if (giftNote) {
+      addressLines.push(`Notes: ${giftNote}`)
+    }
+
+    let shippingAddressText = addressLines.join(', ')
+    if (appliedPromoCodes.length > 0 && discAmt > 0) {
+      const breakdown = getPromoReceiptBreakdown(appliedPromoCodes, subtotalForPromo)
+      shippingAddressText = appendPromoReceiptToShippingAddress(shippingAddressText, breakdown, discAmt)
+    }
+
     const orderPayload = {
       user_id: user.id,
       status: 'completed',
       total_amount: totalAmount,
       shipping_name: form.shipping_name,
-      shipping_address: [
-        form.shipping_address_line_1,
-        form.shipping_address_line_2,
-        `${form.shipping_city} ${form.shipping_postcode}`.trim(),
-      ].filter(Boolean).join(', '),
+      shipping_address: shippingAddressText,
       shipping_email: form.shipping_email,
     }
 
     let orderRes = await supabase
       .from('orders')
-      .insert({ ...orderPayload, shipping_amount: deliveryFee })
+      .insert({ ...orderPayload, shipping_amount: delFee })
       .select('id')
       .single()
 
@@ -156,205 +284,526 @@ export default function Checkout() {
 
   if (items.length === 0 && !submitting) {
     return (
-      <div>
-        <h1 className="text-xl font-bold text-stone-800 mb-3">Checkout</h1>
-        <p className="text-stone-600">Your cart is empty. Add items before checkout.</p>
+      <div className="mx-auto w-full max-w-7xl text-center py-8">
+        <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-3">Checkout</h1>
+        <p className="text-stone-600 dark:text-stone-400">Your cart is empty. Add items before checkout.</p>
       </div>
     )
   }
 
-  const deliveryFee = getDeliveryFee(total)
-  const finalTotal = total + deliveryFee
-
   return (
-    <div className="max-w-lg rounded-2xl border border-emerald-200 bg-white/90 p-4 sm:p-5 shadow-sm">
-      <h1 className="text-xl font-bold text-stone-800 mb-4">Checkout</h1>
-      <p className="text-stone-600 text-sm mb-4">
-        Checkout – loyalty credits use your account balance. Card fields below are for display only; no card is charged.
+    <div className="mx-auto w-full max-w-7xl pb-10">
+      <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-2">Checkout</h1>
+      <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base mb-6 max-w-3xl">
+        Choose delivery speed, apply any discount codes, then pick a payment method.
       </p>
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 mb-5 text-sm">
-        <p className="text-stone-700">Subtotal: {format(total)}</p>
-        <p className="text-stone-700">
-          Delivery:{' '}
-          {deliveryFee === 0 ? (
-            <>
-              <span className="line-through text-stone-500 tabular-nums">{format(STANDARD_DELIVERY_FEE)}</span>{' '}
-              <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Free</span>
-              <span className="text-stone-600"> (orders {format(FREE_SHIPPING_MIN_SUBTOTAL)}+)</span>
-            </>
-          ) : (
-            format(deliveryFee)
-          )}
-        </p>
-        <p className="text-stone-800 font-semibold mt-1">Total to pay: {format(finalTotal)}</p>
-      </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <h2 className="font-semibold text-stone-800 mb-3">Payment details</h2>
-          <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 mb-3">
-            <p className="text-sm text-stone-600 mb-2">Payment method</p>
-            <div className="flex flex-wrap items-center gap-4">
-              <label className="inline-flex items-center gap-2 text-sm text-stone-700">
-                <input
-                  type="radio"
-                  name="payment_method"
-                  value="loyalty"
-                  checked={paymentMethod === 'loyalty'}
-                  onChange={() => setPaymentMethod('loyalty')}
-                />
-                Loyalty credits
-              </label>
-              <label className="inline-flex items-center gap-2 text-sm text-stone-700">
-                <input
-                  type="radio"
-                  name="payment_method"
-                  value="card"
-                  checked={paymentMethod === 'card'}
-                  onChange={() => setPaymentMethod('card')}
-                />
-                Card
-              </label>
-            </div>
-            <p className="text-xs text-stone-500 mt-2">
-              Available credits: {loadingCredits ? 'Loading...' : loyaltyCredits.toFixed(2)} | Charged at checkout: {finalTotal.toFixed(2)}
-            </p>
-          </div>
-          {paymentMethod === 'card' && (
-            <div className="space-y-3">
-            <div>
-              <label htmlFor="card_number" className="block text-sm font-medium text-stone-700 mb-1">Card number</label>
-              <input
-                id="card_number"
-                type="text"
-                inputMode="numeric"
-                autoComplete="cc-number"
-                value={form.card_number}
-                onChange={(e) => setForm((f) => ({ ...f, card_number: e.target.value.replace(/\D/g, '').slice(0, 16) }))}
-                placeholder="1234 5678 9012 3456"
-                required
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="card_expiry" className="block text-sm font-medium text-stone-700 mb-1">Expiry (MM/YY)</label>
-                <input
-                  id="card_expiry"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="cc-exp"
-                  value={form.card_expiry}
-                  onChange={(e) => setForm((f) => ({ ...f, card_expiry: e.target.value }))}
-                  placeholder="MM/YY"
-                  maxLength={5}
-                  required
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-              <div>
-                <label htmlFor="card_cvc" className="block text-sm font-medium text-stone-700 mb-1">CVC</label>
-                <input
-                  id="card_cvc"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="cc-csc"
-                  value={form.card_cvc}
-                  onChange={(e) => setForm((f) => ({ ...f, card_cvc: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
-                  placeholder="123"
-                  required
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-            </div>
-            </div>
-          )}
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:gap-10 lg:items-start"
+      >
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-6 shadow-sm lg:hidden">
+          <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-4">Order summary</h2>
+          <OrderSummaryLines
+            items={items}
+            format={format}
+            total={total}
+            discountAmount={discountAmount}
+            deliveryFee={deliveryFee}
+            deliveryMethod={deliveryMethod}
+            giftWrapFee={giftWrapFee}
+            finalTotal={finalTotal}
+            promoInput={promoInput}
+            setPromoInput={setPromoInput}
+            appliedPromoCodes={appliedPromoCodes}
+            applyPromo={applyPromo}
+            removePromoCode={removePromoCode}
+            promoMessage={promoMessage}
+          />
         </div>
-        <div>
-          <h2 className="font-semibold text-stone-800 mb-3">Shipping address</h2>
-          <div className="space-y-3">
-            <div>
-              <label htmlFor="shipping_name" className="block text-sm font-medium text-stone-700 mb-1">Full name</label>
-              <input
-                id="shipping_name"
-                type="text"
-                value={form.shipping_name}
-                onChange={(e) => setForm((f) => ({ ...f, shipping_name: e.target.value }))}
-                required
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="shipping_email" className="block text-sm font-medium text-stone-700 mb-1">Email</label>
-              <input
-                id="shipping_email"
-                type="email"
-                value={form.shipping_email}
-                onChange={(e) => setForm((f) => ({ ...f, shipping_email: e.target.value }))}
-                required
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="shipping_address_line_1" className="block text-sm font-medium text-stone-700 mb-1">Address line 1</label>
-              <input
-                id="shipping_address_line_1"
-                type="text"
-                value={form.shipping_address_line_1}
-                onChange={(e) => setForm((f) => ({ ...f, shipping_address_line_1: e.target.value }))}
-                required
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="shipping_address_line_2" className="block text-sm font-medium text-stone-700 mb-1">Address line 2 (optional)</label>
-              <input
-                id="shipping_address_line_2"
-                type="text"
-                value={form.shipping_address_line_2}
-                onChange={(e) => setForm((f) => ({ ...f, shipping_address_line_2: e.target.value }))}
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+
+        <div className="min-w-0 space-y-8 lg:col-start-1 lg:row-start-1">
+          <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-4">Shipping address</h2>
+            <div className="space-y-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0">
+              <div className="sm:col-span-2">
+                <label htmlFor="shipping_name" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  Full name
+                </label>
+                <input
+                  id="shipping_name"
+                  type="text"
+                  value={form.shipping_name}
+                  onChange={(e) => setForm((f) => ({ ...f, shipping_name: e.target.value }))}
+                  required
+                  className={inputClass}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="shipping_email" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  Email
+                </label>
+                <input
+                  id="shipping_email"
+                  type="email"
+                  value={form.shipping_email}
+                  onChange={(e) => setForm((f) => ({ ...f, shipping_email: e.target.value }))}
+                  required
+                  className={inputClass}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="shipping_address_line_1" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  Address line 1
+                </label>
+                <input
+                  id="shipping_address_line_1"
+                  type="text"
+                  value={form.shipping_address_line_1}
+                  onChange={(e) => setForm((f) => ({ ...f, shipping_address_line_1: e.target.value }))}
+                  required
+                  className={inputClass}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="shipping_address_line_2" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  Address line 2 (optional)
+                </label>
+                <input
+                  id="shipping_address_line_2"
+                  type="text"
+                  value={form.shipping_address_line_2}
+                  onChange={(e) => setForm((f) => ({ ...f, shipping_address_line_2: e.target.value }))}
+                  className={inputClass}
+                />
+              </div>
               <div>
-                <label htmlFor="shipping_city" className="block text-sm font-medium text-stone-700 mb-1">City</label>
+                <label htmlFor="shipping_city" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  City
+                </label>
                 <input
                   id="shipping_city"
                   type="text"
                   value={form.shipping_city}
                   onChange={(e) => setForm((f) => ({ ...f, shipping_city: e.target.value }))}
                   required
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label htmlFor="shipping_postcode" className="block text-sm font-medium text-stone-700 mb-1">Postcode</label>
+                <label htmlFor="shipping_postcode" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  Postcode
+                </label>
                 <input
                   id="shipping_postcode"
                   type="text"
                   value={form.shipping_postcode}
                   onChange={(e) => setForm((f) => ({ ...f, shipping_postcode: e.target.value }))}
                   required
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  className={inputClass}
                 />
               </div>
             </div>
-          </div>
+          </section>
+
+          <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-1">Delivery option</h2>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
+              Faster options include a courier surcharge. Free standard shipping still applies on orders{' '}
+              {format(FREE_SHIPPING_MIN_SUBTOTAL)}+.
+            </p>
+            <fieldset>
+              <legend className="sr-only">Delivery speed</legend>
+              <div className="grid sm:grid-cols-3 gap-3">
+                {DELIVERY_OPTIONS.map((opt) => {
+                  const optionFee = getDeliveryFeeForMethod(discountedSubtotal, opt.id)
+                  const isSelected = deliveryMethod === opt.id
+                  return (
+                    <label
+                      key={opt.id}
+                      className={`relative flex cursor-pointer flex-col rounded-xl border-2 p-3 sm:p-4 transition-colors ${
+                        isSelected
+                          ? 'border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 dark:border-emerald-500 ring-2 ring-emerald-500/20'
+                          : 'border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-800/40 hover:border-emerald-300 dark:hover:border-emerald-700'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="delivery_method"
+                        value={opt.id}
+                        checked={isSelected}
+                        onChange={() => setDeliveryMethod(opt.id)}
+                        className="sr-only"
+                      />
+                      <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">{opt.title}</span>
+                      <span className="mt-0.5 text-xs text-stone-500 dark:text-stone-400 leading-snug">{opt.description}</span>
+                      <span className="mt-2 text-xs font-semibold tabular-nums text-emerald-800 dark:text-emerald-300">
+                        {opt.id === 'standard' && optionFee === 0 ? (
+                          <>Free · orders {format(FREE_SHIPPING_MIN_SUBTOTAL)}+</>
+                        ) : (
+                          format(optionFee)
+                        )}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </fieldset>
+          </section>
+
+          <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-1">Gift options</h2>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">Optional — we use plastic-free, recycled wrap.</p>
+            <div className="space-y-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isGift}
+                  onChange={(e) => setIsGift(e.target.checked)}
+                  className="mt-1 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-stone-700 dark:text-stone-300">
+                  <span className="font-medium text-stone-800 dark:text-stone-100">This is a gift</span>
+                  <span className="block text-stone-500 dark:text-stone-400 mt-0.5">Hide prices on the packing slip.</span>
+                </span>
+              </label>
+              {isGift && (
+                <div>
+                  <label htmlFor="gift_message" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                    Gift message (optional)
+                  </label>
+                  <textarea
+                    id="gift_message"
+                    rows={3}
+                    value={giftMessage}
+                    onChange={(e) => setGiftMessage(e.target.value)}
+                    placeholder="Add a short message for the recipient"
+                    className={`${inputClass} resize-y min-h-[5rem]`}
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-stone-500 mt-1">{giftMessage.length}/500</p>
+                </div>
+              )}
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={giftWrap}
+                  onChange={(e) => setGiftWrap(e.target.checked)}
+                  className="mt-1 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-stone-700 dark:text-stone-300">
+                  <span className="font-medium text-stone-800 dark:text-stone-100">Add sustainable gift wrap</span>
+                  <span className="block text-stone-500 dark:text-stone-400 mt-0.5 tabular-nums">
+                    {format(GIFT_WRAP_FEE)} — recycled paper, twine, and a gift tag.
+                  </span>
+                </span>
+              </label>
+            </div>
+          </section>
         </div>
-        <label className="flex items-start gap-2 text-sm text-stone-700">
-          <input type="checkbox" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="mt-0.5" />
-          <span>I agree to the delivery, returns, and privacy policies.</span>
-        </label>
-        <p className="text-stone-700 font-medium">Total: {format(finalTotal)}</p>
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full py-2.5 text-sm bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50"
-        >
-          {submitting ? 'Placing order...' : 'Place order'}
-        </button>
+
+        <aside className="min-w-0 space-y-6 lg:col-start-2 lg:row-start-1 lg:self-start lg:sticky lg:top-24">
+          <div className="hidden lg:block rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-5 shadow-sm">
+            <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-4">Order summary</h2>
+            <OrderSummaryLines
+              items={items}
+              format={format}
+              total={total}
+              discountAmount={discountAmount}
+              deliveryFee={deliveryFee}
+              deliveryMethod={deliveryMethod}
+              giftWrapFee={giftWrapFee}
+              finalTotal={finalTotal}
+              promoInput={promoInput}
+              setPromoInput={setPromoInput}
+              appliedPromoCodes={appliedPromoCodes}
+              applyPromo={applyPromo}
+              removePromoCode={removePromoCode}
+              promoMessage={promoMessage}
+            />
+          </div>
+
+          <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-4">Payment</h2>
+            <fieldset className="space-y-3">
+              <legend className="sr-only">Payment method</legend>
+              <div className="grid sm:grid-cols-2 gap-3 lg:grid-cols-1 xl:grid-cols-2">
+                {PAYMENT_OPTIONS.map((opt) => {
+                  const Mark = opt.Mark
+                  return (
+                    <label
+                      key={opt.id}
+                      className={`relative flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 sm:p-4 transition-colors ${
+                        paymentMethod === opt.id
+                          ? 'border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 dark:border-emerald-500 ring-2 ring-emerald-500/20'
+                          : 'border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-800/40 hover:border-emerald-300 dark:hover:border-emerald-700'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value={opt.id}
+                        checked={paymentMethod === opt.id}
+                        onChange={() => setPaymentMethod(opt.id)}
+                        className="sr-only"
+                      />
+                      <span
+                        className={`shrink-0 flex items-center justify-center rounded-lg border bg-white dark:bg-stone-900 p-1.5 shadow-sm ${
+                          opt.id === 'loyalty'
+                            ? 'border-emerald-200 dark:border-emerald-800'
+                            : 'border-stone-200 dark:border-stone-600'
+                        }`}
+                        aria-hidden
+                      >
+                        {opt.id === 'loyalty' ? (
+                          <Mark className="h-9 w-9 text-emerald-600 dark:text-emerald-400" />
+                        ) : (
+                          <Mark />
+                        )}
+                      </span>
+                      <span className="block min-w-0 flex-1 pt-0.5">
+                        <span className="block text-sm font-semibold text-stone-800 dark:text-stone-100">{opt.title}</span>
+                        <span className="block text-xs text-stone-500 dark:text-stone-400 mt-0.5 leading-snug">{opt.description}</span>
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </fieldset>
+
+            {paymentMethod === 'loyalty' && (
+              <p className="mt-4 text-sm text-stone-600 dark:text-stone-400 tabular-nums">
+                Available credits: {loadingCredits ? 'Loading...' : format(loyaltyCredits)} · This order: {format(finalTotal)}
+              </p>
+            )}
+
+            {paymentMethod === 'card' && (
+              <div className="mt-4 space-y-3 pt-2 border-t border-stone-200 dark:border-stone-700">
+                <div>
+                  <label htmlFor="card_number" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                    Card number
+                  </label>
+                  <input
+                    id="card_number"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    value={form.card_number}
+                    onChange={(e) => setForm((f) => ({ ...f, card_number: e.target.value.replace(/\D/g, '').slice(0, 19) }))}
+                    placeholder="1234 5678 9012 3456"
+                    required
+                    className={inputClass}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="card_expiry" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                      Expiry (MM/YY)
+                    </label>
+                    <input
+                      id="card_expiry"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="cc-exp"
+                      value={form.card_expiry}
+                      onChange={(e) => setForm((f) => ({ ...f, card_expiry: e.target.value }))}
+                      placeholder="MM/YY"
+                      maxLength={5}
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="card_cvc" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                      CVC
+                    </label>
+                    <input
+                      id="card_cvc"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="cc-csc"
+                      value={form.card_cvc}
+                      onChange={(e) => setForm((f) => ({ ...f, card_cvc: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
+                      placeholder="123"
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <label className="flex items-start gap-3 text-sm text-stone-700 dark:text-stone-300 cursor-pointer rounded-xl border border-transparent px-1 py-0.5">
+            <input
+              type="checkbox"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              className="mt-0.5 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            <span>I agree to the delivery, returns, and privacy policies.</span>
+          </label>
+
+          {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full py-3 text-base bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-50 shadow-md"
+          >
+            {submitting ? 'Placing order...' : `Place order · ${format(finalTotal)}`}
+          </button>
+        </aside>
       </form>
     </div>
+  )
+}
+
+function OrderSummaryLines({
+  items,
+  format,
+  total,
+  discountAmount,
+  deliveryFee,
+  deliveryMethod,
+  giftWrapFee,
+  finalTotal,
+  promoInput,
+  setPromoInput,
+  appliedPromoCodes,
+  applyPromo,
+  removePromoCode,
+  promoMessage,
+}) {
+  const merchandiseAfterDiscount = Math.max(0, total - discountAmount)
+  const standardWouldBeFree = getDeliveryFee(merchandiseAfterDiscount) === 0
+  const deliveryOptionTitle = DELIVERY_OPTIONS.find((o) => o.id === deliveryMethod)?.title ?? 'Delivery'
+  return (
+    <>
+      <ul className="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">
+        {items.map((row) => {
+          const line = (row.quantity || 0) * (row.products?.price ?? 0)
+          return (
+            <li key={row.id} className="flex justify-between gap-3 text-sm text-stone-700 dark:text-stone-300">
+              <span className="min-w-0 truncate">
+                {row.products?.name ?? 'Item'} <span className="text-stone-500">×{row.quantity}</span>
+              </span>
+              <span className="shrink-0 tabular-nums">{format(line)}</span>
+            </li>
+          )
+        })}
+      </ul>
+
+      <div className="border-t border-emerald-100 dark:border-emerald-900/80 pt-4 space-y-3">
+        <p className="text-xs font-medium text-stone-600 dark:text-stone-400 uppercase tracking-wide">Discount codes</p>
+        {appliedPromoCodes.length > 0 && (
+          <ul className="flex flex-wrap gap-2">
+            {appliedPromoCodes.map((code) => (
+              <li key={code}>
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/50 pl-2.5 pr-1 py-0.5 text-xs font-mono font-medium text-emerald-900 dark:text-emerald-100">
+                  {code}
+                  <button
+                    type="button"
+                    onClick={() => removePromoCode(code)}
+                    className="rounded-full p-0.5 hover:bg-emerald-200/80 dark:hover:bg-emerald-800/80 text-emerald-800 dark:text-emerald-200"
+                    aria-label={`Remove ${code}`}
+                  >
+                    <span aria-hidden className="text-sm leading-none px-0.5">
+                      ×
+                    </span>
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="text"
+            value={promoInput}
+            onChange={(e) => setPromoInput(e.target.value)}
+            placeholder="Enter code"
+            className="flex-1 min-w-0 px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-sm text-stone-900 dark:text-stone-100"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                applyPromo()
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={applyPromo}
+            className="shrink-0 px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
+          >
+            Apply
+          </button>
+        </div>
+        {promoMessage && (
+          <p className={`text-xs ${promoMessage.type === 'ok' ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+            {promoMessage.text}
+          </p>
+        )}
+      </div>
+
+      <div className="border-t border-emerald-100 dark:border-emerald-900/80 pt-4 mt-4 space-y-2 text-sm">
+        <div className="flex justify-between text-stone-700 dark:text-stone-300">
+          <span>Subtotal</span>
+          <span className="tabular-nums">{format(total)}</span>
+        </div>
+        {discountAmount > 0 && (
+          <div className="flex justify-between gap-2 text-emerald-700 dark:text-emerald-400">
+            <span className="min-w-0">
+              <span className="font-medium text-stone-800 dark:text-stone-200">Discount</span>
+              {appliedPromoCodes.length > 0 && (
+                <span className="text-emerald-700 dark:text-emerald-400">
+                  {' '}
+                  (
+                  {appliedPromoCodes.map((c, i) => (
+                    <span key={c}>
+                      {i > 0 ? ' + ' : ''}
+                      {promoOfferSummary(c)}
+                    </span>
+                  ))}
+                  )
+                </span>
+              )}
+            </span>
+            <span className="shrink-0 tabular-nums font-semibold">−{format(discountAmount)}</span>
+          </div>
+        )}
+        <div className="flex justify-between gap-2 text-stone-700 dark:text-stone-300">
+          <span className="min-w-0">
+            <span className="font-medium">Delivery</span>
+            <span className="text-stone-500 dark:text-stone-400 text-xs font-normal block sm:inline sm:ml-1">
+              ({deliveryOptionTitle})
+            </span>
+          </span>
+          <span className="shrink-0 tabular-nums text-right">
+            {deliveryFee === 0 && deliveryMethod === 'standard' && standardWouldBeFree ? (
+              <>
+                <span className="line-through text-stone-400 mr-1">{format(STANDARD_DELIVERY_FEE)}</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Free</span>
+                <span className="block text-[0.65rem] text-stone-500 font-normal">Orders {format(FREE_SHIPPING_MIN_SUBTOTAL)}+</span>
+              </>
+            ) : deliveryFee === 0 ? (
+              <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Free</span>
+            ) : (
+              format(deliveryFee)
+            )}
+          </span>
+        </div>
+        {giftWrapFee > 0 && (
+          <div className="flex justify-between text-stone-700 dark:text-stone-300">
+            <span>Gift wrap</span>
+            <span className="tabular-nums">{format(giftWrapFee)}</span>
+          </div>
+        )}
+        <div className="flex justify-between text-base font-bold text-stone-900 dark:text-stone-50 pt-2 border-t border-emerald-100 dark:border-emerald-900/80">
+          <span>Total</span>
+          <span className="tabular-nums">{format(finalTotal)}</span>
+        </div>
+      </div>
+    </>
   )
 }
