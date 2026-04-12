@@ -1,6 +1,3 @@
--- Single storefront category: Garden & Outdoors (canonical slug: outdoors).
--- Run after categories exist. Reassigns garden products, removes duplicate category row.
-
 UPDATE products p
 SET category_id = o.id
 FROM categories o

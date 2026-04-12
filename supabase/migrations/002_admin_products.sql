@@ -1,9 +1,3 @@
--- Run in SQL Editor to enable owner/developer/admin product management.
--- Set a user role as needed:
--- UPDATE profiles SET role = 'owner' WHERE id = 'your-user-uuid';
--- UPDATE profiles SET role = 'developer' WHERE id = 'your-user-uuid';
--- UPDATE profiles SET role = 'admin' WHERE id = 'your-user-uuid';
-
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'user';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS loyalty_credits numeric(10,2) NOT NULL DEFAULT 1000;
 ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_role_check;

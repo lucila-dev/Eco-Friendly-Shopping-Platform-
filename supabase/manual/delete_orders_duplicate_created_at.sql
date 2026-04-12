@@ -1,12 +1,3 @@
--- Remove duplicate orders that share the exact same created_at for one user
--- (e.g. old seed script that used DEFAULT now() for every row).
---
--- Keeps ONE order per (user_id, created_at) — the one with the smallest id.
--- Run in Supabase → SQL Editor after setting your email.
---
--- 1) Set target_email below.
--- 2) Run the whole script.
-
 DO $$
 DECLARE
   target_email text := 'luula.forno@gmail.com';

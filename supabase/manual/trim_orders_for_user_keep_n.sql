@@ -1,9 +1,3 @@
--- Keep only the N most recent orders for one user; delete older orders + their line items.
--- Run in Supabase → SQL Editor as postgres.
---
--- 1) Set target_email and keep_n (default 12).
--- 2) Run once. Does not touch other users' orders.
-
 DO $$
 DECLARE
   target_email text := 'luula.forno@gmail.com';

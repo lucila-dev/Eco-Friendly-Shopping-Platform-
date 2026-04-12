@@ -1,7 +1,3 @@
--- Copy ALL of this file into Supabase → SQL Editor → Run once.
--- Refreshes generated product names, descriptions, prices, image_url, materials, scores, and carbon for matching slugs.
-
--- Generate 252 category-specific products across 9 categories (28 per category)
 WITH category_map AS (
   SELECT id, slug
   FROM categories

@@ -1,13 +1,3 @@
--- Many sample orders + line items for YOUR account (Track orders + dashboard).
--- Run in Supabase Dashboard → SQL Editor (uses postgres; bypasses RLS).
---
--- 0) Adds orders.shipping_amount if missing (same as migrations/007_order_shipping_amount.sql).
--- 1) Change target_email to the address you use to log into EcoShop.
--- 2) Run the whole script once.
--- 3) Optional: to avoid duplicates, delete your existing orders first:
---    DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id = (SELECT id FROM auth.users WHERE lower(trim(email)) = lower(trim('YOUR_EMAIL'))));
---    DELETE FROM orders WHERE user_id = (SELECT id FROM auth.users WHERE lower(trim(email)) = lower(trim('YOUR_EMAIL')));
-
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS shipping_amount decimal(10,2) NOT NULL DEFAULT 0;
 

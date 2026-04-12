@@ -1,5 +1,3 @@
--- Dev tools: explicit allowlist OR legacy profiles.role (owner / developer / admin).
-
 DROP POLICY IF EXISTS "Managers can insert products" ON products;
 DROP POLICY IF EXISTS "Managers can update products" ON products;
 DROP POLICY IF EXISTS "Managers can delete products" ON products;

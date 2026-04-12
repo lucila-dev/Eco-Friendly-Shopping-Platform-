@@ -1,11 +1,3 @@
--- Wipe EVERY order (all users), then insert fresh sample orders for ONE account.
--- Run in Supabase Dashboard → SQL Editor as postgres (bypasses RLS).
---
--- 1) Set target_email to the account that should get the new orders.
--- 2) Run the entire script once.
---
--- WARNING: TRUNCATE removes all rows from orders and order_items for the whole project.
-
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS shipping_amount decimal(10,2) NOT NULL DEFAULT 0;
 
