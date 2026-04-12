@@ -24,7 +24,7 @@ export default function Wishlist() {
       setLoading(true)
       const { data } = await supabase
         .from('products')
-        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg')
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)')
         .in('id', ids)
       const ordered = ids.map((id) => (data ?? []).find((p) => p.id === id)).filter(Boolean)
       setProducts(ordered)

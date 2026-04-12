@@ -257,7 +257,7 @@ export default function ProductDetail() {
     async function fetchRelated() {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg')
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)')
         .eq('category_id', product.category_id)
         .neq('id', product.id)
         .limit(80)
@@ -393,7 +393,7 @@ export default function ProductDetail() {
             selectedSize={selectedSize}
           />
           <InfoAccordion
-            title="Materials Used"
+            title={isFoodOrDrinkCategory(product) ? 'Ingredients Used' : 'Materials Used'}
             open={openInfo.materials}
             onToggle={() => toggleInfo('materials')}
             className="border-purple-200 bg-purple-50/50"
