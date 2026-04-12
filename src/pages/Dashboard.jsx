@@ -29,6 +29,25 @@ const COMMUNITY_LEADERBOARD_FALLBACK = [
   { name: 'Jordan T.', score: 10.1 },
 ]
 
+/** Names for illustrative “community” rows below real shoppers (same for every viewer). */
+const LEADERBOARD_FILLER_NAMES = [
+  'Zoe A.',
+  'Noah M.',
+  'Maya P.',
+  'Sam K.',
+  'Ava L.',
+  'Jordan T.',
+  'Riley C.',
+  'Quinn S.',
+  'Casey M.',
+  'Alex R.',
+  'Devon K.',
+  'Skyler L.',
+]
+
+/** Target kg for fillers; each is capped below the lowest real score so rankings stay honest. */
+const FILLER_SCORE_TEMPLATE = [18.2, 15.8, 13.4, 11.9, 10.3, 8.9, 7.6, 6.4, 5.5, 4.8, 4.0, 3.2]
+
 function buildFallbackDemoBoard(userCarbonKg) {
   const userScore = Math.max(0, Number(userCarbonKg) || 0)
   const others = COMMUNITY_LEADERBOARD_FALLBACK.map(({ name, score }) => ({
@@ -79,7 +98,43 @@ function mergeLeaderboardFromRpc(uid, myCarbonKg, rpcRows, myDisplayName) {
     if (d !== 0) return d
     return (a.isYou ? 1 : 0) - (b.isYou ? 1 : 0)
   })
-  return list.slice(0, LEADERBOARD_SHOW)
+  return list
+}
+
+/** Pad with illustrative shoppers so the board looks populated; all filler scores stay below real totals. */
+function padLeaderboardWithFakeShoppers(realRows, targetCount = LEADERBOARD_SHOW) {
+  const sorted = [...realRows].sort((a, b) => {
+    const d = b.score - a.score
+    if (d !== 0) return d
+    return (a.isYou ? 1 : 0) - (b.isYou ? 1 : 0)
+  })
+  if (sorted.length >= targetCount) return sorted.slice(0, targetCount)
+
+  const minReal = sorted.length > 0 ? Math.min(...sorted.map((r) => r.score)) : null
+  const need = targetCount - sorted.length
+  const fillers = []
+
+  for (let i = 0; i < need; i += 1) {
+    const name = LEADERBOARD_FILLER_NAMES[i % LEADERBOARD_FILLER_NAMES.length]
+    const templateScore = FILLER_SCORE_TEMPLATE[i] ?? Math.max(0.5, 2.8 - i * 0.25)
+    const cap = minReal != null ? minReal - 0.2 - i * 0.22 : null
+    const score = cap != null ? Math.min(templateScore, Math.max(LEADERBOARD_MIN_KG * 0.5, cap)) : templateScore
+    fillers.push({
+      name,
+      score: Number(score.toFixed(2)),
+      isYou: false,
+      userId: `filler-${i}`,
+    })
+  }
+
+  return [...sorted, ...fillers]
+    .sort((a, b) => {
+      const d = b.score - a.score
+      if (d !== 0) return d
+      if (a.isYou !== b.isYou) return (a.isYou ? 1 : 0) - (b.isYou ? 1 : 0)
+      return String(a.userId ?? '').localeCompare(String(b.userId ?? ''))
+    })
+    .slice(0, targetCount)
 }
 
 function localYmd(d) {
@@ -347,7 +402,9 @@ export default function Dashboard() {
         }
         board = buildFallbackDemoBoard(totalCarbonSaved)
       } else {
-        board = mergeLeaderboardFromRpc(uid, totalCarbonSaved, normalizeLeaderboardRpcRows(leaderboardRes.data), myDisplayName)
+        board = padLeaderboardWithFakeShoppers(
+          mergeLeaderboardFromRpc(uid, totalCarbonSaved, normalizeLeaderboardRpcRows(leaderboardRes.data), myDisplayName),
+        )
       }
 
       setOrders(displayOrders)
@@ -428,7 +485,7 @@ export default function Dashboard() {
       <section className="rounded-xl border border-lime-200 dark:border-lime-900/60 bg-lime-50/50 dark:bg-lime-950/25 p-4 mb-6">
         <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Community leaderboard</h2>
         <p className="text-xs text-stone-600 dark:text-stone-400 mb-3">
-          Everyone sees the same list: totals sum each shopper&apos;s order lines (non-cancelled). You need at least {LEADERBOARD_MIN_KG} kg saved to rank. Older orders may have 0 kg until carbon is backfilled on those lines in the database.
+          Real rows use order carbon totals (same for all viewers). Extra names below the lowest real score are illustrative so the board doesn&apos;t look empty.
         </p>
         <ul className="space-y-2">
           {communityBoard.length === 0 && (
