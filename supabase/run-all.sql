@@ -830,6 +830,7 @@ RETURNS TABLE (
 LANGUAGE sql
 SECURITY DEFINER
 SET search_path = public
+SET row_security = off
 STABLE
 AS $$
   SELECT

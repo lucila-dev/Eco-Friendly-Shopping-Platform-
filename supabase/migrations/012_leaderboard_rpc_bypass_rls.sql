@@ -1,5 +1,6 @@
--- Aggregate CO₂ savings per shopper for a public leaderboard (read via SECURITY DEFINER RPC).
--- RLS on orders/order_items/profiles blocks cross-user reads from the client; this function runs as postgres.
+-- RLS still runs as the invoker inside many SECURITY DEFINER SQL functions, so the leaderboard
+-- could only aggregate that user's order_items (or miss other users' display names). Disable row
+-- security for the duration of this function so all shoppers appear the same for everyone.
 
 CREATE OR REPLACE FUNCTION public.get_carbon_leaderboard(
   p_limit integer DEFAULT 30,

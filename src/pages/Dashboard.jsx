@@ -11,6 +11,14 @@ const LEADERBOARD_MIN_KG = 0.01
 const LEADERBOARD_RPC_LIMIT = 50
 const LEADERBOARD_SHOW = 12
 
+/** PostgREST usually returns an array; normalize edge shapes. */
+function normalizeLeaderboardRpcRows(data) {
+  if (data == null) return []
+  if (Array.isArray(data)) return data
+  if (typeof data === 'object' && data.user_id != null) return [data]
+  return []
+}
+
 /** Demo rows if the leaderboard RPC is unavailable (migration not applied). */
 const COMMUNITY_LEADERBOARD_FALLBACK = [
   { name: 'Zoe A.', score: 24.8 },
@@ -46,22 +54,23 @@ function buildFallbackDemoBoard(userCarbonKg) {
  * @param {string} [myDisplayName]
  */
 function mergeLeaderboardFromRpc(uid, myCarbonKg, rpcRows, myDisplayName) {
+  const uidStr = uid ? String(uid) : ''
   const myScore = Math.max(0, Number(myCarbonKg) || 0)
   const myName = (myDisplayName && String(myDisplayName).trim()) || 'You'
   /** @type {Map<string, { name: string, score: number, isYou: boolean, userId: string }>} */
   const byId = new Map()
 
   for (const row of rpcRows ?? []) {
-    const id = row?.user_id
+    const id = row?.user_id != null ? String(row.user_id) : ''
     if (!id) continue
-    const isSelf = id === uid
+    const isSelf = id === uidStr
     const label = isSelf ? myName : (row.display_label || 'EcoShop member')
     const score = isSelf ? myScore : Math.max(0, Number(row.total_kg) || 0)
     byId.set(id, { name: label, score: Number(score.toFixed(2)), isYou: isSelf, userId: id })
   }
 
-  if (uid && myScore >= LEADERBOARD_MIN_KG && !byId.has(uid)) {
-    byId.set(uid, { name: myName, score: Number(myScore.toFixed(2)), isYou: true, userId: uid })
+  if (uidStr && myScore >= LEADERBOARD_MIN_KG && !byId.has(uidStr)) {
+    byId.set(uidStr, { name: myName, score: Number(myScore.toFixed(2)), isYou: true, userId: uidStr })
   }
 
   let list = [...byId.values()].filter((r) => r.isYou || r.score >= LEADERBOARD_MIN_KG)
@@ -338,7 +347,7 @@ export default function Dashboard() {
         }
         board = buildFallbackDemoBoard(totalCarbonSaved)
       } else {
-        board = mergeLeaderboardFromRpc(uid, totalCarbonSaved, leaderboardRes.data, myDisplayName)
+        board = mergeLeaderboardFromRpc(uid, totalCarbonSaved, normalizeLeaderboardRpcRows(leaderboardRes.data), myDisplayName)
       }
 
       setOrders(displayOrders)
@@ -419,7 +428,7 @@ export default function Dashboard() {
       <section className="rounded-xl border border-lime-200 dark:border-lime-900/60 bg-lime-50/50 dark:bg-lime-950/25 p-4 mb-6">
         <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Community leaderboard</h2>
         <p className="text-xs text-stone-600 dark:text-stone-400 mb-3">
-          Rankings use estimated CO₂ from everyone&apos;s orders (same totals for all viewers). You need at least {LEADERBOARD_MIN_KG} kg saved to appear unless the leaderboard RPC is not deployed yet (then a demo list shows).
+          Everyone sees the same list: totals sum each shopper&apos;s order lines (non-cancelled). You need at least {LEADERBOARD_MIN_KG} kg saved to rank. Older orders may have 0 kg until carbon is backfilled on those lines in the database.
         </p>
         <ul className="space-y-2">
           {communityBoard.length === 0 && (
