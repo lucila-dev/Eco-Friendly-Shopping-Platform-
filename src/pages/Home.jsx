@@ -257,7 +257,7 @@ export default function Home() {
       </section>
 
       <footer
-        className="mt-14 sm:mt-16 bg-gradient-to-r from-emerald-700 via-emerald-800 to-teal-800 text-white dark:from-emerald-950 dark:via-emerald-900 dark:to-emerald-950 dark:text-emerald-50 border-t border-emerald-600/50 dark:border-emerald-800/90 shadow-sm"
+        className="mt-14 sm:mt-16 bg-emerald-800 text-white dark:bg-emerald-900 dark:text-emerald-50 border-t border-emerald-700/60 dark:border-emerald-800 shadow-sm"
         style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}
         aria-label="Site directory"
       >

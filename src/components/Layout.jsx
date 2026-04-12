@@ -131,7 +131,9 @@ export default function Layout() {
         className={`flex-1 text-stone-900 dark:text-stone-100 ${
           isAuthPage
             ? 'w-full max-w-none mx-0 px-0 py-0'
-            : `${contentWidth} ${mainHorizontalPadding} py-4 sm:py-6`
+            : `${contentWidth} ${mainHorizontalPadding} ${
+                isHome ? 'pt-4 sm:pt-6 pb-0' : 'py-4 sm:py-6'
+              }`
         } ${!isAuthPage ? 'text-sm sm:text-base leading-relaxed' : ''}`}
       >
         <Outlet />
