@@ -147,13 +147,13 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
               <span className="text-base font-semibold text-stone-900 dark:text-stone-100 sm:text-lg">
                 Dev tools
               </span>
-              <p className="mt-1 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-                {inlineDevTools
-                  ? 'Products and category images:'
-                  : 'Hover the icon for products or category images. On a phone, use the links below.'}
-              </p>
+              {!inlineDevTools && (
+                <p className="mt-1 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+                  Hover the icon for products or category images. On a phone, use the links below.
+                </p>
+              )}
               <div
-                className={`mt-3 flex flex-col gap-2 border-t border-stone-200 pt-3 dark:border-stone-600 ${inlineDevTools ? '' : 'sm:hidden'}`}
+                className={`flex flex-col gap-2 border-t border-stone-200 pt-3 dark:border-stone-600 ${inlineDevTools ? 'mt-1' : 'mt-3 sm:hidden'}`}
               >
                 <Link
                   to="/admin/products"
