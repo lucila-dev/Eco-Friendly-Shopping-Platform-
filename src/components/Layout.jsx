@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../hooks/useCart'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -19,6 +19,7 @@ export default function Layout() {
   const { signOut, isAuthenticated } = useAuth()
   const { items } = useCart()
   const location = useLocation()
+  const navigate = useNavigate()
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isProductDetail = /^\/products\/[^/]+$/.test(location.pathname)
   const mainHorizontalPadding = isAuthPage ? 'px-0' : contentPad
@@ -78,7 +79,15 @@ export default function Layout() {
                 <AccountDropdown />
                 <button
                   type="button"
-                  onClick={() => signOut()}
+                  onClick={async () => {
+                    try {
+                      await signOut()
+                    } catch (e) {
+                      console.warn('[EcoShop] signOut failed:', e)
+                    } finally {
+                      navigate('/login', { replace: true })
+                    }
+                  }}
                   className="text-sm sm:text-[0.9375rem] font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-1.5 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                   aria-label="Log out"
                 >
