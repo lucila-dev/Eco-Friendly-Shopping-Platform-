@@ -89,7 +89,7 @@ export default function AdminProductForm() {
         setSaving(false)
         return
       }
-      navigate('/admin/products', { replace: true })
+      navigate({ pathname: '/admin/products', hash: 'products' }, { replace: true })
     } else {
       const { error: err } = await supabase.from('products').update(payload).eq('id', id)
       if (err) {
@@ -97,7 +97,7 @@ export default function AdminProductForm() {
         setSaving(false)
         return
       }
-      navigate('/admin/products', { replace: true })
+      navigate({ pathname: '/admin/products', hash: 'products' }, { replace: true })
     }
 
     setSaving(false)

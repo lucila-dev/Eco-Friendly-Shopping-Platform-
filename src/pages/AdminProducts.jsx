@@ -11,6 +11,7 @@ export default function AdminProducts() {
   const { format } = useFormatPrice()
   const location = useLocation()
   const categorySectionRef = useRef(null)
+  const productsSectionRef = useRef(null)
   const { canManageProducts, loading: profileLoading } = useProfile()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
@@ -118,6 +119,11 @@ export default function AdminProducts() {
         <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3 sm:mb-4">Category images</h2>
         <AdminCategoryImagesPanel />
       </section>
+      <section
+        id="products"
+        ref={productsSectionRef}
+        className="scroll-mt-4"
+      >
       <div className="mb-6">
         <Link
           to="/admin/products/new"
@@ -243,6 +249,7 @@ export default function AdminProducts() {
       {!loading && products.length > 0 && filteredProducts.length === 0 && (
         <p className="text-stone-500 dark:text-stone-400 mt-4">No products match your search.</p>
       )}
+      </section>
     </div>
   )
 }
