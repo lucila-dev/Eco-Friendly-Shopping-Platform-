@@ -22,5 +22,3 @@ The design is responsive and works on desktop and mobile, with a simple layout a
 
 - **Frontend:** React (Vite), React Router, Tailwind CSS  
 - **Backend & data:** Supabase (PostgreSQL, Auth, optional Storage for images)
-
-Setup and run instructions are in the repository; clone the repo and follow the configuration steps for your own Supabase project and environment variables.
