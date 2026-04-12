@@ -3,14 +3,14 @@
 
 INSERT INTO categories (id, name, slug, description) VALUES
   ('a1b2c3d4-0001-4000-8000-000000000001', 'Fashion', 'fashion', 'Eco-friendly clothing and accessories'),
-  ('a1b2c3d4-0002-4000-8000-000000000002', 'Home', 'home', 'Sustainable home and living products'),
+  ('a1b2c3d4-0002-4000-8000-000000000002', 'Home & Office', 'home', 'Sustainable home, living, and workspace essentials'),
   ('a1b2c3d4-0003-4000-8000-000000000003', 'Personal Care', 'personal-care', 'Natural and low-waste personal care'),
   ('a1b2c3d4-0004-4000-8000-000000000004', 'Kitchen', 'kitchen', 'Low-waste and reusable kitchen essentials'),
   ('a1b2c3d4-0005-4000-8000-000000000005', 'Beauty', 'beauty', 'Clean beauty and sustainable cosmetics'),
   ('a1b2c3d4-0006-4000-8000-000000000006', 'Garden & Outdoors', 'outdoors', 'Gear for trails and yards—low-impact choices for outside the home'),
   ('a1b2c3d4-0007-4000-8000-000000000007', 'Kids', 'kids', 'Eco-friendly items for babies and children'),
-  ('a1b2c3d4-0008-4000-8000-000000000008', 'Office', 'office', 'Sustainable office and study supplies'),
-  ('a1b2c3d4-0009-4000-8000-000000000009', 'Tech', 'tech', 'Energy-efficient and responsible tech accessories')
+  ('a1b2c3d4-0009-4000-8000-000000000009', 'Tech', 'tech', 'Energy-efficient and responsible tech accessories'),
+  ('a1b2c3d4-000a-4000-8000-00000000000a', 'Food & Drink', 'food-drink', 'Organic pantry staples, low-waste beverages, and ethical treats')
 ON CONFLICT (id) DO NOTHING;
 
 -- Starter products
@@ -31,7 +31,7 @@ WHERE slug LIKE '%-eco-product-%';
 WITH category_map AS (
   SELECT id, slug
   FROM categories
-  WHERE slug IN ('fashion','home','personal-care','kitchen','beauty','outdoors','kids','office','tech')
+  WHERE slug IN ('fashion','home','personal-care','kitchen','beauty','outdoors','kids','food-drink','tech')
 ), generated AS (
   SELECT
     c.id AS category_id,
@@ -40,8 +40,8 @@ WITH category_map AS (
     t.item_description AS description,
     round((
       (CASE c.slug
-        WHEN 'office' THEN
-          2.49::numeric + (mod(n, 11)) * 1.05 + least(2, (n - 1) / 7) * 3.5
+        WHEN 'food-drink' THEN
+          8.49 + (mod(n, 14)) * 2.15 + least(2, (n - 1) / 7) * 7.5
         WHEN 'kids' THEN
           7.99 + (mod(n, 12)) * 2.05 + least(2, (n - 1) / 7) * 6.0
         WHEN 'personal-care' THEN
@@ -72,7 +72,10 @@ WITH category_map AS (
     SELECT
       CASE c.slug
         WHEN 'fashion' THEN (ARRAY['Organic Cotton Tee','Recycled Denim Jacket','Hemp Blend Hoodie','Linen Everyday Shirt','Recycled Knit Sweater','Bamboo Lounge Pants','Vegan Canvas Sneakers'])[((n - 1) % 7) + 1]
-        WHEN 'home' THEN (ARRAY['Recycled Glass Vase','FSC Wood Side Table','Natural Fiber Rug','Low Energy LED Lamp','Reusable Storage Jars','Organic Cotton Throw','Upcycled Decor Basket'])[((n - 1) % 7) + 1]
+        WHEN 'home' THEN (ARRAY[
+          'Recycled Glass Vase','FSC Wood Side Table','Natural Fiber Rug','Low Energy LED Lamp','Reusable Storage Jars','Organic Cotton Throw','Upcycled Decor Basket',
+          'Recycled Notebook Pack','Bamboo Desk Organizer','Refillable Pen Set','Cork Mouse Pad','Eco Sticky Notes','FSC Paper Planner','Reusable Cable Ties'
+        ])[((n - 1) % 14) + 1]
         WHEN 'personal-care' THEN (ARRAY['Natural Toothpaste Tabs','Compostable Floss Kit','Refillable Hand Wash','Plant-Based Face Cleanser','Bamboo Toothbrush Set','Eco Body Lotion','Solid Conditioner Bar'])[((n - 1) % 7) + 1]
         WHEN 'kitchen' THEN (ARRAY['Stainless Steel Straw Set','Bamboo Cooking Utensils','Reusable Silicone Food Bags','Compost Bin Caddy','Glass Meal Prep Containers','Cotton Produce Bags','Beeswax Food Wrap Kit'])[((n - 1) % 7) + 1]
         WHEN 'beauty' THEN (ARRAY['Refillable Lip Balm','Vegan Mascara Tube','Eco Makeup Brush Set','Reusable Cotton Rounds','Natural Tint Moisturizer','Plastic-Free Face Mask','Mineral Blush Compact'])[((n - 1) % 7) + 1]
@@ -81,9 +84,12 @@ WITH category_map AS (
           'Compost Starter Kit','Biodegradable Seed Pots','Reclaimed Wood Planter','Rainwater Collection Barrel','Organic Herb Grow Set','Natural Coir Mulch Mat','Bamboo Plant Labels'
         ])[((n - 1) % 14) + 1]
         WHEN 'kids' THEN (ARRAY['Organic Baby Onesie','Natural Rubber Teether','Bamboo Kids Plate Set','Eco Story Book Set','Reusable Snack Pouch','Wooden Learning Blocks','Organic Cotton Blanket'])[((n - 1) % 7) + 1]
-        WHEN 'office' THEN (ARRAY['Recycled Notebook Pack','Bamboo Desk Organizer','Refillable Pen Set','Cork Mouse Pad','Eco Sticky Notes','FSC Paper Planner','Reusable Cable Ties'])[((n - 1) % 7) + 1]
+        WHEN 'food-drink' THEN (ARRAY[
+          'Fair-Trade Organic Coffee','Loose Leaf Herbal Tea','Small-Batch Probiotic Kombucha','Raw Wildflower Honey','Single-Origin Dark Chocolate Bar','Bronze-Cut Organic Durum Pasta','Sprouted Grain Breakfast Granola',
+          'Home-Compostable Coffee Pods','Sea Salt Oven-Roasted Nut Mix','Plant Protein Smoothie Blend','Unsweetened Apple Sauce Pouches','Hearty Lentil Vegetable Soup Mix','Ancient Grains and Wild Rice Blend','Sparkling Mineral Water Glass Pack'
+        ])[((n - 1) % 14) + 1]
         WHEN 'tech' THEN (ARRAY['Recycled Phone Case','Solar Power Bank','Bamboo Keyboard Wrist Rest','Eco Cable Organizer','Bioplastic Earbud Case','Energy Saving Smart Plug','Recycled Laptop Sleeve'])[((n - 1) % 7) + 1]
-      END || ' ' || (ARRAY['Core', 'Plus', 'Premium'])[((n - 1) / 7) + 1] AS item_name,
+      END AS item_name,
       CASE c.slug
         WHEN 'fashion' THEN (ARRAY[
           'Soft daily tee in GOTS-certified organic cotton with a relaxed fit.',
@@ -101,8 +107,15 @@ WITH category_map AS (
           'LED lamp with warm dimming and recycled aluminum heat sink.',
           'Glass storage jars with bamboo lids for pantry staples.',
           'Throw blanket woven from GOTS organic cotton.',
-          'Decor basket upcycled from textile offcuts and cotton rope.'
-        ])[((n - 1) % 7) + 1]
+          'Decor basket upcycled from textile offcuts and cotton rope.',
+          'Notebook trio with recycled-card covers and dot-grid pages.',
+          'Bamboo desk organizer with trays for pens and accessories.',
+          'Refillable pen set with compostable ink cartridges.',
+          'Cork desk mat sized for mouse and compact keyboard.',
+          'Sticky notes made from sugarcane paper with gentle adhesive.',
+          'Weekly planner on FSC paper with lay-flat binding.',
+          'Reusable cable ties for laptop and charger cords.'
+        ])[((n - 1) % 14) + 1]
         WHEN 'personal-care' THEN (ARRAY[
           'Fluoride-free toothpaste tablets with peppermint polish.',
           'Compostable floss on a refillable glass spool.',
@@ -155,15 +168,22 @@ WITH category_map AS (
           'Wooden blocks with water-based paints for toddlers.',
           'Muslin swaddle blanket in breathable organic cotton.'
         ])[((n - 1) % 7) + 1]
-        WHEN 'office' THEN (ARRAY[
-          'Notebook trio with recycled-card covers and dot-grid pages.',
-          'Bamboo desk organizer with trays for pens and accessories.',
-          'Refillable pen set with compostable ink cartridges.',
-          'Cork desk mat sized for mouse and compact keyboard.',
-          'Sticky notes made from sugarcane paper with gentle adhesive.',
-          'Weekly planner on FSC paper with lay-flat binding.',
-          'Reusable cable ties for laptop and charger cords.'
-        ])[((n - 1) % 7) + 1]
+        WHEN 'food-drink' THEN (ARRAY[
+          'Whole-bean arabica coffee roasted medium; sourced from grower cooperatives with transparent farm-gate pricing.',
+          'Loose-leaf herbal infusion: caffeine-free botanical blend in a steel caddy—steep three to five minutes in hot water.',
+          'Small-batch kombucha: live cultures, light carbonation, and organic cane sugar; sold in returnable glass where the refill program operates.',
+          'Raw wildflower honey with minimal filtration; traceable to regional apiaries that prioritize hive health and forage diversity.',
+          'Dark chocolate bar with a high-cocoa recipe; cocoa mass and butter from fair-trade certified farms and a short ingredient list.',
+          'Bronze-cut organic durum pasta, slow-dried so sauces cling; pantry staple for quick weeknight bowls and bakes.',
+          'Sprouted-grain granola: oven-toasted clusters of oats, seeds, and coconut chips with maple sweetness—crunchy, not dusty.',
+          'Specialty-grade coffee sealed in home- or industrially compostable pods where local rules allow; check your compost service.',
+          'Savory snack mix of almonds, cashews, and peanuts, oven-roasted with sea salt and packed in a paper pouch with plant-based liner.',
+          'Vegan protein powder blending pea and rice protein with coconut sugar; stirs smoothly into smoothies and plant milks.',
+          'Unsweetened apple sauce in squeeze pouches: apples and a touch of vitamin C only; pouches recyclable via participating drop-off schemes.',
+          'Hearty dry soup mix: red lentils, pearl barley, dehydrated vegetables, and spices—simmer twenty-five minutes with water or broth.',
+          'Side-dish grain mix of brown rice, wild rice, and red quinoa; rinse, then simmer until tender and fluffy.',
+          'Sparkling mineral water from a protected spring, bottled in glass with aluminum caps; variety pack of plain and light natural essences.'
+        ])[((n - 1) % 14) + 1]
         WHEN 'tech' THEN (ARRAY[
           'Phone case molded from recycled handset plastics where noted.',
           'Solar-assisted power bank for phones on multi-day trips.',
@@ -191,8 +211,15 @@ WITH category_map AS (
           'LED module, recycled aluminum, steel base',
           'Borosilicate glass, bamboo lid',
           'GOTS organic cotton',
-          'Recycled cotton rope, pine frame'
-        ])[((n - 1) % 7) + 1]
+          'Recycled cotton rope, pine frame',
+          'Recycled paper, kraft cover',
+          'Bamboo ply, steel hardware',
+          'Recycled plastic barrel, plant-based ink',
+          'Natural cork',
+          'Sugarcane paper, low-tack adhesive',
+          'FSC paper, linen thread',
+          'Recycled PET hook-and-loop, elastic'
+        ])[((n - 1) % 14) + 1]
         WHEN 'personal-care' THEN (ARRAY[
           'Sorbitol, calcium carbonate, peppermint oil',
           'Corn PLA filament, candelilla wax, glass spool',
@@ -245,15 +272,22 @@ WITH category_map AS (
           'Beech wood, water-based paint',
           'Organic cotton muslin'
         ])[((n - 1) % 7) + 1]
-        WHEN 'office' THEN (ARRAY[
-          'Recycled paper, kraft cover',
-          'Bamboo ply, steel hardware',
-          'Recycled plastic barrel, plant-based ink',
-          'Natural cork',
-          'Sugarcane paper, low-tack adhesive',
-          'FSC paper, linen thread',
-          'Recycled PET hook-and-loop, elastic'
-        ])[((n - 1) % 7) + 1]
+        WHEN 'food-drink' THEN (ARRAY[
+          'Arabica coffee, kraft bag, plant-based liner',
+          'Organic herbs, steel tin',
+          'Brewed tea, organic cane sugar, live cultures, glass bottle',
+          'Raw honey, glass jar, metal lid',
+          'Cocoa mass, cocoa butter, coconut sugar',
+          'Organic durum wheat semolina',
+          'Sprouted oats, sunflower seeds, maple syrup, coconut oil',
+          'Bio-based capsule, specialty arabica',
+          'Almonds, cashews, peanuts, sea salt',
+          'Pea protein, rice protein, coconut sugar, natural flavors',
+          'Organic apples, ascorbic acid, recyclable pouch film',
+          'Red lentils, pearl barley, dried vegetables, spices, glass jar',
+          'Brown rice, wild rice, red quinoa',
+          'Natural mineral water, glass, aluminum cap'
+        ])[((n - 1) % 14) + 1]
         WHEN 'tech' THEN (ARRAY[
           'Recycled polycarbonate blend',
           'Lithium cells, monocrystalline solar strip',
@@ -281,8 +315,15 @@ WITH category_map AS (
           'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=400',
           'https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?w=400',
           'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400',
-          'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400'
-        ])[((n - 1) % 7) + 1]
+          'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400',
+          'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=400',
+          'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
+          'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400',
+          'https://images.unsplash.com/photo-1508780709619-79562169bc64?w=400',
+          'https://images.unsplash.com/photo-1487014679447-9f8336841d58?w=400',
+          'https://images.unsplash.com/photo-1456324504439-367cee3b3c32?w=400',
+          'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400'
+        ])[((n - 1) % 14) + 1]
         WHEN 'personal-care' THEN (ARRAY[
           'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400',
           'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
@@ -335,15 +376,22 @@ WITH category_map AS (
           'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=400',
           'https://images.unsplash.com/photo-1519340333755-c6e9f6b88a45?w=400'
         ])[((n - 1) % 7) + 1]
-        WHEN 'office' THEN (ARRAY[
-          'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=400',
-          'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
-          'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400',
-          'https://images.unsplash.com/photo-1508780709619-79562169bc64?w=400',
-          'https://images.unsplash.com/photo-1487014679447-9f8336841d58?w=400',
-          'https://images.unsplash.com/photo-1456324504439-367cee3b3c32?w=400',
-          'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400'
-        ])[((n - 1) % 7) + 1]
+        WHEN 'food-drink' THEN (ARRAY[
+          'https://images.unsplash.com/photo-1447933601403-0c6688ce5667?w=400',
+          'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400',
+          'https://images.unsplash.com/photo-1558642452-9d2a7bf7fad0?w=400',
+          'https://images.unsplash.com/photo-1587049352846-4d222aca395e?w=400',
+          'https://images.unsplash.com/photo-1481391032113-d751bdcb7e11?w=400',
+          'https://images.unsplash.com/photo-1551462147-85873367c0af?w=400',
+          'https://images.unsplash.com/photo-1517686469429-8bdd088d38f0?w=400',
+          'https://images.unsplash.com/photo-1514432324607-a09d63b42e1a?w=400',
+          'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=400',
+          'https://images.unsplash.com/photo-1497534546561-136052443605?w=400',
+          'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400',
+          'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400',
+          'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400',
+          'https://images.unsplash.com/photo-1548832908-15b7eea18f75?w=400'
+        ])[((n - 1) % 14) + 1]
         WHEN 'tech' THEN (ARRAY[
           'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400',
           'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',

@@ -24,7 +24,7 @@ export const CATEGORY_DEFAULTS = {
   beauty: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200',
   outdoors: 'https://images.unsplash.com/photo-1501554728187-ce583db33af7?w=1200',
   kids: 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=1200',
-  office: 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=1200',
+  'food-drink': 'https://images.unsplash.com/photo-1497534546561-136052443605?w=1200',
   tech: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
   garden: 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1200',
 }

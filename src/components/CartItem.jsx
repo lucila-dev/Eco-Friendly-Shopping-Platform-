@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { getProductImage } from '../lib/productImageOverrides'
+import { formatCatalogProductName } from '../lib/catalogProductName'
 
 export default function CartItem({ item, onUpdate, onRemove }) {
   const product = item.products
   if (!product) return null
+  const displayName = formatCatalogProductName(product.name)
 
   return (
     <div className="flex gap-3 py-3 border-b border-stone-200 dark:border-stone-600 last:border-0">
@@ -11,14 +13,14 @@ export default function CartItem({ item, onUpdate, onRemove }) {
         to={`/products/${product.slug}`}
         className="shrink-0 w-[4.5rem] h-[4.5rem] rounded-lg overflow-hidden bg-stone-100 dark:bg-stone-800"
       >
-        <img src={getProductImage(product)} alt={product.name} className="h-full w-full object-cover object-center" loading="lazy" />
+        <img src={getProductImage(product)} alt={displayName} className="h-full w-full object-cover object-center" loading="lazy" />
       </Link>
       <div className="flex-1 min-w-0">
         <Link
           to={`/products/${product.slug}`}
           className="text-sm font-medium text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400"
         >
-          {product.name}
+          {displayName}
         </Link>
         {item.size && (
           <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Size: {item.size}</p>

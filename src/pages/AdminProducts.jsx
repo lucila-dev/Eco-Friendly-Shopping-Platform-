@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useProfile } from '../hooks/useProfile'
 import { getProductImage } from '../lib/productImageOverrides'
 import AdminCategoryImagesPanel from '../components/AdminCategoryImagesPanel'
@@ -192,7 +193,7 @@ export default function AdminProducts() {
                       <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800">
                         <img
                           src={getProductImage(p)}
-                          alt={p.name}
+                          alt={formatCatalogProductName(p.name)}
                           className="h-full w-full object-cover object-center"
                           loading="lazy"
                         />
@@ -201,7 +202,7 @@ export default function AdminProducts() {
                         to={`/products/${p.slug}`}
                         className="text-emerald-700 dark:text-emerald-400 hover:underline font-medium"
                       >
-                        {p.name}
+                        {formatCatalogProductName(p.name)}
                       </Link>
                     </div>
                   </td>

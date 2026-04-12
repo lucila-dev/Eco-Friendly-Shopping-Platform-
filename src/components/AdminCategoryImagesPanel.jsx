@@ -7,7 +7,7 @@ import {
   notifyCategoryHomeUpdated,
   mergeCategoryRowForHome,
 } from '../lib/categoryImageLocalStorage'
-import { mergeGardenOutdoorsForHome } from '../lib/storefrontCategoryMerge'
+import { mergeGardenOutdoorsForHome, mergeHomeOfficeForHome } from '../lib/storefrontCategoryMerge'
 import { categoryCardDescription, displayNameMatchesCategorySlug } from '../lib/categoryCardCopy'
 
 function clampFocus(n) {
@@ -72,11 +72,13 @@ export default function AdminCategoryImagesPanel() {
         setDbSupportsFocusY(true)
         setCategories(
           mergeGardenOutdoorsForHome(
-            (full.data ?? []).map((c) =>
-              mergeCategoryRowForHome({
-                ...c,
-                image_focus_y: clampFocus(c.image_focus_y ?? 50),
-              }),
+            mergeHomeOfficeForHome(
+              (full.data ?? []).map((c) =>
+                mergeCategoryRowForHome({
+                  ...c,
+                  image_focus_y: clampFocus(c.image_focus_y ?? 50),
+                }),
+              ),
             ),
           ),
         )
@@ -96,11 +98,13 @@ export default function AdminCategoryImagesPanel() {
         setDbSupportsFocusY(false)
         setCategories(
           mergeGardenOutdoorsForHome(
-            (withUrl.data ?? []).map((c) =>
-              mergeCategoryRowForHome({
-                ...c,
-                image_focus_y: 50,
-              }),
+            mergeHomeOfficeForHome(
+              (withUrl.data ?? []).map((c) =>
+                mergeCategoryRowForHome({
+                  ...c,
+                  image_focus_y: 50,
+                }),
+              ),
             ),
           ),
         )
@@ -113,12 +117,14 @@ export default function AdminCategoryImagesPanel() {
       const basic = await supabase.from('categories').select('id, name, slug, description').order('name')
       setCategories(
         mergeGardenOutdoorsForHome(
-          (basic.data ?? []).map((c) =>
-            mergeCategoryRowForHome({
-              ...c,
-              image_url: null,
-              image_focus_y: 50,
-            }),
+          mergeHomeOfficeForHome(
+            (basic.data ?? []).map((c) =>
+              mergeCategoryRowForHome({
+                ...c,
+                image_url: null,
+                image_focus_y: 50,
+              }),
+            ),
           ),
         ),
       )

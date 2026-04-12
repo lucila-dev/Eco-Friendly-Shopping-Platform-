@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { getProductImage } from '../lib/productImageOverrides'
+import { formatCatalogProductName } from '../lib/catalogProductName'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
 import { STANDARD_DELIVERY_FEE } from '../lib/shipping'
 import OrderTrackingTimeline from '../components/OrderTrackingTimeline'
@@ -192,6 +193,7 @@ export default function Orders() {
                 {items.map((item) => {
                   const unit = Number(item.price_at_order)
                   const lineTotal = item.quantity * unit
+                  const lineName = formatCatalogProductName(item.products?.name || '')
                   return (
                   <div key={item.id} className="flex items-center justify-between border border-stone-200 dark:border-stone-700 rounded-md px-2 py-2 bg-stone-50/50 dark:bg-stone-950/30">
                     <div className="flex items-center gap-2 min-w-0">
@@ -202,7 +204,7 @@ export default function Orders() {
                             slug: item.products?.slug,
                             image_url: item.products?.image_url,
                           })}
-                          alt={item.products?.name || 'Product'}
+                          alt={lineName || 'Product'}
                           className="h-full w-full object-cover object-center"
                           loading="lazy"
                           onError={(e) => {
@@ -212,7 +214,7 @@ export default function Orders() {
                         />
                       </div>
                       <Link to={`/products/${item.products?.slug}`} className="text-sm text-stone-800 dark:text-stone-200 truncate hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline">
-                        {item.products?.name || 'Product'}
+                        {lineName || 'Product'}
                       </Link>
                       {item.selected_size && (
                         <span className="text-xs text-stone-600 dark:text-stone-400">Size {item.selected_size}</span>
