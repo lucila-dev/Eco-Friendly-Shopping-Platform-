@@ -5,8 +5,10 @@ import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useProfile } from '../hooks/useProfile'
 import { getProductImage } from '../lib/productImageOverrides'
 import AdminCategoryImagesPanel from '../components/AdminCategoryImagesPanel'
+import { useFormatPrice } from '../hooks/useFormatPrice'
 
 export default function AdminProducts() {
+  const { format } = useFormatPrice()
   const location = useLocation()
   const categorySectionRef = useRef(null)
   const { canManageProducts, loading: profileLoading } = useProfile()
@@ -206,7 +208,7 @@ export default function AdminProducts() {
                       </Link>
                     </div>
                   </td>
-                  <td className="p-3 text-stone-600 dark:text-stone-300">£{Number(p.price).toFixed(2)}</td>
+                  <td className="p-3 text-stone-600 dark:text-stone-300">{format(Number(p.price))}</td>
                   <td className="p-3 text-stone-600 dark:text-stone-300">{p.sustainability_score ?? '–'}/10</td>
                   <td className="p-3 text-stone-600 dark:text-stone-300">
                     {categories.find((c) => c.id === p.category_id)?.name ?? '–'}

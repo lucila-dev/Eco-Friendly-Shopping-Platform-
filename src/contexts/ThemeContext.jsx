@@ -1,8 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { DISPLAY_CURRENCIES } from '../lib/shopMoney'
 
 const THEME_KEY = 'ecoshop-theme'
 const LARGE_TEXT_KEY = 'ecoshop-large-text'
-const SPACIOUS_CATALOG_KEY = 'ecoshop-spacious-catalog'
+const REGION_KEY = 'ecoshop-region'
+const CURRENCY_KEY = 'ecoshop-display-currency'
 
 function readStoredTheme() {
   try {
@@ -22,6 +24,26 @@ function readStoredBool(key) {
   }
 }
 
+function readStoredRegion() {
+  try {
+    const v = localStorage.getItem(REGION_KEY)
+    if (v && /^[A-Z]{2}$/i.test(v)) return v.toUpperCase()
+  } catch {
+    /* ignore */
+  }
+  return 'GB'
+}
+
+function readStoredCurrency() {
+  try {
+    const v = localStorage.getItem(CURRENCY_KEY)
+    if (v && DISPLAY_CURRENCIES.includes(v)) return v
+  } catch {
+    /* ignore */
+  }
+  return 'GBP'
+}
+
 function isDarkMediaQuery() {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
 }
@@ -37,7 +59,8 @@ export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(readStoredTheme)
   const [systemPrefersDark, setSystemPrefersDark] = useState(isDarkMediaQuery)
   const [comfortableText, setComfortableTextState] = useState(() => readStoredBool(LARGE_TEXT_KEY))
-  const [spaciousCatalog, setSpaciousCatalogState] = useState(() => readStoredBool(SPACIOUS_CATALOG_KEY))
+  const [region, setRegionState] = useState(readStoredRegion)
+  const [displayCurrency, setDisplayCurrencyState] = useState(readStoredCurrency)
 
   useEffect(() => {
     applyDarkClass(theme)
@@ -60,13 +83,20 @@ export function ThemeProvider({ children }) {
   }, [comfortableText])
 
   useEffect(() => {
-    document.documentElement.classList.toggle('ecoshop-spacious-catalog', spaciousCatalog)
     try {
-      localStorage.setItem(SPACIOUS_CATALOG_KEY, spaciousCatalog ? '1' : '0')
+      localStorage.setItem(REGION_KEY, region)
     } catch {
       /* ignore */
     }
-  }, [spaciousCatalog])
+  }, [region])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CURRENCY_KEY, displayCurrency)
+    } catch {
+      /* ignore */
+    }
+  }, [displayCurrency])
 
   const setTheme = useCallback((next) => {
     setThemeState(next)
@@ -82,8 +112,14 @@ export function ThemeProvider({ children }) {
     setComfortableTextState(Boolean(value))
   }, [])
 
-  const setSpaciousCatalog = useCallback((value) => {
-    setSpaciousCatalogState(Boolean(value))
+  const setRegion = useCallback((value) => {
+    const v = String(value || '').toUpperCase()
+    if (/^[A-Z]{2}$/.test(v)) setRegionState(v)
+  }, [])
+
+  const setDisplayCurrency = useCallback((value) => {
+    const v = String(value || '').toUpperCase()
+    if (DISPLAY_CURRENCIES.includes(v)) setDisplayCurrencyState(v)
   }, [])
 
   const resolvedTheme = useMemo(() => {
@@ -99,10 +135,22 @@ export function ThemeProvider({ children }) {
       setTheme,
       comfortableText,
       setComfortableText,
-      spaciousCatalog,
-      setSpaciousCatalog,
+      region,
+      setRegion,
+      displayCurrency,
+      setDisplayCurrency,
     }),
-    [theme, resolvedTheme, setTheme, comfortableText, setComfortableText, spaciousCatalog, setSpaciousCatalog],
+    [
+      theme,
+      resolvedTheme,
+      setTheme,
+      comfortableText,
+      setComfortableText,
+      region,
+      setRegion,
+      displayCurrency,
+      setDisplayCurrency,
+    ],
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

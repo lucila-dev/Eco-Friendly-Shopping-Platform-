@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
 import { hashString } from '../lib/productMetrics'
 import { formatCatalogProductName } from '../lib/catalogProductName'
+import { useFormatPrice } from '../hooks/useFormatPrice'
 
 /** Leaderboard: you as “You” at #1; other rows are “Firstname L.” and stay below your total. */
 function buildHighImpactCommunityBoard(userId, userCarbonKg) {
@@ -215,6 +216,7 @@ function Co2LineChart({ data, periodDescription }) {
 }
 
 export default function Dashboard() {
+  const { format } = useFormatPrice()
   const { user } = useAuth()
   const [orders, setOrders] = useState([])
   const [myReviews, setMyReviews] = useState([])
@@ -413,7 +415,7 @@ export default function Dashboard() {
                     {new Date(order.created_at).toLocaleDateString()}
                   </span>
                 </div>
-                <span className="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">£{Number(order.total_amount).toFixed(2)}</span>
+                <span className="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">{format(Number(order.total_amount))}</span>
               </li>
             ))}
           </ul>

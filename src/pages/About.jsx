@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { FREE_SHIPPING_MIN_SUBTOTAL } from '../lib/shipping'
+import { useFormatPrice } from '../hooks/useFormatPrice'
 
 const SECTIONS = [
   { id: 'guarantee', label: 'Sustainability', title: 'Sustainability guarantee' },
@@ -39,6 +41,7 @@ function HeroStat({ title, detail }) {
 }
 
 export default function About() {
+  const { format } = useFormatPrice()
   const [activeSection, setActiveSection] = useState('guarantee')
   const [country, setCountry] = useState('UK')
   const [shippingType, setShippingType] = useState('standard')
@@ -87,7 +90,7 @@ export default function About() {
           Delivery help, policies, and support.
         </p>
         <div className="relative mx-auto mt-6 flex max-w-3xl flex-col gap-2.5 sm:flex-row sm:gap-3">
-          <HeroStat title="Free shipping" detail="On orders over £100" />
+          <HeroStat title="Free shipping" detail={`On orders over ${format(FREE_SHIPPING_MIN_SUBTOTAL)}`} />
           <HeroStat title="30-day returns" detail="Unused items, original packaging" />
           <HeroStat title="Secure checkout" detail="Encrypted payments" />
         </div>
@@ -201,7 +204,9 @@ export default function About() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-xl border border-emerald-200 dark:border-emerald-700 bg-white/95 dark:bg-stone-900/95 p-4 shadow-sm">
                     <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-300">Free shipping</p>
-                    <p className="mt-1 text-sm text-stone-700 dark:text-stone-300">On qualifying orders over £100 at checkout.</p>
+                    <p className="mt-1 text-sm text-stone-700 dark:text-stone-300">
+                      On qualifying orders over {format(FREE_SHIPPING_MIN_SUBTOTAL)} at checkout.
+                    </p>
                   </div>
                   <div className="rounded-xl border border-emerald-200 dark:border-emerald-700 bg-white/95 dark:bg-stone-900/95 p-4 shadow-sm">
                     <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-300">Tracking</p>
@@ -209,7 +214,7 @@ export default function About() {
                   </div>
                 </div>
                 <p className={bodyText}>
-                  Free shipping on orders over £100. Tracking is emailed after checkout.
+                  Free shipping on orders over {format(FREE_SHIPPING_MIN_SUBTOTAL)}. Tracking is emailed after checkout.
                 </p>
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div>

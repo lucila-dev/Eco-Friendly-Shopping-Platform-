@@ -6,6 +6,8 @@ import { mergeCategoryRowForHome } from '../lib/categoryImageLocalStorage'
 import { mergeGardenOutdoorsForHome, mergeHomeOfficeForHome } from '../lib/storefrontCategoryMerge'
 import { categoryCardDescription } from '../lib/categoryCardCopy'
 import { LeafIcon, TruckIcon, PackageIcon, RecycleIcon, CheckCircleIcon, ArrowUpIcon } from '../components/Icons'
+import { FREE_SHIPPING_MIN_SUBTOTAL } from '../lib/shipping'
+import { useFormatPrice } from '../hooks/useFormatPrice'
 
 const COMMITMENTS = [
   {
@@ -53,6 +55,7 @@ const CATEGORY_ITEM_TAGS = {
 }
 
 export default function Home() {
+  const { format } = useFormatPrice()
   const [categories, setCategories] = useState([])
   const [localVersion, setLocalVersion] = useState(0)
 
@@ -119,7 +122,9 @@ export default function Home() {
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 sm:mb-10">
         <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-4">
-          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">Free delivery on orders £100+</p>
+          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+            Free delivery on orders {format(FREE_SHIPPING_MIN_SUBTOTAL)}+
+          </p>
           <p className="text-sm text-stone-700 dark:text-stone-300 mt-1 leading-relaxed">Automatic at checkout.</p>
         </div>
         <div className="rounded-lg border border-teal-200 dark:border-teal-800 bg-teal-50 dark:bg-teal-950/35 p-4">

@@ -6,6 +6,7 @@ import ReviewList from '../components/ReviewList'
 import ReviewForm from '../components/ReviewForm'
 import { getProductImage } from '../lib/productImageOverrides'
 import { formatCatalogProductName } from '../lib/catalogProductName'
+import { useFormatPrice } from '../hooks/useFormatPrice'
 
 function parseMaterialTags(materials) {
   if (!materials) return []
@@ -149,6 +150,7 @@ function getSizeGuide(product) {
 }
 
 export default function ProductDetail() {
+  const { format } = useFormatPrice()
   const { slug } = useParams()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -249,7 +251,7 @@ export default function ProductDetail() {
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 leading-tight">{displayName}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
-            <p className="text-2xl sm:text-3xl text-emerald-700 dark:text-emerald-400 font-bold tabular-nums">£{Number(product.price).toFixed(2)}</p>
+            <p className="text-2xl sm:text-3xl text-emerald-700 dark:text-emerald-400 font-bold tabular-nums">{format(Number(product.price))}</p>
             <span className="text-sm px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium">In stock</span>
             <span className="text-sm px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 font-medium">{productUse}</span>
           </div>

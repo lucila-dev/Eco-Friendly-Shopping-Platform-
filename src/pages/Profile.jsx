@@ -2,7 +2,9 @@ import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-import { LOYALTY_POINTS_PER_DOLLAR, loyaltyCreditsToMoney, formatMoneyUsd } from '../lib/loyaltyValue'
+import { LOYALTY_POINTS_PER_DOLLAR, loyaltyCreditsToMoney } from '../lib/loyaltyValue'
+import { usdToGbpApprox } from '../lib/shopMoney'
+import { useFormatPrice } from '../hooks/useFormatPrice'
 import {
   getProfileAvatarLocal,
   setProfileAvatarLocal,
@@ -13,6 +15,7 @@ import { CartIcon, LeafIcon, TruckIcon } from '../components/Icons'
 const DEFAULT_AVATAR = '/favicon-96x96.png'
 
 export default function Profile() {
+  const { format } = useFormatPrice()
   const { user } = useAuth()
   const [profile, setProfile] = useState(null)
   const [nameInput, setNameInput] = useState('')
@@ -230,7 +233,7 @@ export default function Profile() {
             </div>
             <div className="rounded-xl border border-stone-100 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/60 px-4 py-4 text-center">
               <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Redeem value</p>
-              <p className="text-lg font-semibold text-stone-800 dark:text-stone-100 mt-1 tabular-nums">{formatMoneyUsd(redeemApproxUsd)}</p>
+              <p className="text-lg font-semibold text-stone-800 dark:text-stone-100 mt-1 tabular-nums">{format(usdToGbpApprox(redeemApproxUsd))}</p>
               <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">at checkout</p>
             </div>
           </div>
@@ -241,10 +244,10 @@ export default function Profile() {
               {loyaltyBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })} pts
             </p>
             <p className="text-sm sm:text-base text-emerald-50 mt-2 leading-snug">
-              {LOYALTY_POINTS_PER_DOLLAR} points = {formatMoneyUsd(1)} when redeemed at checkout.
+              {LOYALTY_POINTS_PER_DOLLAR} points = {format(usdToGbpApprox(1))} when redeemed at checkout.
             </p>
             <p className="text-sm font-medium mt-1.5">
-              Balance worth about <span className="tabular-nums">{formatMoneyUsd(redeemApproxUsd)}</span> off eligible orders.
+              Balance worth about <span className="tabular-nums">{format(usdToGbpApprox(redeemApproxUsd))}</span> off eligible orders.
             </p>
           </div>
 

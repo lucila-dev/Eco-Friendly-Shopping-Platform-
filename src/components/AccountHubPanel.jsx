@@ -49,7 +49,7 @@ const CARDS = [
   {
     to: '/settings',
     title: 'Settings',
-    description: 'Theme, shopping preferences, and account options.',
+    description: 'Country, currency, text size, theme, and account deletion.',
     Icon: GearIcon,
   },
   {

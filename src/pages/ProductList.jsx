@@ -175,7 +175,7 @@ export default function ProductList() {
           </div>
           <div className="flex flex-wrap gap-3 items-end">
             <div>
-              <label htmlFor="priceMin" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Min ($)</label>
+              <label htmlFor="priceMin" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Min (GBP)</label>
               <input
                 id="priceMin"
                 type="number"
@@ -188,7 +188,7 @@ export default function ProductList() {
               />
             </div>
             <div>
-              <label htmlFor="priceMax" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Max ($)</label>
+              <label htmlFor="priceMax" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Max (GBP)</label>
               <input
                 id="priceMax"
                 type="number"
@@ -237,6 +237,9 @@ export default function ProductList() {
             </button>
           </div>
         </div>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2.5 leading-relaxed">
+          Min and max filter the numeric prices stored in GBP (product cards can show another currency in Settings).
+        </p>
       </div>
 
       {/* Category pills */}

@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useFormatPrice } from '../hooks/useFormatPrice'
 
 export default function OrderConfirmation() {
+  const { format } = useFormatPrice()
   const { id } = useParams()
   const { user } = useAuth()
   const [order, setOrder] = useState(null)
@@ -38,7 +40,7 @@ export default function OrderConfirmation() {
       <p className="text-stone-600 text-sm mb-3">
         Order <span className="font-mono text-stone-800">{order.id.slice(0, 8)}...</span> has been placed.
       </p>
-      <p className="text-emerald-700 text-sm font-medium mb-5">Total: £{Number(order.total_amount).toFixed(2)}</p>
+      <p className="text-emerald-700 text-sm font-medium mb-5">Total: {format(Number(order.total_amount))}</p>
       <Link to="/orders" className="text-emerald-600 hover:underline">Track order</Link>
       <span className="mx-2 text-stone-400">|</span>
       <Link to="/products" className="text-emerald-600 hover:underline">Continue shopping</Link>
