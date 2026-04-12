@@ -7,8 +7,12 @@ import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 import { SUPPORT_EMAIL } from '../lib/supportContact'
 
-/** Shared demo community totals (kg CO₂) — identical for every shopper; only “You” uses real data. */
-const COMMUNITY_LEADERBOARD_BASE = [
+const LEADERBOARD_MIN_KG = 0.01
+const LEADERBOARD_RPC_LIMIT = 50
+const LEADERBOARD_SHOW = 12
+
+/** Demo rows if the leaderboard RPC is unavailable (migration not applied). */
+const COMMUNITY_LEADERBOARD_FALLBACK = [
   { name: 'Zoe A.', score: 24.8 },
   { name: 'Noah M.', score: 21.3 },
   { name: 'Maya P.', score: 18.6 },
@@ -17,15 +21,56 @@ const COMMUNITY_LEADERBOARD_BASE = [
   { name: 'Jordan T.', score: 10.1 },
 ]
 
-function buildHighImpactCommunityBoard(userCarbonKg) {
+function buildFallbackDemoBoard(userCarbonKg) {
   const userScore = Math.max(0, Number(userCarbonKg) || 0)
-  const others = COMMUNITY_LEADERBOARD_BASE.map(({ name, score }) => ({ name, score, isYou: false }))
-  const you = { name: 'You', score: Number(userScore.toFixed(2)), isYou: true }
-  return [you, ...others].sort((a, b) => {
+  const others = COMMUNITY_LEADERBOARD_FALLBACK.map(({ name, score }) => ({
+    name,
+    score,
+    isYou: false,
+    userId: null,
+  }))
+  const you = { name: 'You', score: Number(userScore.toFixed(2)), isYou: true, userId: null }
+  return [you, ...others]
+    .sort((a, b) => {
+      const d = b.score - a.score
+      if (d !== 0) return d
+      return (b.isYou ? 1 : 0) - (a.isYou ? 1 : 0)
+    })
+    .slice(0, LEADERBOARD_SHOW)
+}
+
+/**
+ * @param {string} uid
+ * @param {number} myCarbonKg - client total (matches “Your green impact”)
+ * @param {Array<{ user_id: string, display_label: string, total_kg: number }>|null|undefined} rpcRows
+ * @param {string} [myDisplayName]
+ */
+function mergeLeaderboardFromRpc(uid, myCarbonKg, rpcRows, myDisplayName) {
+  const myScore = Math.max(0, Number(myCarbonKg) || 0)
+  const myName = (myDisplayName && String(myDisplayName).trim()) || 'You'
+  /** @type {Map<string, { name: string, score: number, isYou: boolean, userId: string }>} */
+  const byId = new Map()
+
+  for (const row of rpcRows ?? []) {
+    const id = row?.user_id
+    if (!id) continue
+    const isSelf = id === uid
+    const label = isSelf ? myName : (row.display_label || 'EcoShop member')
+    const score = isSelf ? myScore : Math.max(0, Number(row.total_kg) || 0)
+    byId.set(id, { name: label, score: Number(score.toFixed(2)), isYou: isSelf, userId: id })
+  }
+
+  if (uid && myScore >= LEADERBOARD_MIN_KG && !byId.has(uid)) {
+    byId.set(uid, { name: myName, score: Number(myScore.toFixed(2)), isYou: true, userId: uid })
+  }
+
+  let list = [...byId.values()].filter((r) => r.isYou || r.score >= LEADERBOARD_MIN_KG)
+  list.sort((a, b) => {
     const d = b.score - a.score
     if (d !== 0) return d
-    return (b.isYou ? 1 : 0) - (a.isYou ? 1 : 0)
+    return (a.isYou ? 1 : 0) - (b.isYou ? 1 : 0)
   })
+  return list.slice(0, LEADERBOARD_SHOW)
 }
 
 function localYmd(d) {
@@ -253,10 +298,12 @@ export default function Dashboard() {
     let cancelled = false
 
     async function fetchDashboard() {
-      const [ordersRes, reviewsRes, catalogRes] = await Promise.all([
+      const [ordersRes, reviewsRes, catalogRes, profileRes, leaderboardRes] = await Promise.all([
         supabase.from('orders').select('id, total_amount, status, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
         supabase.from('reviews').select('id, rating, body, created_at, products(id, name, slug)').eq('user_id', uid).order('created_at', { ascending: false }),
         supabase.from('products').select('name, slug, image_url, price').limit(48),
+        supabase.from('profiles').select('display_name').eq('id', uid).maybeSingle(),
+        supabase.rpc('get_carbon_leaderboard', { p_limit: LEADERBOARD_RPC_LIMIT, p_min_kg: LEADERBOARD_MIN_KG }),
       ])
       if (cancelled) return
 
@@ -282,7 +329,17 @@ export default function Dashboard() {
       }
       Object.assign(carbonByOrderIdNext, carbonByOrderIdSynthetic)
       const totalCarbonSaved = Object.values(carbonByOrderIdNext).reduce((sum, value) => sum + value, 0)
-      const board = buildHighImpactCommunityBoard(totalCarbonSaved)
+
+      const myDisplayName = profileRes.data?.display_name
+      let board
+      if (leaderboardRes.error) {
+        if (import.meta.env.DEV) {
+          console.warn('[EcoShop] get_carbon_leaderboard:', leaderboardRes.error.message)
+        }
+        board = buildFallbackDemoBoard(totalCarbonSaved)
+      } else {
+        board = mergeLeaderboardFromRpc(uid, totalCarbonSaved, leaderboardRes.data, myDisplayName)
+      }
 
       setOrders(displayOrders)
       setGreenImpact({ totalCarbonSaved, orderCount: displayOrders.length })
@@ -362,12 +419,17 @@ export default function Dashboard() {
       <section className="rounded-xl border border-lime-200 dark:border-lime-900/60 bg-lime-50/50 dark:bg-lime-950/25 p-4 mb-6">
         <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Community leaderboard</h2>
         <p className="text-xs text-stone-600 dark:text-stone-400 mb-3">
-          Community totals are shared for everyone. Your row uses your own estimated CO₂ saved from orders; your rank changes as you shop.
+          Rankings use estimated CO₂ from everyone&apos;s orders (same totals for all viewers). You need at least {LEADERBOARD_MIN_KG} kg saved to appear unless the leaderboard RPC is not deployed yet (then a demo list shows).
         </p>
         <ul className="space-y-2">
+          {communityBoard.length === 0 && (
+            <li className="text-sm text-stone-600 dark:text-stone-400 py-2">
+              No shoppers meet the minimum yet. Place an order to get on the board.
+            </li>
+          )}
           {communityBoard.map((u, idx) => (
             <li
-              key={u.isYou ? 'you' : `${u.name}-${idx}`}
+              key={u.userId ? u.userId : u.isYou ? 'you' : `row-${idx}-${u.name}`}
               className={`flex items-center justify-between rounded-md border px-3 py-2 ${
                 u.isYou
                   ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-400/30'
