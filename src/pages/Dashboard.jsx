@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
 import { hashString } from '../lib/productMetrics'
+import { formatCatalogProductName } from '../lib/catalogProductName'
 
 /** Leaderboard: you as “You” at #1; other rows are “Firstname L.” and stay below your total. */
 function buildHighImpactCommunityBoard(userId, userCarbonKg) {
@@ -429,7 +430,7 @@ export default function Dashboard() {
             {myReviews.map((r) => (
               <li key={r.id} className="border-b border-stone-200 dark:border-stone-700 pb-3 last:border-0">
                 <Link to={`/products/${r.products?.slug}`} className="font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
-                  {r.products?.name ?? 'Product'}
+                  {formatCatalogProductName(r.products?.name ?? '') || 'Product'}
                 </Link>
                 <p className="text-amber-500 dark:text-amber-400 text-sm mt-0.5">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</p>
                 {r.body && <p className="text-stone-700 dark:text-stone-300 text-sm mt-1">{r.body}</p>}

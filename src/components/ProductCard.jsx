@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getProductImage } from '../lib/productImageOverrides'
+import { formatCatalogProductName } from '../lib/catalogProductName'
 import { getProductMetrics } from '../lib/productMetrics'
 import { useAuth } from '../contexts/AuthContext'
 import { useWishlist } from '../hooks/useWishlist'
 
 export default function ProductCard({ product }) {
   const { name, slug, price, image_url, materials } = product
+  const displayName = formatCatalogProductName(name)
   const { displayScore, displayCarbon, discountPercent, originalPrice, loyaltyPoints } = getProductMetrics(product)
   const displayImage = getProductImage({ name, slug, image_url })
   const { user } = useAuth()
@@ -56,7 +58,7 @@ export default function ProductCard({ product }) {
         <div className="relative aspect-square w-full overflow-hidden bg-stone-100 dark:bg-stone-900">
           <img
             src={displayImage}
-            alt={name}
+            alt={displayName}
             loading="lazy"
             className="h-full w-full object-cover object-center"
           />
@@ -70,7 +72,7 @@ export default function ProductCard({ product }) {
           )}
         </div>
         <div className="p-3">
-          <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100 line-clamp-2 transition-colors group-hover:text-emerald-700 dark:group-hover:text-emerald-400 leading-snug">{name}</h2>
+          <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100 line-clamp-2 transition-colors group-hover:text-emerald-700 dark:group-hover:text-emerald-400 leading-snug">{displayName}</h2>
           <p className="text-sm text-stone-700 dark:text-stone-300 mt-1.5 line-clamp-1 leading-normal">{materials || 'Eco-friendly materials'}</p>
           <div className="mt-2 flex items-center gap-2 flex-wrap">
             <p className="text-emerald-700 dark:text-emerald-400 font-bold text-lg tabular-nums">£{Number(price).toFixed(2)}</p>

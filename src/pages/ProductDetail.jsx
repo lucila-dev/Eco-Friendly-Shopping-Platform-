@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import ReviewList from '../components/ReviewList'
 import ReviewForm from '../components/ReviewForm'
 import { getProductImage } from '../lib/productImageOverrides'
+import { formatCatalogProductName } from '../lib/catalogProductName'
 
 function parseMaterialTags(materials) {
   if (!materials) return []
@@ -21,9 +22,14 @@ function getProductUseLabel(product) {
   if (/bottle|mug|utensil|cutlery|straw|kitchen|container|lunch/.test(text)) return 'Kitchen essential'
   if (/shampoo|conditioner|tooth|soap|deodorant|balm|mascara|skincare/.test(text)) return 'Personal care'
   if (/notebook|pen|planner|office|desk/.test(text)) return 'Office supply'
+  if (/coffee|tea|kombucha|chocolate|pasta|granola|honey|soup|rice|smoothie|apple|nuts|water|snack|food|drink|beverage/.test(text)) return 'Food & drink'
   if (/planter|garden|lantern|camp|outdoor/.test(text)) return 'Outdoor item'
   if (/phone|laptop|tech|charger|power bank/.test(text)) return 'Tech accessory'
   return 'Everyday essential'
+}
+
+function isFoodOrDrinkCategory(product) {
+  return String(product?.category?.slug ?? '').toLowerCase() === 'food-drink'
 }
 
 function getSustainabilityReasons(product, materials) {
@@ -31,15 +37,44 @@ function getSustainabilityReasons(product, materials) {
   const materialText = materials.join(' ').toLowerCase()
   const score = Number(product?.sustainability_score ?? 0)
   const carbon = Number(product?.carbon_footprint_saving_kg ?? 0)
+  const consumable = isFoodOrDrinkCategory(product)
 
-  if (/recycled/.test(materialText)) reasons.push('Contains recycled material content.')
-  if (/organic|bamboo|hemp|cork/.test(materialText)) reasons.push('Uses renewable or organically sourced materials.')
-  if (/steel|glass|silicone|aluminum/.test(materialText)) reasons.push('Designed for repeated use with durable materials.')
+  if (/recycled/.test(materialText)) {
+    reasons.push(
+      consumable
+        ? 'Packaging or materials include recycled content where it fits food safety rules.'
+        : 'Contains recycled material content.',
+    )
+  }
+  if (/organic|bamboo|hemp|cork/.test(materialText)) {
+    reasons.push(
+      consumable
+        ? 'Ingredients or crop inputs emphasize organic or responsibly farmed sources where noted.'
+        : 'Uses renewable or organically sourced materials.',
+    )
+  }
+  if (/steel|glass|silicone|aluminum/.test(materialText)) {
+    reasons.push(
+      consumable
+        ? 'Packaging uses materials like glass or metal that are easy to recycle instead of single-use plastic.'
+        : 'Designed for repeated use with durable materials.',
+    )
+  }
   if (score >= 8) reasons.push('High sustainability score based on catalog assessment.')
-  if (carbon > 0) reasons.push(`Estimated to save about ${carbon.toFixed(1)} kg CO2 per item versus conventional alternatives.`)
+  if (carbon > 0) {
+    reasons.push(
+      consumable
+        ? `Estimated to save about ${carbon.toFixed(1)} kg CO2 versus more wasteful mainstream options in this category.`
+        : `Estimated to save about ${carbon.toFixed(1)} kg CO2 per item versus conventional alternatives.`,
+    )
+  }
 
   if (reasons.length === 0) {
-    reasons.push('Selected for lower-impact materials and everyday reusability.')
+    reasons.push(
+      consumable
+        ? 'Selected for responsible sourcing, simpler ingredients, and lower-impact packaging.'
+        : 'Selected for lower-impact materials and everyday reusability.',
+    )
   }
   return reasons.slice(0, 4)
 }
@@ -130,10 +165,12 @@ export default function ProductDetail() {
   const { isAuthenticated } = useAuth()
   const { user } = useAuth()
 
+  const displayName = formatCatalogProductName(product?.name ?? '')
+
   useEffect(() => {
-    document.title = product ? `${product.name} – EcoShop` : 'EcoShop – Sustainable Shopping'
+    document.title = product ? `${displayName || product.name} – EcoShop` : 'EcoShop – Sustainable Shopping'
     return () => { document.title = 'EcoShop – Sustainable Shopping' }
-  }, [product?.name])
+  }, [product?.name, displayName])
 
   useEffect(() => {
     async function fetchProduct() {
@@ -199,7 +236,7 @@ export default function ProductDetail() {
           <div className="aspect-square w-full max-w-[30rem] shrink-0 overflow-hidden rounded-xl border border-emerald-100 bg-stone-100 lg:aspect-auto lg:h-full lg:min-h-0 lg:w-full lg:max-w-none lg:flex-1">
             <img
               src={displayImage}
-              alt={product.name}
+              alt={displayName}
               loading="lazy"
               className="h-full w-full object-cover object-center"
             />
@@ -210,7 +247,7 @@ export default function ProductDetail() {
           <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
             Sustainability Score: {score100}/100
           </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 leading-tight">{product.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 leading-tight">{displayName}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
             <p className="text-2xl sm:text-3xl text-emerald-700 dark:text-emerald-400 font-bold tabular-nums">£{Number(product.price).toFixed(2)}</p>
             <span className="text-sm px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium">In stock</span>
@@ -345,7 +382,7 @@ export default function ProductDetail() {
         </div>
       </div>
       <div className="mt-3 sm:mt-4 border-t border-emerald-200/50 pt-3 sm:pt-4">
-        <ReviewList productId={product.id} productName={product.name} key={`${product.id}-${reviewVersion}`} />
+        <ReviewList productId={product.id} productName={displayName} key={`${product.id}-${reviewVersion}`} />
         <ReviewForm productId={product.id} canReview={canReview} onSubmitted={() => setReviewVersion((v) => v + 1)} />
       </div>
     </div>

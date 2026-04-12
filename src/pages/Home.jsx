@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getCategoryCardSrc, getCategoryImageObjectPosition } from '../lib/categoryCardImage'
 import { mergeCategoryRowForHome } from '../lib/categoryImageLocalStorage'
-import { mergeGardenOutdoorsForHome } from '../lib/storefrontCategoryMerge'
+import { mergeGardenOutdoorsForHome, mergeHomeOfficeForHome } from '../lib/storefrontCategoryMerge'
 import { categoryCardDescription } from '../lib/categoryCardCopy'
 import { LeafIcon, TruckIcon, PackageIcon, RecycleIcon, CheckCircleIcon, ArrowUpIcon } from '../components/Icons'
 
@@ -42,13 +42,13 @@ const COMMITMENTS = [
 
 const CATEGORY_ITEM_TAGS = {
   fashion: ['T-Shirts', 'Pants', 'Dresses'],
-  home: ['Kitchenware', 'Bedding', 'Decor'],
+  home: ['Kitchenware', 'Bedding', 'Office'],
   'personal-care': ['Skincare', 'Haircare', 'Oral Care'],
   kitchen: ['Containers', 'Utensils', 'Drinkware'],
   beauty: ['Makeup', 'Lip Care', 'Face Care'],
   outdoors: ['Gardening', 'Camping', 'Sports'],
   kids: ['Baby Care', 'Toys', 'Clothing'],
-  office: ['Notebooks', 'Pens', 'Desk Tools'],
+  'food-drink': ['Pantry', 'Beverages', 'Snacks'],
   tech: ['Solar Chargers', 'LED Lights', 'Accessories'],
 }
 
@@ -92,7 +92,7 @@ export default function Home() {
 
   const displayCategories = useMemo(() => {
     const withLocal = categories.map((c) => mergeCategoryRowForHome(c))
-    return mergeGardenOutdoorsForHome(withLocal)
+    return mergeGardenOutdoorsForHome(mergeHomeOfficeForHome(withLocal))
   }, [categories, localVersion])
 
   return (

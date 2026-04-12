@@ -3,11 +3,12 @@ import { useAuth } from '../contexts/AuthContext'
 import { useProfile } from '../hooks/useProfile'
 import {
   CartIcon,
+  DevToolsIcon,
+  GearIcon,
   HeartIcon,
-  LeafIcon,
+  ImpactChartIcon,
   PackageIcon,
   PersonIcon,
-  SettingsIcon,
   TruckIcon,
 } from './Icons'
 
@@ -43,13 +44,13 @@ const CARDS = [
     to: '/dashboard',
     title: 'Dashboard',
     description: 'Your green impact, purchase history, and community snapshot.',
-    Icon: LeafIcon,
+    Icon: ImpactChartIcon,
   },
   {
     to: '/settings',
     title: 'Settings',
     description: 'Theme, shopping preferences, and account options.',
-    Icon: SettingsIcon,
+    Icon: GearIcon,
   },
   {
     to: '/about',
@@ -106,7 +107,7 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1' }) {
               className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 ring-2 ring-teal-200/80 dark:ring-teal-800/80"
               aria-hidden
             >
-              <SettingsIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+              <DevToolsIcon className="w-6 h-6 sm:w-7 sm:h-7" />
             </span>
             <div className="min-w-0 flex flex-col flex-1">
               <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-teal-800 dark:group-hover:text-teal-300">
