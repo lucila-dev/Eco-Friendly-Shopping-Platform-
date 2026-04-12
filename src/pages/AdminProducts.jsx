@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatCatalogProductName } from '../lib/catalogProductName'
@@ -32,14 +32,45 @@ export default function AdminProducts() {
     }
   }, [location.hash])
 
-  useLayoutEffect(() => {
-    if (location.hash !== '#products') return
-    if (loading || profileLoading) return
-    if (!canManageProducts) return
-    const el = productsSectionRef.current
-    if (!el) return
-    el.scrollIntoView({ behavior: 'auto', block: 'start' })
-  }, [location.hash, location.pathname, loading, profileLoading, canManageProducts])
+  useEffect(() => {
+    const wantsProducts =
+      location.hash === '#products' || location.state?.scrollToProducts === true
+    if (!wantsProducts) return
+    if (loading || profileLoading || !canManageProducts) return
+
+    const stickyOffsetPx = 112
+
+    const scrollOnce = () => {
+      const el = productsSectionRef.current
+      if (!el) return
+      const y = el.getBoundingClientRect().top + window.scrollY - stickyOffsetPx
+      window.scrollTo({ top: Math.max(0, y), behavior: 'auto' })
+    }
+
+    let cancelled = false
+    const run = () => {
+      if (!cancelled) scrollOnce()
+    }
+
+    run()
+    const raf1 = requestAnimationFrame(run)
+    const raf2 = requestAnimationFrame(() => requestAnimationFrame(run))
+    const timeouts = [0, 50, 120, 350].map((ms) => window.setTimeout(run, ms))
+
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(raf1)
+      cancelAnimationFrame(raf2)
+      timeouts.forEach(clearTimeout)
+    }
+  }, [
+    location.key,
+    location.hash,
+    location.state,
+    loading,
+    profileLoading,
+    canManageProducts,
+  ])
 
   useEffect(() => {
     async function fetch() {

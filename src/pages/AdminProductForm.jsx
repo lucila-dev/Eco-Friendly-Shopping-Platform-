@@ -89,7 +89,7 @@ export default function AdminProductForm() {
         setSaving(false)
         return
       }
-      navigate('/admin/products#products', { replace: true })
+      navigate('/admin/products', { replace: true, state: { scrollToProducts: true } })
     } else {
       const { error: err } = await supabase.from('products').update(payload).eq('id', id)
       if (err) {
@@ -97,7 +97,7 @@ export default function AdminProductForm() {
         setSaving(false)
         return
       }
-      navigate('/admin/products#products', { replace: true })
+      navigate('/admin/products', { replace: true, state: { scrollToProducts: true } })
     }
 
     setSaving(false)
