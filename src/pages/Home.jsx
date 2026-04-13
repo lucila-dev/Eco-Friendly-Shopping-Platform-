@@ -5,7 +5,7 @@ import { getCategoryCardSrc, getCategoryImageObjectPosition } from '../lib/categ
 import { mergeCategoryRowForHome } from '../lib/categoryImageLocalStorage'
 import { mergeGardenOutdoorsForHome, mergeHomeOfficeForHome } from '../lib/storefrontCategoryMerge'
 import { categoryCardDescription } from '../lib/categoryCardCopy'
-import { MaterialsIcon, TruckIcon, PackageIcon, RecycleIcon, CheckCircleIcon, ArrowUpIcon } from '../components/Icons'
+import { MaterialsIcon, TruckIcon, PackageIcon, WasteReductionIcon, CheckCircleIcon, CarbonReductionIcon } from '../components/Icons'
 import { FREE_SHIPPING_MIN_SUBTOTAL } from '../lib/shipping'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
@@ -18,12 +18,12 @@ const COMMITMENTS = [
   {
     title: 'Carbon Footprint Reduction',
     description: 'Every product shows estimated carbon footprint savings compared to traditional alternatives.',
-    Icon: ArrowUpIcon,
+    Icon: CarbonReductionIcon,
   },
   {
     title: 'Waste Reduction',
     description: 'Products designed for longevity and made from recycled materials to minimize waste.',
-    Icon: RecycleIcon,
+    Icon: WasteReductionIcon,
   },
   {
     title: 'Green Shipping',
