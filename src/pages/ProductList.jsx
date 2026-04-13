@@ -1,71 +1,102 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import ProductCard from '../components/ProductCard'
+import {
+  categoryIdsForProductFilter,
+  categoriesForProductListPills,
+} from '../lib/storefrontCategoryMerge'
+import { productGridStrideForWidth, productGridStrideViewport } from '../lib/productGridStride'
 
 function usePageTitle(title) {
   useEffect(() => {
     document.title = title
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [title])
 }
 
-const PAGE_SIZE = 12
+const MAX_ROWS = 1000
 
 export default function ProductList() {
-  usePageTitle('Products – EcoShop')
+  usePageTitle('Products · EcoShop')
   const [searchParams, setSearchParams] = useSearchParams()
   const categorySlug = searchParams.get('category') || ''
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null)
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [search, setSearch] = useState(searchParams.get('q') || '')
   const [priceMin, setPriceMin] = useState(searchParams.get('priceMin') || '')
   const [priceMax, setPriceMax] = useState(searchParams.get('priceMax') || '')
   const [scoreMin, setScoreMin] = useState(searchParams.get('scoreMin') || '')
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest')
-  const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [hasMore, setHasMore] = useState(true)
+  const [totalMatching, setTotalMatching] = useState(null)
+  const [gridStride, setGridStride] = useState(() => productGridStrideViewport())
+  const [visibleCount, setVisibleCount] = useState(() => productGridStrideViewport())
+
+  useEffect(() => {
+    const onResize = () => setGridStride(productGridStrideForWidth(window.innerWidth))
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   useEffect(() => {
     async function fetchCategories() {
+      setCategoriesLoading(true)
       const { data } = await supabase.from('categories').select('id, name, slug').order('name')
       setCategories(data ?? [])
+      setCategoriesLoading(false)
     }
     fetchCategories()
   }, [])
 
   useEffect(() => {
-    if (!categorySlug || categories.length === 0) {
-      setSelectedCategoryId(null)
-      return
-    }
-    const cat = categories.find((c) => c.slug === categorySlug)
-    setSelectedCategoryId(cat?.id ?? null)
-  }, [categorySlug, categories])
+    setSearch(searchParams.get('q') || '')
+    setPriceMin(searchParams.get('priceMin') || '')
+    setPriceMax(searchParams.get('priceMax') || '')
+    setScoreMin(searchParams.get('scoreMin') || '')
+    setSortBy(searchParams.get('sort') || 'newest')
+  }, [
+    searchParams.get('q'),
+    searchParams.get('priceMin'),
+    searchParams.get('priceMax'),
+    searchParams.get('scoreMin'),
+    searchParams.get('sort'),
+    searchParams.get('category'),
+  ])
 
-  useEffect(() => {
-    setPage(0)
-    setProducts([])
-    setHasMore(true)
-  }, [selectedCategoryId, search, priceMin, priceMax, scoreMin, sortBy])
+  const resolvedCategoryIds = useMemo(() => {
+    if (!categorySlug) return null
+    if (categoriesLoading) return undefined
+    if (categories.length === 0) return null
+    return categoryIdsForProductFilter(categorySlug, categories)
+  }, [categorySlug, categories, categoriesLoading])
 
   useEffect(() => {
     async function fetchProducts() {
+      if (resolvedCategoryIds === undefined) {
+        setLoading(true)
+        setProducts([])
+        setTotalMatching(null)
+        setVisibleCount(0)
+        return
+      }
+
       setLoading(true)
       let query = supabase
         .from('products')
-        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg', { count: 'exact' })
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)', { count: 'exact' })
+        .range(0, MAX_ROWS - 1)
 
       if (sortBy === 'price-asc') query = query.order('price', { ascending: true })
       else if (sortBy === 'price-desc') query = query.order('price', { ascending: false })
       else if (sortBy === 'score-desc') query = query.order('sustainability_score', { ascending: false })
       else query = query.order('created_at', { ascending: false })
 
-      if (selectedCategoryId) {
-        query = query.eq('category_id', selectedCategoryId)
+      if (resolvedCategoryIds?.length === 1) {
+        query = query.eq('category_id', resolvedCategoryIds[0])
+      } else if (resolvedCategoryIds && resolvedCategoryIds.length > 1) {
+        query = query.in('category_id', resolvedCategoryIds)
       }
       if (search.trim()) {
         query = query.ilike('name', `%${search.trim()}%`)
@@ -83,18 +114,21 @@ export default function ProductList() {
         if (!Number.isNaN(n)) query = query.gte('sustainability_score', n)
       }
 
-      const { data, error } = await query
+      const { data, error, count } = await query
       if (error) {
         console.error(error)
         setLoading(false)
         return
       }
-      setProducts((prev) => (page === 0 ? (data ?? []) : [...prev, ...(data ?? [])]))
-      setHasMore((data?.length ?? 0) === PAGE_SIZE)
+      const rows = data ?? []
+      setProducts(rows)
+      setTotalMatching(typeof count === 'number' ? count : null)
+      const stride = productGridStrideForWidth(typeof window !== 'undefined' ? window.innerWidth : 1024)
+      setVisibleCount(Math.min(stride, rows.length))
       setLoading(false)
     }
     fetchProducts()
-  }, [selectedCategoryId, search, priceMin, priceMax, scoreMin, sortBy, page])
+  }, [resolvedCategoryIds, search, priceMin, priceMax, scoreMin, sortBy])
 
   const applyFilters = () => {
     const next = new URLSearchParams(searchParams)
@@ -111,128 +145,156 @@ export default function ProductList() {
     setSearchParams(next, { replace: true })
   }
 
+  const categoryPills = categoriesForProductListPills(categories)
+  const pillIdsSignature = (slug) => {
+    const ids = categoryIdsForProductFilter(slug, categories)
+    return ids?.length ? [...ids].sort().join(',') : ''
+  }
+  const activePillSignature =
+    resolvedCategoryIds != null && resolvedCategoryIds.length > 0
+      ? [...resolvedCategoryIds].sort().join(',')
+      : ''
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-stone-800 mb-6">Products</h1>
-
-      {/* Search */}
-      <div className="flex flex-wrap items-end gap-3 mb-4 rounded-xl border border-emerald-200 bg-gradient-to-r from-white to-emerald-50 p-3">
-        <div className="flex-1 min-w-[200px]">
-          <label htmlFor="search" className="block text-sm font-medium text-stone-700 mb-1">Search by name</label>
-          <input
-            id="search"
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-            placeholder="e.g. cotton, bamboo"
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-          />
-        </div>
-        <div className="flex flex-wrap gap-3 items-end">
-          <div>
-            <label htmlFor="priceMin" className="block text-sm font-medium text-stone-700 mb-1">Min price ($)</label>
-            <input
-              id="priceMin"
-              type="number"
-              min="0"
-              step="0.01"
-              value={priceMin}
-              onChange={(e) => setPriceMin(e.target.value)}
-              placeholder="0"
-              className="w-24 px-2 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="priceMax" className="block text-sm font-medium text-stone-700 mb-1">Max price ($)</label>
-            <input
-              id="priceMax"
-              type="number"
-              min="0"
-              step="0.01"
-              value={priceMax}
-              onChange={(e) => setPriceMax(e.target.value)}
-              placeholder="Any"
-              className="w-24 px-2 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="scoreMin" className="block text-sm font-medium text-stone-700 mb-1">Min sustainability (1–10)</label>
-            <input
-              id="scoreMin"
-              type="number"
-              min="1"
-              max="10"
-              value={scoreMin}
-              onChange={(e) => setScoreMin(e.target.value)}
-              placeholder="Any"
-              className="w-20 px-2 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="sortBy" className="block text-sm font-medium text-stone-700 mb-1">Sort by</label>
-            <select
-              id="sortBy"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-2 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-sm"
-            >
-              <option value="newest">Newest</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
-              <option value="score-desc">Sustainability: high first</option>
-            </select>
-          </div>
-          <button
-            type="button"
-            onClick={applyFilters}
-            className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
-          >
-            Apply filters
-          </button>
-        </div>
+      <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Products</h1>
+        {!loading && totalMatching != null && (
+          <p className="text-sm font-medium text-stone-700 dark:text-stone-300 tabular-nums">
+            {visibleCount < products.length
+              ? `Showing ${Math.min(visibleCount, products.length)} of ${products.length}`
+              : totalMatching > MAX_ROWS
+                ? `Showing ${products.length} of ${totalMatching} products`
+                : `${totalMatching} product${totalMatching === 1 ? '' : 's'}`}
+          </p>
+        )}
       </div>
 
-      {/* Category pills */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="max-w-5xl rounded-xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-white to-emerald-50 dark:from-stone-900 dark:to-emerald-950/40 p-2.5 sm:p-3 mb-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-full min-w-[12rem] max-w-md flex-1">
+            <label htmlFor="search" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Search by name</label>
+            <input
+              id="search"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+              placeholder="e.g. cotton, bamboo"
+              className="w-full px-2.5 py-1.5 text-sm leading-normal border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div className="flex flex-wrap gap-3 items-end">
+            <div>
+              <label htmlFor="priceMin" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Min (GBP)</label>
+              <input
+                id="priceMin"
+                type="number"
+                min="0"
+                step="0.01"
+                value={priceMin}
+                onChange={(e) => setPriceMin(e.target.value)}
+                placeholder="0"
+                className="w-24 px-2 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="priceMax" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Max (GBP)</label>
+              <input
+                id="priceMax"
+                type="number"
+                min="0"
+                step="0.01"
+                value={priceMax}
+                onChange={(e) => setPriceMax(e.target.value)}
+                placeholder="Any"
+                className="w-24 px-2 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="scoreMin" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Min score</label>
+              <input
+                id="scoreMin"
+                type="number"
+                min="1"
+                max="10"
+                value={scoreMin}
+                onChange={(e) => setScoreMin(e.target.value)}
+                placeholder="1 to 10"
+                title="Minimum sustainability score (1 to 10)"
+                className="w-20 px-2 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="sortBy" className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1">Sort</label>
+              <select
+                id="sortBy"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-2 py-1.5 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-sm focus:ring-2 focus:ring-emerald-500 min-h-[2.25rem]"
+              >
+                <option value="newest">Newest</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+                <option value="score-desc">Sustainability: high first</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={applyFilters}
+              className="px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+            >
+              Apply filters
+            </button>
+          </div>
+        </div>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2.5 leading-relaxed">
+          Min and max filter the numeric prices stored in GBP (product cards can show another currency in Settings).
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
         <button
           type="button"
           onClick={() => setSearchParams({})}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${!selectedCategoryId ? 'bg-emerald-600 text-white' : 'bg-stone-200 text-stone-700'}`}
+          className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${!categorySlug ? 'bg-emerald-600 text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200'}`}
         >
           All
         </button>
-        {categories.map((cat) => (
+        {categoryPills.map((cat) => (
           <button
             key={cat.id}
             type="button"
             onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), category: cat.slug })}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${selectedCategoryId === cat.id ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
+            className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${pillIdsSignature(cat.slug) === activePillSignature && activePillSignature ? 'bg-emerald-600 text-white' : 'bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700'}`}
           >
             {cat.name}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {products.map((product) => (
+      <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {products.slice(0, visibleCount).map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      {loading && <p className="text-center text-stone-500 py-4">Loading...</p>}
-      {!loading && hasMore && products.length > 0 && (
-        <div className="text-center py-6">
+      {!loading && products.length > visibleCount && (
+        <div className="flex justify-center mt-6 sm:mt-8">
           <button
             type="button"
-            onClick={() => setPage((p) => p + 1)}
-            className="px-4 py-2 bg-stone-200 text-stone-700 rounded-lg hover:bg-stone-300"
+            onClick={() => setVisibleCount((c) => Math.min(c + gridStride, products.length))}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border border-emerald-700/30 transition-colors"
           >
-            Load more
+            Show more
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M6 9l6 6 6-6" />
+            </svg>
           </button>
         </div>
       )}
+      {loading && <p className="text-center text-stone-600 dark:text-stone-400 text-sm font-medium py-4">Loading...</p>}
       {!loading && products.length === 0 && (
-        <p className="text-stone-500 py-8">No products found. Try different filters or search.</p>
+        <p className="text-stone-700 dark:text-stone-300 text-sm py-6 leading-relaxed max-w-prose">No products found. Try different filters or search.</p>
       )}
     </div>
   )

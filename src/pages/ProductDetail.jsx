@@ -1,62 +1,222 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import SustainabilityBadge from '../components/SustainabilityBadge'
 import ReviewList from '../components/ReviewList'
 import ReviewForm from '../components/ReviewForm'
 import { getProductImage } from '../lib/productImageOverrides'
+import { formatCatalogProductName } from '../lib/catalogProductName'
+import { useFormatPrice } from '../hooks/useFormatPrice'
+import ProductCard from '../components/ProductCard'
+import { pickRelatedSlices } from '../lib/productRecommendations'
 
-function getProductFacts(product) {
-  const name = (product?.name || '').toLowerCase()
-  const materials = product?.materials || 'Eco-conscious mixed materials'
-  const facts = [
-    { label: 'Materials', value: materials },
-    { label: 'Delivery', value: 'Dispatch in 24 hours. Standard 2-4 days, express 1-2 days.' },
-    { label: 'Returns', value: '30-day returns for unused items in original condition.' },
-  ]
+function parseMaterialTags(materials) {
+  if (!materials) return []
+  return materials
+    .split(',')
+    .map((m) => m.trim())
+    .filter(Boolean)
+    .slice(0, 4)
+}
 
-  if (/balm|mascara|cleanser|lotion|deodorant|shampoo|conditioner|beauty|personal/i.test(name)) {
-    facts.push({ label: 'Ingredients', value: 'Plant-based extracts, low-impact preservatives, fragrance-free options.' })
-    facts.push({ label: 'Shelf life', value: '12 months after opening. Store in a cool, dry place.' })
-  } else if (/wrap|food|snack|kitchen|produce/i.test(name)) {
-    facts.push({ label: 'Food contact guidance', value: 'Clean before first use. Avoid direct high heat exposure.' })
-    facts.push({ label: 'Shelf life', value: 'Reusable for 6-12 months depending on care and usage.' })
-  } else if (/bottle|container|vase|planter|utensil|straw/i.test(name)) {
-    facts.push({ label: 'Care', value: 'Hand wash recommended. Dishwasher safe on top rack if applicable.' })
-    facts.push({ label: 'Expected lifespan', value: '2+ years with regular use and proper care.' })
-  } else {
-    facts.push({ label: 'Product use', value: 'Designed for frequent everyday use with long-life durability.' })
+function getProductUseLabel(product) {
+  const text = `${product?.name || ''} ${product?.category?.name || ''}`.toLowerCase()
+  if (/shirt|jacket|hoodie|dress|sneaker|sock|onesie/.test(text)) return 'Apparel'
+  if (/bottle|mug|utensil|cutlery|straw|kitchen|container|lunch/.test(text)) return 'Kitchen essential'
+  if (/shampoo|conditioner|tooth|soap|deodorant|balm|mascara|skincare/.test(text)) return 'Personal care'
+  if (/notebook|pen|planner|office|desk/.test(text)) return 'Office supply'
+  if (/coffee|tea|kombucha|chocolate|pasta|granola|honey|soup|rice|smoothie|apple|nuts|water|snack|food|drink|beverage/.test(text)) return 'Food & drink'
+  if (/planter|garden|lantern|camp|outdoor/.test(text)) return 'Outdoor item'
+  if (/phone|laptop|tech|charger|power bank/.test(text)) return 'Tech accessory'
+  return 'Everyday essential'
+}
+
+function isFoodOrDrinkCategory(product) {
+  return String(product?.category?.slug ?? '').toLowerCase() === 'food-drink'
+}
+
+function getSustainabilityReasons(product, materials) {
+  const reasons = []
+  const materialText = materials.join(' ').toLowerCase()
+  const score = Number(product?.sustainability_score ?? 0)
+  const carbon = Number(product?.carbon_footprint_saving_kg ?? 0)
+  const consumable = isFoodOrDrinkCategory(product)
+
+  if (/recycled/.test(materialText)) {
+    reasons.push(
+      consumable
+        ? 'Packaging or materials include recycled content where it fits food safety rules.'
+        : 'Contains recycled material content.',
+    )
+  }
+  if (/organic|bamboo|hemp|cork/.test(materialText)) {
+    reasons.push(
+      consumable
+        ? 'Ingredients or crop inputs emphasize organic or responsibly farmed sources where noted.'
+        : 'Uses renewable or organically sourced materials.',
+    )
+  }
+  if (/steel|glass|silicone|aluminum/.test(materialText)) {
+    reasons.push(
+      consumable
+        ? 'Packaging uses materials like glass or metal that are easy to recycle instead of single-use plastic.'
+        : 'Designed for repeated use with durable materials.',
+    )
+  }
+  if (score >= 8) reasons.push('High sustainability score based on catalog assessment.')
+  if (carbon > 0) {
+    reasons.push(
+      consumable
+        ? `Estimated to save about ${carbon.toFixed(1)} kg CO2 versus more wasteful mainstream options in this category.`
+        : `Estimated to save about ${carbon.toFixed(1)} kg CO2 per item versus conventional alternatives.`,
+    )
   }
 
-  return facts
+  if (reasons.length === 0) {
+    reasons.push(
+      consumable
+        ? 'Selected for responsible sourcing, simpler ingredients, and lower-impact packaging.'
+        : 'Selected for lower-impact materials and everyday reusability.',
+    )
+  }
+  return reasons.slice(0, 4)
+}
+
+function ecoShopImpactClass(score) {
+  const s = Number(score)
+  if (!Number.isFinite(s) || s <= 0) return 'Bronze'
+  if (s >= 8) return 'Gold'
+  if (s >= 6) return 'Silver'
+  return 'Bronze'
+}
+
+function getCertificationDisplay(product, materials) {
+  const raw = `${product?.name || ''} ${product?.description || ''} ${(materials || []).join(' ')}`.toLowerCase()
+  const impactClass = ecoShopImpactClass(product?.sustainability_score)
+
+  const core = [
+    'EcoShop Earth Quality Mark',
+    `EcoShop Impact Programme, ${impactClass} Class`,
+  ]
+
+  const standards = []
+  if (/\bgots\b|global organic textile/.test(raw)) standards.push('GOTS organic textile')
+  if (/\bfsc\b|fsc[\s-]*certified|fsc®/.test(raw)) standards.push('FSC® chain of custody')
+  if (/\bfairtrade\b|fair trade|fair-trade/.test(raw)) standards.push('Fairtrade sourcing')
+  if (/oeko-tex|oeko tex|standard 100 by oeko/.test(raw)) standards.push('OEKO-TEX® Standard 100')
+  if (/usda organic/.test(raw)) standards.push('USDA Organic')
+  if (/energy star|energystar/.test(raw)) standards.push('ENERGY STAR®')
+  if (/bluesign/.test(raw)) standards.push('bluesign® approved')
+  if (/cradle to cradle|cradle2cradle|c2c certified/.test(raw)) standards.push('Cradle to Cradle Certified®')
+  if (/b corp|b corporation|bcorp/.test(raw)) standards.push('B Corp Certified')
+
+  const hints = []
+  if (/recycled|post-consumer|pcr|rpet|ocean-bound/.test(raw)) hints.push('Recycled content profile')
+  const hasNamedOrganic = standards.some((s) => s.includes('GOTS') || s.includes('USDA'))
+  if ((/organic\b|bio-based/.test(raw)) && !hasNamedOrganic) hints.push('Organic & bio-based inputs')
+  if (/\bvegan\b|plant-based|plant based|cruelty-free/.test(raw) && !/\bhoney\b/.test(raw)) {
+    hints.push('Vegan formulation')
+  }
+  if (/compostable|home[\s-]*compost|industrially compostable|biodegradable/.test(raw)) {
+    hints.push('End-of-life: compostable options')
+  }
+
+  const rest = [...standards, ...hints]
+  const chips = [...core, ...rest].filter((x, i, a) => a.indexOf(x) === i).slice(0, 4)
+
+  return { chips }
+}
+
+function getSizeGuide(product) {
+  const text = `${product?.name || ''} ${product?.category?.name || ''}`.toLowerCase()
+  if (!/shirt|jacket|hoodie|dress|pant|trouser|sweater|tee|fashion|onesie|sock/.test(text)) return null
+
+  const isBottom = /pant|trouser|short|legging/.test(text)
+  const isDress = /dress/.test(text)
+
+  if (isBottom) {
+    return {
+      title: 'Size and Fit',
+      description: 'Choose your usual size. If you are between sizes, we suggest sizing up for comfort.',
+      columns: ['Size', 'Waist (cm)', 'Hip (cm)', 'Inseam (cm)'],
+      rows: [
+        ['XS', '60-67', '84-91', '72'],
+        ['S', '68-75', '92-99', '74'],
+        ['M', '76-83', '100-107', '76'],
+        ['L', '84-91', '108-115', '78'],
+        ['XL', '92-100', '116-124', '79'],
+        ['XXL', '101-110', '125-134', '80'],
+      ],
+      options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    }
+  }
+
+  if (isDress) {
+    return {
+      title: 'Size and Fit',
+      description: 'Regular fit. For a looser silhouette, choose one size up.',
+      columns: ['Size', 'Bust (cm)', 'Waist (cm)', 'Length (cm)'],
+      rows: [
+        ['XS', '76-83', '58-64', '92'],
+        ['S', '84-91', '65-71', '95'],
+        ['M', '92-99', '72-79', '98'],
+        ['L', '100-107', '80-87', '101'],
+        ['XL', '108-116', '88-96', '103'],
+        ['XXL', '117-126', '97-106', '105'],
+      ],
+      options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    }
+  }
+
+  return {
+    title: 'Size and Fit',
+    description: 'Standard fit. Check measurements below to pick your best size.',
+    columns: ['Size', 'Chest (cm)', 'Shoulder (cm)', 'Length (cm)'],
+    rows: [
+      ['XS', '80-87', '40', '64'],
+      ['S', '88-95', '42', '67'],
+      ['M', '96-103', '45', '70'],
+      ['L', '104-111', '48', '73'],
+      ['XL', '112-120', '51', '76'],
+      ['XXL', '121-130', '54', '79'],
+    ],
+    options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+  }
 }
 
 export default function ProductDetail() {
+  const { format } = useFormatPrice()
   const { slug } = useParams()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [reviewVersion, setReviewVersion] = useState(0)
   const [canReview, setCanReview] = useState(false)
-  const [openSections, setOpenSections] = useState({
-    overview: true,
+  const [selectedSize, setSelectedSize] = useState('')
+  const [showSizeMeasurements, setShowSizeMeasurements] = useState(false)
+  const [openInfo, setOpenInfo] = useState({
     materials: false,
-    delivery: false,
-    sustainability: false,
+    certifications: false,
+    why: false,
+    impact: false,
   })
+  const [relatedSimilar, setRelatedSimilar] = useState([])
+  const [relatedTogether, setRelatedTogether] = useState([])
+  const [relatedLoading, setRelatedLoading] = useState(false)
   const { isAuthenticated } = useAuth()
   const { user } = useAuth()
 
+  const displayName = formatCatalogProductName(product?.name ?? '')
+
   useEffect(() => {
-    document.title = product ? `${product.name} – EcoShop` : 'EcoShop – Sustainable Shopping'
-    return () => { document.title = 'EcoShop – Sustainable Shopping' }
-  }, [product?.name])
+    document.title = product ? `${displayName || product.name} · EcoShop` : 'EcoShop · Sustainable Shopping'
+    return () => { document.title = 'EcoShop · Sustainable Shopping' }
+  }, [product?.name, displayName])
 
   useEffect(() => {
     async function fetchProduct() {
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, category:categories(id, name, slug)')
         .eq('slug', slug)
         .single()
       if (error) {
@@ -86,173 +246,321 @@ export default function ProductDetail() {
     checkPurchased()
   }, [user?.id, product?.id])
 
-  if (loading) return <p className="text-stone-500">Loading...</p>
-  if (!product) return <p className="text-stone-600">Product not found. <Link to="/products" className="text-emerald-600 hover:underline">Back to products</Link></p>
-  const displayImage = getProductImage(product)
-  const facts = getProductFacts(product)
-  const materialsFact = facts.find((f) => f.label === 'Materials')
-  const ingredientFact = facts.find((f) => f.label === 'Ingredients')
-  const shelfLifeFact = facts.find((f) => f.label === 'Shelf life')
-  const deliveryFact = facts.find((f) => f.label === 'Delivery')
-  const returnsFact = facts.find((f) => f.label === 'Returns')
+  useEffect(() => {
+    if (!product?.category_id || !product?.id) {
+      setRelatedSimilar([])
+      setRelatedTogether([])
+      return
+    }
+    let cancelled = false
+    setRelatedLoading(true)
+    async function fetchRelated() {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)')
+        .eq('category_id', product.category_id)
+        .neq('id', product.id)
+        .limit(80)
+      if (cancelled) return
+      if (error || !data?.length) {
+        setRelatedSimilar([])
+        setRelatedTogether([])
+        setRelatedLoading(false)
+        return
+      }
+      const { similar, together } = pickRelatedSlices(data, product.slug, {
+        similarCount: 4,
+        togetherCount: 3,
+      })
+      setRelatedSimilar(similar)
+      setRelatedTogether(together)
+      setRelatedLoading(false)
+    }
+    fetchRelated()
+    return () => {
+      cancelled = true
+    }
+  }, [product?.id, product?.category_id, product?.slug])
 
-  const toggleSection = (key) => {
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
+  const materials = useMemo(() => parseMaterialTags(product?.materials), [product?.materials])
+  const sustainabilityReasons = useMemo(() => getSustainabilityReasons(product, materials), [product, materials])
+  const certificationChips = useMemo(() => getCertificationDisplay(product, materials).chips, [product, materials])
+  const productUse = useMemo(() => getProductUseLabel(product), [product])
+  const sizeGuide = useMemo(() => getSizeGuide(product), [product])
+
+  if (loading) return <p className="text-stone-500 dark:text-stone-400 text-sm py-3">Loading...</p>
+  if (!product) return <p className="text-stone-600">Product not found. <Link to="/products" className="text-emerald-600 hover:underline">Back to products</Link></p>
+
+  const displayImage = getProductImage(product)
+  const score100 = Math.round((Number(product.sustainability_score ?? 0) / 10) * 100)
+  const carbonSaving = Number(product.carbon_footprint_saving_kg ?? 0)
+  const categoryLink = product?.category?.slug ? `/products?category=${product.category.slug}` : '/products'
+  const toggleInfo = (key) => setOpenInfo((prev) => ({ ...prev, [key]: !prev[key] }))
 
   return (
-    <div className="max-w-4xl">
-      <Link to="/products" className="text-sm text-stone-500 hover:text-emerald-600 mb-4 inline-block">
-        ← Back to products
-      </Link>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="aspect-square rounded-xl overflow-hidden bg-stone-100">
-          <img
-            src={displayImage}
-            alt={product.name}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
+    <div className="w-full py-3 sm:py-4">
+      <div className="grid w-full max-w-none grid-cols-1 items-stretch gap-x-4 gap-y-4 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4">
+        <Link
+          to={categoryLink}
+          className="col-span-full block text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400"
+        >
+          ← Back to Category
+        </Link>
+
+        <div className="flex h-full min-h-0 w-full min-w-0 flex-col self-stretch max-lg:items-center lg:min-h-0">
+          <div className="aspect-square w-full max-w-[30rem] shrink-0 overflow-hidden rounded-xl border border-emerald-100 bg-stone-100 lg:aspect-auto lg:h-full lg:min-h-0 lg:w-full lg:max-w-none lg:flex-1">
+            <img
+              src={displayImage}
+              alt={displayName}
+              loading="lazy"
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-stone-800">{product.name}</h1>
-          <div className="flex flex-wrap items-center gap-3 mt-2">
-            <p className="text-2xl text-emerald-700 font-semibold">${Number(product.price).toFixed(2)}</p>
-            <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium">In stock</span>
-            <span className="text-xs px-2 py-1 rounded-full bg-teal-100 text-teal-700 font-medium">Eco verified</span>
+
+        <div className="min-h-0 min-w-0 w-full space-y-2 sm:space-y-3 self-stretch">
+          <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+            Sustainability Score: {score100}/100
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 leading-tight">{displayName}</h1>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <p className="text-2xl sm:text-3xl text-emerald-700 dark:text-emerald-400 font-bold tabular-nums">{format(Number(product.price))}</p>
+            <span className="text-sm px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium">In stock</span>
+            <span className="text-sm px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 font-medium">{productUse}</span>
           </div>
+          {product.description?.trim() ? (
+            <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg leading-relaxed">{product.description.trim()}</p>
+          ) : null}
 
-          <div className="mt-5 space-y-3">
-            <Accordion
-              title="Overview"
-              open={openSections.overview}
-              onToggle={() => toggleSection('overview')}
-            >
-              <p className="text-stone-700 text-base leading-7">{product.description || 'No description provided yet.'}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-700">Product type</p>
-                  <p className="text-base text-stone-800 mt-1">Everyday sustainable essential</p>
-                </div>
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-700">Best for</p>
-                  <p className="text-base text-stone-800 mt-1">Low-impact daily use and waste reduction</p>
-                </div>
+          {sizeGuide && (
+            <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 bg-emerald-100/35 dark:bg-emerald-950/30 p-3 sm:p-4">
+              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-base">{sizeGuide.title}</h3>
+              <p className="mt-1 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">{sizeGuide.description}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {sizeGuide.options.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setSelectedSize(size)}
+                    className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
+                      selectedSize === size
+                        ? 'border-emerald-500 bg-emerald-100 text-emerald-700'
+                        : 'border-stone-300 bg-emerald-50 text-stone-700 hover:border-emerald-300'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
               </div>
-            </Accordion>
-
-            <Accordion
-              title="Materials and care"
-              open={openSections.materials}
-              onToggle={() => toggleSection('materials')}
-            >
-              <div className="space-y-3">
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-700">Materials</p>
-                  <p className="text-base text-stone-800 mt-1">{materialsFact?.value || product.materials || 'Not specified'}</p>
-                </div>
-                {ingredientFact && (
-                  <div className="rounded-lg border border-stone-200 bg-white p-3">
-                    <p className="text-sm font-semibold text-stone-700">Ingredients</p>
-                    <p className="text-base text-stone-800 mt-1">{ingredientFact.value}</p>
-                  </div>
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSizeMeasurements((v) => !v)}
+                  className="inline-flex items-center rounded-md border border-stone-300/80 dark:border-stone-600 bg-emerald-100/40 dark:bg-emerald-900/30 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-200 hover:border-emerald-400"
+                >
+                  {showSizeMeasurements ? 'Hide measurements' : 'View measurements'}
+                </button>
+              </div>
+              <div className={`${showSizeMeasurements ? 'mt-4' : 'mt-0'} overflow-x-auto`}>
+                {showSizeMeasurements && (
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-stone-600 border-b border-stone-200">
+                        {sizeGuide.columns.map((col) => (
+                          <th key={col} className="py-2 pr-4 font-semibold">{col}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sizeGuide.rows.map((row) => (
+                        <tr key={row[0]} className="border-b border-stone-100 text-stone-700">
+                          {row.map((cell, idx) => (
+                            <td key={`${row[0]}-${idx}`} className="py-2 pr-4">{cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-700">Care instructions</p>
-                  <p className="text-base text-stone-800 mt-1">
-                    Keep clean and dry after use. Follow product-specific cleaning instructions for best lifespan.
-                  </p>
-                </div>
-                {shelfLifeFact && (
-                  <div className="rounded-lg border border-stone-200 bg-white p-3">
-                    <p className="text-sm font-semibold text-stone-700">Shelf life</p>
-                    <p className="text-base text-stone-800 mt-1">{shelfLifeFact.value}</p>
-                  </div>
-                )}
               </div>
-            </Accordion>
+            </div>
+          )}
 
-            <Accordion
-              title="Delivery and returns"
-              open={openSections.delivery}
-              onToggle={() => toggleSection('delivery')}
-            >
-              <div className="space-y-3">
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-700">Delivery options</p>
-                  <p className="text-base text-stone-800 mt-1">{deliveryFact?.value || 'Dispatch in 24 hours. Standard 2-4 days.'}</p>
-                </div>
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-700">Returns</p>
-                  <p className="text-base text-stone-800 mt-1">{returnsFact?.value || '30-day returns for eligible items.'}</p>
-                </div>
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-700">Order tracking</p>
-                  <p className="text-base text-stone-800 mt-1">Track order status in your dashboard: preparing, dispatched, out for delivery, delivered.</p>
-                </div>
+          <AddToCartButton
+            product={product}
+            isAuthenticated={isAuthenticated}
+            requiresSize={Boolean(sizeGuide)}
+            selectedSize={selectedSize}
+          />
+          <InfoAccordion
+            title={isFoodOrDrinkCategory(product) ? 'Ingredients Used' : 'Materials Used'}
+            open={openInfo.materials}
+            onToggle={() => toggleInfo('materials')}
+            className="border-purple-200 bg-purple-50/50"
+            titleClassName="text-purple-800"
+          >
+            <div className="flex flex-wrap gap-1.5">
+              {(materials.length > 0 ? materials : ['Not specified']).map((m) => (
+                <span key={m} className="inline-flex items-center rounded-md bg-purple-100 dark:bg-purple-950/50 px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-300">{m}</span>
+              ))}
+            </div>
+          </InfoAccordion>
+          <InfoAccordion
+            title="Why This Product is Sustainable"
+            open={openInfo.why}
+            onToggle={() => toggleInfo('why')}
+            className="border-emerald-300 bg-emerald-50/50"
+            titleClassName="text-emerald-800"
+          >
+            <ul className="mt-2 space-y-2">
+              {sustainabilityReasons.map((reason) => (
+                <li key={reason} className="text-sm sm:text-base text-stone-700 dark:text-stone-300 leading-relaxed">✓ {reason}</li>
+              ))}
+            </ul>
+          </InfoAccordion>
+          <InfoAccordion
+            title="Environmental Impact"
+            open={openInfo.impact}
+            onToggle={() => toggleInfo('impact')}
+            className="border-sky-300 bg-sky-50/50"
+            titleClassName="text-sky-800"
+          >
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-sm text-stone-600 dark:text-stone-400">
+                <span>Sustainability Score</span>
+                <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-base">{score100}/100</span>
               </div>
-            </Accordion>
-
-            <Accordion
-              title="Sustainability details"
-              open={openSections.sustainability}
-              onToggle={() => toggleSection('sustainability')}
-            >
-              <SustainabilityBadge product={product} />
-            </Accordion>
-          </div>
-          {isAuthenticated && (
-            <AddToCartButton product={product} />
-          )}
-          {!isAuthenticated && (
-            <p className="mt-4 text-stone-500 text-sm">
-              <Link to="/login" className="text-emerald-600 hover:underline">Sign in</Link> to add to cart.
-            </p>
-          )}
+              <div className="mt-1.5 h-3 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${score100}%` }} />
+              </div>
+            </div>
+            <div className="mt-2 rounded-md border border-sky-200/70 bg-sky-100/35 p-3">
+              <p className="text-sm font-semibold text-sky-900 dark:text-sky-200">Carbon Footprint Savings</p>
+              <p className="text-base text-stone-700 dark:text-stone-300 mt-1.5 leading-relaxed">
+                This product saves approximately <span className="font-semibold text-emerald-700">{carbonSaving.toFixed(1)} kg CO2</span> compared to traditional alternatives.
+              </p>
+            </div>
+          </InfoAccordion>
+          <InfoAccordion
+            title="Certifications & standards"
+            open={openInfo.certifications}
+            onToggle={() => toggleInfo('certifications')}
+            className="border-amber-300 bg-amber-50/60"
+            titleClassName="text-amber-800"
+          >
+            <div className="flex flex-wrap gap-1.5">
+              {certificationChips.map((cert) => (
+                <span
+                  key={cert}
+                  className="inline-flex items-center rounded-md border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/40 px-3 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-200"
+                >
+                  {cert}
+                </span>
+              ))}
+            </div>
+          </InfoAccordion>
         </div>
       </div>
-      <div className="mt-8">
-        <ReviewList productId={product.id} productName={product.name} key={`${product.id}-${reviewVersion}`} />
+      <div className="mt-3 sm:mt-4 border-t border-emerald-200/50 pt-3 sm:pt-4">
+        <ReviewList productId={product.id} productName={displayName} key={`${product.id}-${reviewVersion}`} />
         <ReviewForm productId={product.id} canReview={canReview} onSubmitted={() => setReviewVersion((v) => v + 1)} />
       </div>
+
+      {(relatedLoading || relatedSimilar.length > 0 || relatedTogether.length > 0) && (
+        <div className="mt-10 sm:mt-12 space-y-10 sm:space-y-12 border-t border-stone-200 dark:border-stone-700 pt-8 sm:pt-10">
+          {relatedLoading && (
+            <p className="text-sm text-stone-500 dark:text-stone-400">Loading recommendations…</p>
+          )}
+
+          {!relatedLoading && relatedSimilar.length > 0 && (
+            <section className="w-full" aria-labelledby="related-similar-heading">
+              <div className="flex flex-wrap items-end justify-between gap-3 mb-4 sm:mb-5">
+                <div>
+                  <h2 id="related-similar-heading" className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
+                    You may also like
+                  </h2>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
+                    Similar items from {product.category?.name || 'this category'}.
+                  </p>
+                </div>
+                <Link
+                  to={categoryLink}
+                  className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:underline shrink-0"
+                >
+                  View all in category →
+                </Link>
+              </div>
+              <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                {relatedSimilar.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {!relatedLoading && relatedTogether.length > 0 && (
+            <section className="w-full" aria-labelledby="related-together-heading">
+              <div className="mb-4 sm:mb-5">
+                <h2 id="related-together-heading" className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
+                  Frequently bought together
+                </h2>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
+                  Popular pairings shoppers add alongside products like this one (same category).
+                </p>
+              </div>
+              <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-5xl">
+                {relatedTogether.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
-function Accordion({ title, open, onToggle, children }) {
+function InfoAccordion({ title, open, onToggle, className = '', titleClassName = '', children }) {
   return (
-    <section className="rounded-xl border border-stone-200 bg-white overflow-hidden">
+    <section className={`rounded-xl border px-3 py-2.5 sm:px-4 sm:py-3 ${className}`}>
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-stone-50"
+        className="w-full flex items-center justify-between text-left py-1 gap-3"
+        aria-expanded={open}
       >
-        <span className="text-base font-semibold text-stone-800">{title}</span>
-        <span className={`text-stone-600 transition-transform ${open ? 'rotate-180' : ''}`}>▼</span>
+        <h3 className={`font-semibold text-base sm:text-lg ${titleClassName}`}>{title}</h3>
+        <span className={`text-stone-600 dark:text-stone-400 text-lg leading-none shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}>⌄</span>
       </button>
-      {open && (
-        <div className="px-4 pb-4">
-          {children}
-        </div>
-      )}
+      {open && <div className="mt-3">{children}</div>}
     </section>
   )
 }
-
-function AddToCartButton({ product }) {
+function AddToCartButton({ product, isAuthenticated, requiresSize = false, selectedSize = '' }) {
   const [adding, setAdding] = useState(false)
   const [done, setDone] = useState(false)
+  const [qty, setQty] = useState(1)
   const { user } = useAuth()
 
   const handleAdd = async () => {
     if (!user) return
+    if (requiresSize && !selectedSize) return
     setAdding(true)
     setDone(false)
-    const { data: existing } = await supabase.from('cart_items').select('quantity').eq('user_id', user.id).eq('product_id', product.id).maybeSingle()
-    const newQty = (existing?.quantity ?? 0) + 1
+    const normalizedSize = requiresSize ? selectedSize : ''
+    let existingQuery = supabase
+      .from('cart_items')
+      .select('quantity')
+      .eq('user_id', user.id)
+      .eq('product_id', product.id)
+    if (normalizedSize) existingQuery = existingQuery.eq('size', normalizedSize)
+    else existingQuery = existingQuery.eq('size', '')
+    const { data: existing } = await existingQuery.maybeSingle()
+    const newQty = (existing?.quantity ?? 0) + qty
     const { error } = await supabase.from('cart_items').upsert(
-      { user_id: user.id, product_id: product.id, quantity: newQty },
-      { onConflict: 'user_id,product_id' }
+      { user_id: user.id, product_id: product.id, size: normalizedSize, quantity: newQty },
+      { onConflict: 'user_id,product_id,size' }
     )
     setAdding(false)
     if (!error) {
@@ -262,19 +570,49 @@ function AddToCartButton({ product }) {
   }
 
   return (
-    <div className="mt-6">
-      <button
-        type="button"
-        onClick={handleAdd}
-        disabled={adding}
-        className="px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50"
-      >
-        {adding ? 'Adding...' : done ? 'Added to cart' : 'Add to cart'}
-      </button>
-      {done && (
-        <Link to="/cart" className="ml-3 text-emerald-600 hover:underline text-sm">
+    <div className="pt-1">
+      <div className="flex gap-2">
+        <div className="flex items-center rounded-lg border border-stone-300 bg-white">
+          <button
+            type="button"
+            onClick={() => setQty((q) => Math.max(1, q - 1))}
+            className="px-2.5 py-2 text-stone-700 hover:bg-stone-50 text-sm"
+            aria-label="Decrease quantity"
+          >
+            -
+          </button>
+          <span className="w-9 text-center text-sm font-medium text-stone-700">{qty}</span>
+          <button
+            type="button"
+            onClick={() => setQty((q) => Math.min(9, q + 1))}
+            className="px-2.5 py-2 text-stone-700 hover:bg-stone-50 text-sm"
+            aria-label="Increase quantity"
+          >
+            +
+          </button>
+        </div>
+        {isAuthenticated ? (
+          <button
+            type="button"
+            onClick={handleAdd}
+            disabled={adding || (requiresSize && !selectedSize)}
+            className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {adding ? 'Adding...' : done ? 'Added to Cart' : 'Add to Cart'}
+          </button>
+        ) : (
+          <Link to="/login" className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-center text-sm font-semibold rounded-lg hover:bg-emerald-700">
+            Sign In to Add
+          </Link>
+        )}
+      </div>
+      {done && isAuthenticated && (
+        <Link to="/cart" className="inline-block mt-2 text-emerald-600 hover:underline text-sm">
           View cart
         </Link>
+      )}
+      {requiresSize && !selectedSize && (
+        <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">Choose a size to add this item to cart.</p>
       )}
     </div>
   )

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, deleteCurrentAuthUser, mapSupabaseAuthError } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
@@ -9,11 +9,17 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session)
+        setUser(session?.user ?? null)
+        setLoading(false)
+      })
+      .catch((e) => {
+        console.warn('[EcoShop] getSession failed:', e)
+        setLoading(false)
+      })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
@@ -24,28 +30,42 @@ export function AuthProvider({ children }) {
   }, [])
 
   const signUp = async (email, password, metadata = {}) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: metadata },
-    })
-    return { data, error }
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: metadata },
+      })
+      return { data, error: error ? mapSupabaseAuthError(error) : null }
+    } catch (e) {
+      return { data: null, error: mapSupabaseAuthError(e) }
+    }
   }
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    return { data, error }
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      return { data, error: error ? mapSupabaseAuthError(error) : null }
+    } catch (e) {
+      return { data: null, error: mapSupabaseAuthError(e) }
+    }
   }
 
   const signOut = async () => {
     await supabase.auth.signOut()
   }
 
+  const deleteAccount = async (credentials) => deleteCurrentAuthUser(credentials)
+
   const resetPassword = async (email) => {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/login`,
-    })
-    return { data, error }
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login`,
+      })
+      return { data, error: error ? mapSupabaseAuthError(error) : null }
+    } catch (e) {
+      return { data: null, error: mapSupabaseAuthError(e) }
+    }
   }
 
   const value = {
@@ -55,6 +75,7 @@ export function AuthProvider({ children }) {
     signUp,
     signIn,
     signOut,
+    deleteAccount,
     resetPassword,
     isAuthenticated: !!user,
   }

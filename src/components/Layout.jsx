@@ -1,95 +1,138 @@
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../hooks/useCart'
-import { useProfile } from '../hooks/useProfile'
+import { isSupabaseConfigured } from '../lib/supabase'
 import { CartIcon, PersonIcon } from './Icons'
+import AccountDropdown from './AccountDropdown'
+import HomeAnnouncementBar from './HomeAnnouncementBar'
+import SiteFooter from './SiteFooter'
+
+const contentPad = 'px-4 sm:px-6 lg:px-8'
+const contentWidth = 'max-w-7xl mx-auto w-full'
+
+const navLinkClass =
+  'text-sm sm:text-[0.9375rem] font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 px-1.5 py-1.5 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
+const navLinkActiveClass =
+  'text-sm sm:text-[0.9375rem] font-semibold text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 px-1.5 py-1.5 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 
 export default function Layout() {
   const { signOut, isAuthenticated } = useAuth()
   const { items } = useCart()
-  const { canManageProducts } = useProfile()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
+  const isProductDetail = /^\/products\/[^/]+$/.test(location.pathname)
+  const mainHorizontalPadding = isAuthPage ? 'px-0' : contentPad
   const cartCount = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
+  const isHome = location.pathname === '/'
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50">
-      <header className="border-b border-emerald-200 bg-gradient-to-r from-white via-emerald-50 to-teal-50 shadow-sm sticky top-0 z-10">
-        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2 text-emerald-800 hover:text-emerald-700 shrink-0">
-            <img src="/favicon.svg" alt="" aria-hidden="true" className="w-7 h-7" />
-            <span className="text-xl font-semibold">EcoShop</span>
+    <div
+      className={`min-h-screen flex flex-col ${
+        isAuthPage
+          ? 'bg-emerald-100/70 dark:bg-emerald-950/40'
+          : isProductDetail
+            ? 'bg-emerald-50/85 dark:bg-emerald-950/35'
+            : 'bg-stone-50 dark:bg-stone-900'
+      }`}
+    >
+      {isHome && <HomeAnnouncementBar />}
+      <header className="overflow-visible border-b border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-white via-emerald-50 to-teal-50 dark:from-stone-900 dark:via-emerald-950/50 dark:to-stone-900 shadow-sm sticky top-0 z-20">
+        <div className={`${contentWidth} ${contentPad} py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3`}>
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 hover:text-emerald-700 dark:hover:text-emerald-200 shrink-0 py-0.5"
+          >
+            <img src="/favicon-96x96.png" alt="" aria-hidden="true" className="w-8 h-8 sm:w-9 sm:h-9" />
+            <span className="text-lg sm:text-xl font-bold tracking-tight">EcoShop</span>
           </Link>
-          <nav className="w-full sm:w-auto flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-6">
-            <Link to="/products" className="text-stone-600 hover:text-emerald-700 text-sm">
+          <nav className="w-full sm:w-auto flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2 sm:gap-y-1.5">
+            <Link to="/" className={navLinkActiveClass}>
+              Home
+            </Link>
+            <Link to="/products" className={navLinkClass}>
               Products
             </Link>
-            <Link to="/about" className="text-stone-600 hover:text-emerald-700 text-sm">
+            <Link to="/about" className={navLinkClass}>
               About
             </Link>
-            <Link to="/cart" className="relative flex items-center text-stone-600 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-stone-100" aria-label="Shopping cart">
-              <CartIcon className="w-6 h-6" />
+            <Link
+              to="/cart"
+              className={`relative inline-flex items-center gap-1.5 ${navLinkClass}`}
+            >
+              <CartIcon className="w-5 h-5 shrink-0" aria-hidden />
+              <span>Cart</span>
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[1.25rem] h-5 px-1 flex items-center justify-center bg-emerald-600 text-white text-xs font-medium rounded-full">
+                <span className="min-w-[1.125rem] h-5 px-1 flex items-center justify-center bg-emerald-600 text-white text-[0.65rem] font-semibold rounded-full leading-none">
                   {cartCount}
                 </span>
               )}
             </Link>
-            {isAuthenticated && (
-              <Link to="/wishlist" className="text-stone-600 hover:text-emerald-700 text-sm">
-                Wishlist
-              </Link>
-            )}
-            <Link to="/dashboard" className="text-stone-600 hover:text-emerald-700 text-sm">
-              Dashboard
-            </Link>
-            {canManageProducts && (
-              <Link to="/admin/products" className="text-stone-600 hover:text-emerald-700 text-sm">
-                Dev tools
-              </Link>
-            )}
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/profile"
-                  className="inline-flex items-center gap-1.5 text-stone-600 hover:text-emerald-700 text-sm"
-                  aria-label="Profile"
-                >
-                  <PersonIcon className="w-5 h-5" />
+                <Link to="/dashboard" className={navLinkClass}>
+                  Dashboard
                 </Link>
+                <AccountDropdown />
                 <button
                   type="button"
-                  onClick={() => signOut()}
-                  className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1.5"
+                  onClick={async () => {
+                    try {
+                      await signOut()
+                    } catch (e) {
+                      console.warn('[EcoShop] signOut failed:', e)
+                    } finally {
+                      navigate('/login', { replace: true })
+                    }
+                  }}
+                  className="text-sm sm:text-[0.9375rem] font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-1.5 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                   aria-label="Log out"
                 >
-                  <span>Logout</span>
+                  Log out
                 </button>
               </>
             ) : (
-              <>
+              <span className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700"
+                  className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2 bg-emerald-600 text-white text-sm sm:text-[0.9375rem] font-semibold rounded-xl hover:bg-emerald-700 shadow-sm"
                   aria-label="Log in"
                 >
-                  <PersonIcon className="w-5 h-5" />
+                  <PersonIcon className="w-5 h-5 shrink-0" />
                   <span>Login</span>
                 </Link>
-                <Link to="/signup" className="text-stone-600 hover:text-emerald-700 text-sm font-medium">
+                <Link
+                  to="/signup"
+                  className="text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-sm sm:text-[0.9375rem] font-semibold px-3 py-2 rounded-xl hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30 border border-transparent hover:border-emerald-200/80 dark:hover:border-emerald-700/50"
+                >
                   Sign up
                 </Link>
-              </>
+              </span>
             )}
           </nav>
         </div>
       </header>
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 text-[15px] sm:text-base">
+      {!isSupabaseConfigured && (
+        <div
+          className="bg-amber-100 dark:bg-amber-950/80 border-b border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-100 text-center text-xs sm:text-sm px-4 py-2"
+          role="status"
+        >
+          <strong className="font-semibold">Backend not configured.</strong> Add{' '}
+          <code className="rounded bg-amber-200/80 dark:bg-amber-900/60 px-1 py-0.5 text-[0.8em]">VITE_SUPABASE_URL</code> and{' '}
+          <code className="rounded bg-amber-200/80 dark:bg-amber-900/60 px-1 py-0.5 text-[0.8em]">VITE_SUPABASE_ANON_KEY</code> in
+          your host&apos;s environment variables, then redeploy.
+        </div>
+      )}
+      <main
+        className={`flex-1 text-stone-900 dark:text-stone-100 ${
+          isAuthPage
+            ? 'w-full max-w-none mx-0 px-0 py-0'
+            : `${contentWidth} ${mainHorizontalPadding} py-4 sm:py-6`
+        } ${!isAuthPage ? 'text-sm sm:text-base leading-relaxed' : ''}`}
+      >
         <Outlet />
       </main>
-      <footer className="border-t border-emerald-200 bg-gradient-to-r from-white to-emerald-50 py-6 mt-auto">
-        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center text-stone-500 text-sm">
-          EcoShop – Sustainable shopping for a greener future.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
