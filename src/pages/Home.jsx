@@ -5,7 +5,7 @@ import { getCategoryCardSrc, getCategoryImageObjectPosition } from '../lib/categ
 import { mergeCategoryRowForHome } from '../lib/categoryImageLocalStorage'
 import { mergeGardenOutdoorsForHome, mergeHomeOfficeForHome } from '../lib/storefrontCategoryMerge'
 import { categoryCardDescription } from '../lib/categoryCardCopy'
-import { LeafIcon, TruckIcon, PackageIcon, RecycleIcon, CheckCircleIcon, ArrowUpIcon } from '../components/Icons'
+import { MaterialsIcon, TruckIcon, PackageIcon, RecycleIcon, CheckCircleIcon, ArrowUpIcon } from '../components/Icons'
 import { FREE_SHIPPING_MIN_SUBTOTAL } from '../lib/shipping'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
@@ -13,7 +13,7 @@ const COMMITMENTS = [
   {
     title: 'Responsible materials',
     description: 'Products made from recycled, organic, and fair trade certified materials.',
-    Icon: LeafIcon,
+    Icon: MaterialsIcon,
   },
   {
     title: 'Carbon Footprint Reduction',
@@ -147,7 +147,7 @@ export default function Home() {
           {COMMITMENTS.map(({ title, description, Icon }) => (
             <div
               key={title}
-              className="rounded-xl border border-emerald-100 dark:border-emerald-800/80 bg-white dark:bg-stone-900 p-4 sm:p-5 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-600 transition-all"
+              className="rounded-xl border border-emerald-100 dark:border-emerald-800/80 bg-white dark:bg-stone-900 p-4 sm:p-5 shadow-sm"
             >
               <div className="flex items-center gap-2.5 mb-2">
                 <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
