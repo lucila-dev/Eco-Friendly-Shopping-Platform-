@@ -209,6 +209,36 @@ export default function Home() {
           <p className="text-stone-500 dark:text-stone-400">No categories yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 hover:underline">Browse all products</Link>.</p>
         )}
       </section>
+
+      <section
+        className="relative w-screen max-w-[100vw] left-1/2 -translate-x-1/2 mt-10 sm:mt-12 bg-emerald-600 dark:bg-emerald-700 text-white py-10 sm:py-14 px-4 sm:px-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+        aria-labelledby="impact-heading"
+      >
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 id="impact-heading" className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">
+            Together We&apos;re Making a Difference
+          </h2>
+          <p className="text-sm sm:text-base text-emerald-50/95 max-w-xl mx-auto leading-relaxed mb-8 sm:mb-10">
+            Join thousands of eco-conscious shoppers reducing their carbon footprint
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
+            <div>
+              <p className="text-3xl sm:text-4xl font-bold tabular-nums text-white">12,500+</p>
+              <p className="text-sm sm:text-base text-emerald-100/90 mt-1 font-medium">Products Sold</p>
+            </div>
+            <div>
+              <p className="text-3xl sm:text-4xl font-bold tabular-nums text-white">25 tons</p>
+              <p className="text-sm sm:text-base text-emerald-100/90 mt-1 font-medium">
+                CO<span className="text-[0.75em]">₂</span> Saved
+              </p>
+            </div>
+            <div>
+              <p className="text-3xl sm:text-4xl font-bold tabular-nums text-white">8,300+</p>
+              <p className="text-sm sm:text-base text-emerald-100/90 mt-1 font-medium">Happy Customers</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
