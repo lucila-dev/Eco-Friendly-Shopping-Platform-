@@ -6,8 +6,53 @@ import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 import { SUPPORT_EMAIL } from '../lib/supportContact'
+import { PackageIcon, ImpactChartIcon } from '../components/Icons'
+import co2SavedIcon from '../assets/co2-saved-icon.png'
 
 const LEADERBOARD_MIN_KG = 0.01
+
+/** Shared shell so all stat cards share one row height (grid stretch + h-full). */
+const DASHBOARD_SUMMARY_CARD_CLASS =
+  'rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900 p-4 sm:p-5 shadow-sm flex flex-col gap-1.5 min-h-[9.5rem] h-full'
+
+/**
+ * Illustrative equivalents from the user's total kg CO2 saved on orders (sum of order_items.carbon_saving_kg).
+ * Ratios: tree-equivalent index = 50x kg CO2, water = 15 L per kg CO2, waste = 2 kg diverted per kg CO2.
+ */
+function environmentalEquivalentsFromCo2Kg(totalCarbonKg) {
+  const co2 = Math.max(0, Number(totalCarbonKg) || 0)
+  return {
+    treesEquivalent: Math.round(co2 * 50),
+    waterLiters: Math.round(co2 * 15),
+    wasteDivertedKg: Math.round(co2 * 2),
+  }
+}
+
+/** ~0.4 kg CO₂ per km — rough average passenger car (illustrative). */
+function kmDrivingEquivalentFromCo2Kg(totalCarbonKg) {
+  const kg = Math.max(0, Number(totalCarbonKg) || 0)
+  if (kg <= 0) return 0
+  return Math.round(kg / 0.4)
+}
+
+function ecoLevelFromCarbonKg(totalCarbonKg) {
+  const kg = Math.max(0, Number(totalCarbonKg) || 0)
+  if (kg < 5) return { label: 'Starter', hint: 'Your first sustainable picks add up fast.' }
+  if (kg < 15) return { label: 'Bronze', hint: 'Nice work — keep choosing lower-impact products.' }
+  if (kg < 55) return { label: 'Silver', hint: 'Keep shopping sustainably!' }
+  if (kg < 120) return { label: 'Gold', hint: 'Outstanding impact' }
+  return { label: 'Emerald', hint: 'Champion tier — thank you for going the extra mile.' }
+}
+
+function SummaryMedalIcon({ className = 'w-7 h-7' }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="9" r="6" fill="#fbbf24" stroke="#d97706" strokeWidth="1.25" />
+      <path d="M8.5 14.5L7 22l5-3 5 3-1.5-7.5" fill="none" stroke="#d97706" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 const LEADERBOARD_RPC_LIMIT = 50
 const LEADERBOARD_SHOW = 12
 
@@ -367,6 +412,7 @@ export default function Dashboard() {
   const [orders, setOrders] = useState([])
   const [myReviews, setMyReviews] = useState([])
   const [greenImpact, setGreenImpact] = useState({ totalCarbonSaved: 0, orderCount: 0 })
+  const [realOrderStats, setRealOrderStats] = useState({ count: 0, totalSpent: 0 })
   const [carbonByOrderId, setCarbonByOrderId] = useState({})
   const [chartGranularity, setChartGranularity] = useState('week')
   const [communityBoard, setCommunityBoard] = useState([])
@@ -386,6 +432,21 @@ export default function Dashboard() {
           ? 'by month'
           : 'by year'
 
+  const impactEquivalents = useMemo(
+    () => environmentalEquivalentsFromCo2Kg(greenImpact.totalCarbonSaved),
+    [greenImpact.totalCarbonSaved],
+  )
+
+  const kmDrivingEquiv = useMemo(
+    () => kmDrivingEquivalentFromCo2Kg(greenImpact.totalCarbonSaved),
+    [greenImpact.totalCarbonSaved],
+  )
+
+  const ecoLevel = useMemo(
+    () => ecoLevelFromCarbonKg(greenImpact.totalCarbonSaved),
+    [greenImpact.totalCarbonSaved],
+  )
+
   useEffect(() => {
     document.title = 'Dashboard · EcoShop'
     return () => { document.title = 'EcoShop · Sustainable Shopping' }
@@ -399,6 +460,7 @@ export default function Dashboard() {
       setOrders([])
       setMyReviews([])
       setGreenImpact({ totalCarbonSaved: 0, orderCount: 0 })
+      setRealOrderStats({ count: 0, totalSpent: 0 })
       setCarbonByOrderId({})
       setCommunityBoard([])
       setLoading(false)
@@ -441,6 +503,9 @@ export default function Dashboard() {
       Object.assign(carbonByOrderIdNext, carbonByOrderIdSynthetic)
       const totalCarbonSaved = Object.values(carbonByOrderIdNext).reduce((sum, value) => sum + value, 0)
 
+      const totalSpentReal = realOrders.reduce((s, o) => s + (Number(o.total_amount) || 0), 0)
+      setRealOrderStats({ count: realOrders.length, totalSpent: totalSpentReal })
+
       const myDisplayName = profileRes.data?.display_name
       let board
       if (leaderboardRes.error) {
@@ -472,23 +537,109 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-4">Your dashboard</h1>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-5">Your dashboard</h1>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 items-stretch">
+        <div className={DASHBOARD_SUMMARY_CARD_CLASS}>
+          <img
+            src={co2SavedIcon}
+            alt=""
+            width={32}
+            height={32}
+            className="w-8 h-8 shrink-0 object-contain"
+            decoding="async"
+          />
+          <p className="text-[0.7rem] sm:text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
+            Total CO₂ Saved
+          </p>
+          <p className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5">
+            {greenImpact.totalCarbonSaved.toFixed(1)} kg
+          </p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
+            Equal to {kmDrivingEquiv.toLocaleString()} km driven
+          </p>
+        </div>
+        <div className={DASHBOARD_SUMMARY_CARD_CLASS}>
+          <span className="text-blue-600 dark:text-blue-400">
+            <PackageIcon className="w-8 h-8 shrink-0" />
+          </span>
+          <p className="text-[0.7rem] sm:text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
+            Total Orders
+          </p>
+          <p className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tabular-nums mt-0.5">
+            {realOrderStats.count.toLocaleString()}
+          </p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
+            Since joining EcoShop
+          </p>
+        </div>
+        <div className={DASHBOARD_SUMMARY_CARD_CLASS}>
+          <span className="text-violet-600 dark:text-violet-400">
+            <ImpactChartIcon className="w-8 h-8 shrink-0" />
+          </span>
+          <p className="text-[0.7rem] sm:text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
+            Total Spent
+          </p>
+          <p className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tabular-nums mt-0.5">
+            {format(realOrderStats.totalSpent)}
+          </p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
+            On sustainable products
+          </p>
+        </div>
+        <div className={DASHBOARD_SUMMARY_CARD_CLASS}>
+          <SummaryMedalIcon className="w-8 h-8 shrink-0" />
+          <p className="text-[0.7rem] sm:text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
+            Eco Level
+          </p>
+          <p className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 mt-0.5">{ecoLevel.label}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
+            {ecoLevel.hint}
+          </p>
+        </div>
+      </div>
+
+      <section
+        className="rounded-2xl border border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/50 dark:bg-emerald-950/35 px-5 py-7 sm:px-8 sm:py-8 mb-6 shadow-sm"
+        aria-labelledby="env-impact-banner-title"
+      >
+        <h2 id="env-impact-banner-title" className="text-left text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-8">
+          Your Environmental Impact
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
+          <div className="flex flex-col items-center text-center">
+            <span className="text-4xl sm:text-5xl leading-none mb-4" aria-hidden>
+              {'\u{1F331}'}
+            </span>
+            <p className="text-2xl sm:text-3xl font-bold tabular-nums text-stone-900 dark:text-stone-100">
+              {impactEquivalents.treesEquivalent.toLocaleString()}
+            </p>
+            <p className="text-sm font-semibold text-stone-700 dark:text-stone-300 mt-2">Trees planted equivalent</p>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <span className="text-4xl sm:text-5xl leading-none mb-4" aria-hidden>
+              {'\u{1F4A7}'}
+            </span>
+            <p className="text-2xl sm:text-3xl font-bold tabular-nums text-stone-900 dark:text-stone-100">
+              {impactEquivalents.waterLiters.toLocaleString()} L
+            </p>
+            <p className="text-sm font-semibold text-stone-700 dark:text-stone-300 mt-2">Water saved</p>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <span className="text-4xl sm:text-5xl leading-none mb-4" aria-hidden>
+              {'\u267B\uFE0F'}
+            </span>
+            <p className="text-2xl sm:text-3xl font-bold tabular-nums text-stone-900 dark:text-stone-100">
+              {impactEquivalents.wasteDivertedKg.toLocaleString()} kg
+            </p>
+            <p className="text-sm font-semibold text-stone-700 dark:text-stone-300 mt-2">Waste diverted from landfill</p>
+          </div>
+        </div>
+      </section>
 
       <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/50 dark:bg-emerald-950/35 p-5 md:p-6 mb-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">Your green impact</h2>
-        <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mb-1.5">
-          By choosing eco-friendly products, you have saved an estimated:
-        </p>
-        <p className="text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-400">
-          {greenImpact.totalCarbonSaved.toFixed(1)} kg CO₂
-        </p>
-        <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base mt-1">
-          Across {greenImpact.orderCount} {greenImpact.orderCount === 1 ? 'order' : 'orders'}.
-        </p>
-        <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mt-2">
-          Your contribution to the environment through your purchases is shown above.
-        </p>
-        <div className="mt-5">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-4">Your green impact over time</h2>
+        <div className="mt-1">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
             <p className="text-base font-semibold text-stone-800 dark:text-stone-200">Estimated CO₂ saved over time</p>
             <div
@@ -517,10 +668,6 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
-          <p className="text-sm text-stone-600 dark:text-stone-400 mb-3">
-            Switch grouping for day-by-day noise, weekly rollups (weeks start Monday), monthly totals, or yearly totals.
-            Empty days/weeks/months show as 0 kg.
-          </p>
           <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-stone-900/90 p-4 md:p-5 overflow-x-auto">
             <Co2LineChart data={chartData} periodDescription={chartPeriodDescription} />
           </div>
