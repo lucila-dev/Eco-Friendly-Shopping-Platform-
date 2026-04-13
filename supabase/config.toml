@@ -1,0 +1,8 @@
+# Supabase local / deploy config (optional for DB; needed for Edge Functions workflow).
+# Deploy the delete-account function:
+#   supabase link --project-ref <your-project-ref>
+#   supabase secrets set SERVICE_ROLE_KEY=<service_role_jwt>
+#   supabase functions deploy delete-account
+
+[functions.delete-account]
+verify_jwt = false
