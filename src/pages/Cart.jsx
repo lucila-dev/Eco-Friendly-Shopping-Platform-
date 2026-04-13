@@ -6,7 +6,7 @@ import { FREE_SHIPPING_MIN_SUBTOTAL, getDeliveryFee, STANDARD_DELIVERY_FEE } fro
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
 export default function Cart() {
-  const { items, loading, updateQuantity, removeItem, total } = useCart()
+  const { items, loading, error, updateQuantity, removeItem, total } = useCart()
   const { format } = useFormatPrice()
   const deliveryFee = getDeliveryFee(total)
   const finalTotal = total + deliveryFee
@@ -16,6 +16,22 @@ export default function Cart() {
   }, [])
 
   if (loading) return <p className="text-stone-500 dark:text-stone-400">Loading cart...</p>
+
+  if (error) {
+    return (
+      <div>
+        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Your cart</h1>
+        <p className="text-red-600 dark:text-red-400 text-sm mb-3">Could not load your cart: {error}</p>
+        <p className="text-stone-600 dark:text-stone-400 text-sm">
+          Check your connection and Supabase settings, then{' '}
+          <Link to="/products" className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium">
+            continue shopping
+          </Link>
+          .
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div>
