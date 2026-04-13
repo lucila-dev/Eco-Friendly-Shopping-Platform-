@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "eco-friendly-shopping-platform",
   "private": true,
   "version": "0.0.0",
@@ -14,7 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.99.1",
+    "@supabase/supabase-js": "^2.103.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.1"
@@ -31,9 +30,5 @@
     "globals": "^16.5.0",
     "tailwindcss": "^4.2.1",
     "vite": "^7.3.1"
-=======
-  "dependencies": {
-    "@supabase/supabase-js": "^2.103.0"
->>>>>>> ded571e (first commit)
   }
 }
