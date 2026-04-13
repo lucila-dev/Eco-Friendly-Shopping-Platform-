@@ -4,10 +4,28 @@ import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
 export default function CartItem({ item, onUpdate, onRemove }) {
-  const product = item.products
-  if (!product) return null
-  const displayName = formatCatalogProductName(product.name)
   const { format } = useFormatPrice()
+  const product = Array.isArray(item.products) ? item.products[0] : item.products
+  if (!product?.slug) {
+    return (
+      <div className="flex gap-3 py-3 border-b border-stone-200 dark:border-stone-600 last:border-0">
+        <div className="shrink-0 w-[4.5rem] h-[4.5rem] rounded-lg bg-stone-200 dark:bg-stone-700" aria-hidden />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-stone-800 dark:text-stone-100">Product unavailable</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">This item may have been removed from the catalog.</p>
+          <button
+            type="button"
+            onClick={() => onRemove(item.id)}
+            className="mt-2 text-red-600 dark:text-red-400 text-sm hover:underline"
+          >
+            Remove from cart
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const displayName = formatCatalogProductName(product.name)
 
   return (
     <div className="flex gap-3 py-3 border-b border-stone-200 dark:border-stone-600 last:border-0">
@@ -31,7 +49,9 @@ export default function CartItem({ item, onUpdate, onRemove }) {
         <div className="flex items-center gap-2 mt-1">
           <button
             type="button"
-            onClick={() => onUpdate(item.id, item.quantity - 1)}
+            onClick={() =>
+              item.quantity <= 1 ? onRemove(item.id) : onUpdate(item.id, item.quantity - 1)
+            }
             className="w-7 h-7 rounded border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
             aria-label="Decrease"
           >

@@ -61,7 +61,12 @@ export function useCart() {
   }, [user?.id])
 
   const updateQuantity = async (cartItemId, quantity) => {
-    if (quantity < 1) return
+    if (quantity < 1) {
+      await supabase.from('cart_items').delete().eq('id', cartItemId)
+      window.dispatchEvent(new Event(CART_UPDATED_EVENT))
+      await fetchCart()
+      return
+    }
     await supabase.from('cart_items').update({ quantity }).eq('id', cartItemId)
     window.dispatchEvent(new Event(CART_UPDATED_EVENT))
     await fetchCart()
@@ -73,7 +78,10 @@ export function useCart() {
     await fetchCart()
   }
 
-  const total = items.reduce((sum, row) => sum + (row.quantity * (row.products?.price ?? 0)), 0)
+  const total = items.reduce((sum, row) => {
+    const p = Array.isArray(row.products) ? row.products[0] : row.products
+    return sum + row.quantity * (Number(p?.price) || 0)
+  }, 0)
 
   return { items, loading, updateQuantity, removeItem, refetch: fetchCart, total }
 }
