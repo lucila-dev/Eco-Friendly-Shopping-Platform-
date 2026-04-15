@@ -1,0 +1,107 @@
+-- =============================================================================
+-- Incomplete / mismatched orders (Supabase SQL editor or psql)
+--
+-- Symptoms in the app:
+--   • "No products are listed for this order" — order row exists, zero order_items.
+--   • Red mismatch text — sum(lines) + delivery ≠ orders.total_amount (missing lines,
+--     old bugs, or product prices changed after checkout).
+--
+-- You can: (1) delete bad rows, (2) snap total_amount to lines + shipping, or
+-- (3) manually INSERT order_items then fix totals (not scripted here — needs real SKUs).
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 1) PREVIEW — orders with no line items but a non-zero total (typical broken checkout)
+-- -----------------------------------------------------------------------------
+-- SELECT o.id,
+--        o.user_id,
+--        o.total_amount,
+--        o.shipping_amount,
+--        o.created_at,
+--        u.email
+-- FROM orders o
+-- LEFT JOIN order_items oi ON oi.order_id = o.id
+-- LEFT JOIN auth.users u ON u.id = o.user_id
+-- GROUP BY o.id, o.user_id, o.total_amount, o.shipping_amount, o.created_at, u.email
+-- HAVING COUNT(oi.id) = 0 AND o.total_amount > 0
+-- ORDER BY o.created_at DESC;
+
+-- -----------------------------------------------------------------------------
+-- 2) PREVIEW — orders that have lines but total ≠ subtotal + shipping_amount
+--    (Ignores promos/gift wrap stored only in shipping_address text — may flag false positives.)
+-- -----------------------------------------------------------------------------
+-- WITH agg AS (
+--   SELECT order_id,
+--          SUM(quantity * price_at_order)::numeric(10,2) AS subtotal
+--   FROM order_items
+--   GROUP BY order_id
+-- )
+-- SELECT o.id,
+--        o.user_id,
+--        u.email,
+--        o.total_amount,
+--        o.shipping_amount,
+--        a.subtotal,
+--        (a.subtotal + COALESCE(o.shipping_amount, 0))::numeric(10,2) AS expected_total,
+--        o.created_at
+-- FROM orders o
+-- JOIN agg a ON a.order_id = o.id
+-- LEFT JOIN auth.users u ON u.id = o.user_id
+-- WHERE ABS(o.total_amount - (a.subtotal + COALESCE(o.shipping_amount, 0))) > 0.05
+-- ORDER BY o.created_at DESC;
+
+-- =============================================================================
+-- 3) DELETE — all "empty" orders (no order_items) for one shopper, by email
+--    Run PREVIEW (1) first. Deleting the order removes nothing else if there are no items.
+--    To delete empties AND insert the same count of new March orders with lines, use:
+--    supabase/manual/replace_empty_orders_with_march_orders.sql
+-- =============================================================================
+-- DO $$
+-- DECLARE
+--   target_email text := 'your@email.com';
+--   uid uuid;
+--   n int;
+-- BEGIN
+--   SELECT id INTO uid FROM auth.users WHERE lower(trim(email)) = lower(trim(target_email)) LIMIT 1;
+--   IF uid IS NULL THEN
+--     RAISE EXCEPTION 'No auth user for email %.', target_email;
+--   END IF;
+--
+--   DELETE FROM orders o
+--   WHERE o.user_id = uid
+--     AND o.total_amount > 0
+--     AND NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.id);
+--
+--   GET DIAGNOSTICS n = ROW_COUNT;
+--   RAISE NOTICE 'Deleted % empty orders for %.', n, target_email;
+-- END $$;
+
+-- =============================================================================
+-- 4) DELETE — specific order IDs (paste UUIDs from the UI)
+-- =============================================================================
+-- DELETE FROM orders
+-- WHERE id IN (
+--   'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'::uuid,
+--   'ffffffff-gggg-hhhh-iiii-jjjjjjjjjjjj'::uuid
+-- );
+
+-- =============================================================================
+-- 5) REPAIR — set total_amount = sum(lines) + shipping_amount for mismatched orders
+--    Use when lines are correct but the header total is wrong (e.g. partial insert).
+--    Does NOT invent missing lines. Run PREVIEW (2) first.
+--    See: repair_order_totals_from_line_items.sql (preview, per-email, single UUID).
+-- =============================================================================
+-- WITH agg AS (
+--   SELECT order_id,
+--          SUM(quantity * price_at_order)::numeric(10,2) AS subtotal
+--   FROM order_items
+--   GROUP BY order_id
+-- )
+-- UPDATE orders o
+-- SET total_amount = (a.subtotal + COALESCE(o.shipping_amount, 0))::numeric(10,2)
+-- FROM agg a
+-- WHERE o.id = a.order_id
+--   AND ABS(o.total_amount - (a.subtotal + COALESCE(o.shipping_amount, 0))) > 0.05;
+
+-- After repair, backfill carbon on lines if needed:
+-- See backfill_order_item_carbon_from_products.sql

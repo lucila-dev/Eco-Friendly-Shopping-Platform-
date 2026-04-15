@@ -62,7 +62,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="w-full max-w-3xl mx-auto flex justify-center py-10">
-        <p className="text-stone-500 dark:text-stone-400 text-sm">Loading profile...</p>
+        <p className="text-stone-500 dark:text-stone-400 text-base">Loading profile...</p>
       </div>
     )
   }
@@ -173,13 +173,13 @@ export default function Profile() {
         <p className="mb-2">
           <Link
             to="/account"
-            className="text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+            className="text-base font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
           >
             ← Your account
           </Link>
         </p>
         <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Your profile</h1>
-        <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-md mx-auto leading-relaxed">
+        <p className="mt-2 text-base sm:text-lg text-stone-600 dark:text-stone-300 max-w-md mx-auto leading-relaxed">
           Update how you appear on EcoShop, check your loyalty balance, and jump back to shopping or your activity.
         </p>
       </header>
@@ -217,36 +217,36 @@ export default function Profile() {
               </button>
             </div>
             <p className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-100 mt-4">{displayName}</p>
-            <p className="text-stone-600 dark:text-stone-400 mt-2 text-sm sm:text-base break-all max-w-md">{user?.email}</p>
+            <p className="text-stone-600 dark:text-stone-400 mt-2 text-base sm:text-lg break-all max-w-md">{user?.email}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-6 sm:mt-8">
             <div className="rounded-xl border border-stone-100 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/60 px-4 py-4 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Member since</p>
-              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100 mt-1.5 leading-snug">{memberSinceLabel}</p>
+              <p className="text-base font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Member since</p>
+              <p className="text-base font-semibold text-stone-800 dark:text-stone-100 mt-1.5 leading-snug">{memberSinceLabel}</p>
             </div>
             <div className="rounded-xl border border-stone-100 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/60 px-4 py-4 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Loyalty snapshot</p>
+              <p className="text-base font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Loyalty snapshot</p>
               <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400 mt-1 tabular-nums">
                 {loyaltyBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })} pts
               </p>
             </div>
             <div className="rounded-xl border border-stone-100 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/60 px-4 py-4 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Redeem value</p>
+              <p className="text-base font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Redeem value</p>
               <p className="text-lg font-semibold text-stone-800 dark:text-stone-100 mt-1 tabular-nums">{format(usdToGbpApprox(redeemApproxUsd))}</p>
-              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">at checkout</p>
+              <p className="text-base text-stone-500 dark:text-stone-400 mt-0.5">at checkout</p>
             </div>
           </div>
 
           <div className="mt-6 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-5 sm:p-6 shadow-lg border border-emerald-500/40 text-center sm:text-left">
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-emerald-100/90">EcoShop loyalty</p>
+            <p className="text-base sm:text-lg font-semibold uppercase tracking-wide text-emerald-100/90">EcoShop loyalty</p>
             <p className="text-2xl sm:text-3xl font-bold mt-1.5 tabular-nums text-center sm:text-left">
               {loyaltyBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })} pts
             </p>
-            <p className="text-sm sm:text-base text-emerald-50 mt-2 leading-snug">
+            <p className="text-base sm:text-lg text-emerald-50 mt-2 leading-snug">
               {LOYALTY_POINTS_PER_DOLLAR} points = {format(usdToGbpApprox(1))} when redeemed at checkout.
             </p>
-            <p className="text-sm font-medium mt-1.5">
+            <p className="text-base font-medium mt-1.5">
               Balance worth about <span className="tabular-nums">{format(usdToGbpApprox(redeemApproxUsd))}</span> off eligible orders.
             </p>
           </div>
@@ -255,7 +255,7 @@ export default function Profile() {
             <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100 text-center sm:text-left mb-4">Edit your details</h2>
             <form onSubmit={saveProfile} className="space-y-4 max-w-lg mx-auto sm:mx-0">
               <div>
-                <label htmlFor="displayName" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+                <label htmlFor="displayName" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-2">
                   Display name
                 </label>
                 <input
@@ -263,53 +263,53 @@ export default function Profile() {
                   type="text"
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 placeholder:text-stone-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 text-base border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 placeholder:text-stone-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-50"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white text-base font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-50"
                 >
                   {savingProfile ? 'Saving...' : 'Save profile'}
                 </button>
               </div>
-              {profileMessage && <p className="text-sm text-red-700 dark:text-red-400">{profileMessage}</p>}
+              {profileMessage && <p className="text-base text-red-700 dark:text-red-400">{profileMessage}</p>}
             </form>
           </div>
         </div>
       </section>
 
       <section className="mt-8" aria-label="Quick links">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 text-center mb-3">Quick links</h2>
+        <h2 className="text-base font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 text-center mb-3">Quick links</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Link to="/products" className={shortcutClass}>
             <CartIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
-            <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Shop</span>
-            <span className="text-xs text-stone-500 dark:text-stone-400">Browse products</span>
+            <span className="text-base font-semibold text-stone-800 dark:text-stone-100">Shop</span>
+            <span className="text-base text-stone-500 dark:text-stone-400">Browse products</span>
           </Link>
           <Link to="/dashboard" className={shortcutClass}>
             <LeafIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
-            <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Impact</span>
-            <span className="text-xs text-stone-500 dark:text-stone-400">Your dashboard</span>
+            <span className="text-base font-semibold text-stone-800 dark:text-stone-100">Impact</span>
+            <span className="text-base text-stone-500 dark:text-stone-400">Your dashboard</span>
           </Link>
           <Link to="/orders" className={shortcutClass}>
             <TruckIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
-            <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Orders</span>
-            <span className="text-xs text-stone-500 dark:text-stone-400">Track shipments</span>
+            <span className="text-base font-semibold text-stone-800 dark:text-stone-100">Orders</span>
+            <span className="text-base text-stone-500 dark:text-stone-400">Track shipments</span>
           </Link>
           <Link to="/wishlist" className={shortcutClass}>
             <span className="text-xl" aria-hidden>
               ♡
             </span>
-            <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">Wishlist</span>
-            <span className="text-xs text-stone-500 dark:text-stone-400">Saved items</span>
+            <span className="text-base font-semibold text-stone-800 dark:text-stone-100">Wishlist</span>
+            <span className="text-base text-stone-500 dark:text-stone-400">Saved items</span>
           </Link>
         </div>
       </section>
 
-      <p className="mt-8 text-center text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-lg mx-auto leading-relaxed px-2">
+      <p className="mt-8 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-lg mx-auto leading-relaxed px-2">
         Earn more points with every purchase, then apply them at checkout to support a lower-impact basket.
       </p>
     </div>

@@ -67,15 +67,15 @@ export default function OrderConfirmation() {
   return (
     <div className="mx-auto w-full max-w-lg">
       <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2 text-center">Thank you for your order</h1>
-      <p className="text-stone-600 dark:text-stone-400 text-sm mb-6 text-center">
+      <p className="text-stone-600 dark:text-stone-400 text-base mb-6 text-center">
         Order <span className="font-mono text-stone-800 dark:text-stone-200">{order.id.slice(0, 8)}…</span> ·{' '}
         {order.created_at
           ? new Date(order.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
           : ''}
       </p>
 
-      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-stone-900/95 p-4 sm:p-5 shadow-sm text-left text-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-3">Receipt</p>
+      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-stone-900/95 p-4 sm:p-5 shadow-sm text-left text-base">
+        <p className="text-base font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-3">Receipt</p>
 
         {lineItems.length > 0 ? (
           <ul className="space-y-2 border-b border-emerald-100 dark:border-emerald-900/80 pb-3 mb-3">
@@ -103,11 +103,11 @@ export default function OrderConfirmation() {
             <div className="rounded-lg bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/80 px-3 py-2 space-y-2">
               <ul className="space-y-2">
                 {promoReceipt.lines.map((line) => (
-                  <li key={line.code} className="flex justify-between gap-3 text-xs sm:text-sm">
+                  <li key={line.code} className="flex justify-between gap-3 text-base sm:text-lg">
                     <span className="min-w-0 text-emerald-900 dark:text-emerald-100">
                       <span className="font-medium text-stone-800 dark:text-stone-200">Discount</span>{' '}
                       <span className="text-emerald-800 dark:text-emerald-300">({line.offer})</span>
-                      <span className="text-stone-500 dark:text-stone-400 font-mono text-[0.7rem] sm:text-xs ml-1">
+                      <span className="text-stone-500 dark:text-stone-400 font-mono text-base sm:text-lg ml-1">
                         {line.code}
                       </span>
                     </span>
@@ -118,7 +118,7 @@ export default function OrderConfirmation() {
                 ))}
               </ul>
               {promoReceipt.totalSaved != null && (
-                <p className="text-xs text-emerald-800/90 dark:text-emerald-400/90 pt-1 border-t border-emerald-200/60 dark:border-emerald-800/60">
+                <p className="text-base text-emerald-800/90 dark:text-emerald-400/90 pt-1 border-t border-emerald-200/60 dark:border-emerald-800/60">
                   Total saved: {format(promoReceipt.totalSaved)}
                 </p>
               )}
@@ -139,7 +139,7 @@ export default function OrderConfirmation() {
         </div>
       </div>
 
-      <div className="mt-6 text-center text-sm">
+      <div className="mt-6 text-center text-base">
         <Link to="/orders" className="text-emerald-600 dark:text-emerald-400 hover:underline">
           Track order
         </Link>

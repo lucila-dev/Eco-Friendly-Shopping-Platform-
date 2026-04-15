@@ -156,34 +156,34 @@ export default function AdminProductForm() {
       : 'e.g. Organic cotton, recycled polyester'
 
   return (
-    <div className="max-w-2xl">
+    <div className="w-full max-w-2xl mx-auto">
       <Link
         to="/admin/products"
-        className="text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 mb-4 inline-block"
+        className="text-base text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 mb-4 inline-block"
       >
         ← Back to products
       </Link>
       <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">{isNew ? 'Add product' : 'Edit product'}</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Name *</label>
+          <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">Name *</label>
           <input type="text" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Slug *</label>
+          <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">Slug *</label>
           <input type="text" value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} required placeholder="e.g. organic-cotton-tshirt" className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Description</label>
+          <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">Description</label>
           <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3} className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Price *</label>
+            <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">Price *</label>
             <input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} required className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Image URL</label>
+            <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">Image URL</label>
             <input type="url" value={form.image_url} onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))} className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
             {form.image_url && (
               <img
@@ -193,7 +193,7 @@ export default function AdminProductForm() {
               />
             )}
             <div className="mt-2 p-2 rounded-md border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900/80">
-              <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1">
+              <label className="block text-base font-medium text-stone-600 dark:text-stone-400 mb-1">
                 {uploadingImage ? 'Uploading…' : 'Or upload image file'}
               </label>
               <input
@@ -205,13 +205,13 @@ export default function AdminProductForm() {
                   e.target.value = ''
                   if (picked) void handleImageUpload(picked)
                 }}
-                className="block w-full text-xs text-stone-600 dark:text-stone-400 file:mr-2 file:rounded file:border-0 file:bg-emerald-600 file:px-2 file:py-1 file:text-white hover:file:bg-emerald-700 disabled:opacity-50"
+                className="block w-full text-base text-stone-600 dark:text-stone-400 file:mr-2 file:rounded file:border-0 file:bg-emerald-600 file:px-2 file:py-1 file:text-white hover:file:bg-emerald-700 disabled:opacity-50"
               />
             </div>
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Category</label>
+          <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">Category</label>
           <select value={form.category_id} onChange={(e) => setForm((f) => ({ ...f, category_id: e.target.value }))} className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500">
             <option value="">None</option>
             {categories.map((c) => (
@@ -221,11 +221,11 @@ export default function AdminProductForm() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Sustainability score (1 to 10)</label>
+            <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">Sustainability score (1 to 10)</label>
             <input type="number" min="1" max="10" value={form.sustainability_score} onChange={(e) => setForm((f) => ({ ...f, sustainability_score: e.target.value }))} className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Carbon footprint saving (kg)</label>
+            <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">Carbon footprint saving (kg)</label>
             <input
               type="number"
               min="0"
@@ -243,10 +243,10 @@ export default function AdminProductForm() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">{materialsFieldLabel}</label>
+          <label className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">{materialsFieldLabel}</label>
           <input type="text" value={form.materials} onChange={(e) => setForm((f) => ({ ...f, materials: e.target.value }))} placeholder={materialsPlaceholder} className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500" />
         </div>
-        {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-base">{error}</p>}
         <button type="submit" disabled={saving} className="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50">
           {saving ? 'Saving...' : isNew ? 'Add product' : 'Save changes'}
         </button>

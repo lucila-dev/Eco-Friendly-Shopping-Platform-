@@ -65,7 +65,7 @@ export default function Login() {
           <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-stone-900 dark:text-stone-50">
             {forgotMode ? 'Reset Password' : 'Welcome Back'}
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-[18rem]">
+          <p className="mt-1 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-[18rem]">
             {forgotMode
               ? 'Enter your email and we will send you a reset link'
               : 'Sign in to continue your sustainable shopping journey'}
@@ -73,7 +73,7 @@ export default function Login() {
         </div>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label htmlFor="email" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+          <label htmlFor="email" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
             Email
           </label>
           <div className="relative">
@@ -86,14 +86,14 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-sm text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
               placeholder="Enter your email"
             />
           </div>
         </div>
         {!forgotMode && (
           <div>
-            <label htmlFor="password" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+            <label htmlFor="password" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
               Password
             </label>
             <div className="relative">
@@ -107,17 +107,17 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-sm text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
                 placeholder="Enter your password"
               />
             </div>
           </div>
         )}
-        {error && <p className="text-red-600 dark:text-red-400 text-xs sm:text-sm">{error}</p>}
-        {success && <p className="text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">{success}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-base sm:text-lg">{error}</p>}
+        {success && <p className="text-emerald-600 dark:text-emerald-400 text-base sm:text-lg">{success}</p>}
         <button
           type="submit"
-          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
+          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-base font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
         >
           {forgotMode ? 'Send Reset Link' : 'Sign In'}
         </button>
@@ -127,7 +127,7 @@ export default function Login() {
           <button
             type="button"
             onClick={() => setForgotMode(true)}
-            className="text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+            className="text-base sm:text-lg font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
           >
             Forgot password?
           </button>
@@ -138,13 +138,13 @@ export default function Login() {
           <button
             type="button"
             onClick={() => setForgotMode(false)}
-            className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400"
+            className="text-base sm:text-lg text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400"
           >
             Back to sign in
           </button>
         </p>
       )}
-      <p className="mt-4 text-center text-xs sm:text-sm text-stone-500 dark:text-stone-400">
+      <p className="mt-4 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
         Don’t have an account?{' '}
         <Link to="/signup" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
           Create Account

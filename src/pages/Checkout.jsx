@@ -26,9 +26,10 @@ import {
   PaymentLoyaltyIcon,
   PaymentPayPalMark,
 } from '../components/Icons'
+import { layoutContentWidthClass } from '../lib/layoutContent'
 
 const inputClass =
-  'w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-500'
+  'w-full px-3 py-2.5 text-base border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-500'
 
 const PAYMENT_OPTIONS = [
   { id: 'loyalty', title: 'Loyalty credits', description: 'Pay with your EcoShop balance', Mark: PaymentLoyaltyIcon },
@@ -284,17 +285,17 @@ export default function Checkout() {
 
   if (items.length === 0 && !submitting) {
     return (
-      <div className="mx-auto w-full max-w-7xl text-center py-8">
-        <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-3">Checkout</h1>
+      <div className={`${layoutContentWidthClass} text-center py-8`}>
+        <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-3">Checkout</h1>
         <p className="text-stone-600 dark:text-stone-400">Your cart is empty. Add items before checkout.</p>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl pb-10">
-      <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 mb-2">Checkout</h1>
-      <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base mb-6 max-w-3xl">
+    <div className={`${layoutContentWidthClass} pb-10`}>
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 dark:text-stone-100 mb-2">Checkout</h1>
+      <p className="text-stone-600 dark:text-stone-400 text-base sm:text-lg mb-6 max-w-3xl leading-relaxed">
         Choose delivery speed, apply any discount codes, then pick a payment method.
       </p>
 
@@ -327,7 +328,7 @@ export default function Checkout() {
             <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-4">Shipping address</h2>
             <div className="space-y-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0">
               <div className="sm:col-span-2">
-                <label htmlFor="shipping_name" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label htmlFor="shipping_name" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                   Full name
                 </label>
                 <input
@@ -340,7 +341,7 @@ export default function Checkout() {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="shipping_email" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label htmlFor="shipping_email" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                   Email
                 </label>
                 <input
@@ -353,7 +354,7 @@ export default function Checkout() {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="shipping_address_line_1" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label htmlFor="shipping_address_line_1" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                   Address line 1
                 </label>
                 <input
@@ -366,7 +367,7 @@ export default function Checkout() {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="shipping_address_line_2" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label htmlFor="shipping_address_line_2" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                   Address line 2 (optional)
                 </label>
                 <input
@@ -378,7 +379,7 @@ export default function Checkout() {
                 />
               </div>
               <div>
-                <label htmlFor="shipping_city" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label htmlFor="shipping_city" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                   City
                 </label>
                 <input
@@ -391,7 +392,7 @@ export default function Checkout() {
                 />
               </div>
               <div>
-                <label htmlFor="shipping_postcode" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label htmlFor="shipping_postcode" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                   Postcode
                 </label>
                 <input
@@ -408,7 +409,7 @@ export default function Checkout() {
 
           <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-1">Delivery option</h2>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
+            <p className="text-base text-stone-500 dark:text-stone-400 mb-4">
               Faster options include a courier surcharge. Free standard shipping still applies on orders{' '}
               {format(FREE_SHIPPING_MIN_SUBTOTAL)}+.
             </p>
@@ -435,9 +436,9 @@ export default function Checkout() {
                         onChange={() => setDeliveryMethod(opt.id)}
                         className="sr-only"
                       />
-                      <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">{opt.title}</span>
-                      <span className="mt-0.5 text-xs text-stone-500 dark:text-stone-400 leading-snug">{opt.description}</span>
-                      <span className="mt-2 text-xs font-semibold tabular-nums text-emerald-800 dark:text-emerald-300">
+                      <span className="text-base font-semibold text-stone-800 dark:text-stone-100">{opt.title}</span>
+                      <span className="mt-0.5 text-base text-stone-500 dark:text-stone-400 leading-snug">{opt.description}</span>
+                      <span className="mt-2 text-base font-semibold tabular-nums text-emerald-800 dark:text-emerald-300">
                         {opt.id === 'standard' && optionFee === 0 ? (
                           <>Free · orders {format(FREE_SHIPPING_MIN_SUBTOTAL)}+</>
                         ) : (
@@ -453,7 +454,7 @@ export default function Checkout() {
 
           <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 sm:p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-1">Gift options</h2>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">Optional. We use plastic free, recycled wrap.</p>
+            <p className="text-base text-stone-500 dark:text-stone-400 mb-4">Optional. We use plastic free, recycled wrap.</p>
             <div className="space-y-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
@@ -462,14 +463,14 @@ export default function Checkout() {
                   onChange={(e) => setIsGift(e.target.checked)}
                   className="mt-1 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
                 />
-                <span className="text-sm text-stone-700 dark:text-stone-300">
+                <span className="text-base text-stone-700 dark:text-stone-300">
                   <span className="font-medium text-stone-800 dark:text-stone-100">This is a gift</span>
                   <span className="block text-stone-500 dark:text-stone-400 mt-0.5">Hide prices on the packing slip.</span>
                 </span>
               </label>
               {isGift && (
                 <div>
-                  <label htmlFor="gift_message" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  <label htmlFor="gift_message" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                     Gift message (optional)
                   </label>
                   <textarea
@@ -481,7 +482,7 @@ export default function Checkout() {
                     className={`${inputClass} resize-y min-h-[5rem]`}
                     maxLength={500}
                   />
-                  <p className="text-xs text-stone-500 mt-1">{giftMessage.length}/500</p>
+                  <p className="text-base text-stone-500 mt-1">{giftMessage.length}/500</p>
                 </div>
               )}
               <label className="flex items-start gap-3 cursor-pointer">
@@ -491,7 +492,7 @@ export default function Checkout() {
                   onChange={(e) => setGiftWrap(e.target.checked)}
                   className="mt-1 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
                 />
-                <span className="text-sm text-stone-700 dark:text-stone-300">
+                <span className="text-base text-stone-700 dark:text-stone-300">
                   <span className="font-medium text-stone-800 dark:text-stone-100">Add sustainable gift wrap</span>
                   <span className="block text-stone-500 dark:text-stone-400 mt-0.5 tabular-nums">
                     {format(GIFT_WRAP_FEE)}: recycled paper, twine, and a gift tag.
@@ -562,8 +563,8 @@ export default function Checkout() {
                         )}
                       </span>
                       <span className="block min-w-0 flex-1 pt-0.5">
-                        <span className="block text-sm font-semibold text-stone-800 dark:text-stone-100">{opt.title}</span>
-                        <span className="block text-xs text-stone-500 dark:text-stone-400 mt-0.5 leading-snug">{opt.description}</span>
+                        <span className="block text-base font-semibold text-stone-800 dark:text-stone-100">{opt.title}</span>
+                        <span className="block text-base text-stone-500 dark:text-stone-400 mt-0.5 leading-snug">{opt.description}</span>
                       </span>
                     </label>
                   )
@@ -572,7 +573,7 @@ export default function Checkout() {
             </fieldset>
 
             {paymentMethod === 'loyalty' && (
-              <p className="mt-4 text-sm text-stone-600 dark:text-stone-400 tabular-nums">
+              <p className="mt-4 text-base text-stone-600 dark:text-stone-400 tabular-nums">
                 Available credits: {loadingCredits ? 'Loading...' : format(loyaltyCredits)} · This order: {format(finalTotal)}
               </p>
             )}
@@ -580,7 +581,7 @@ export default function Checkout() {
             {paymentMethod === 'card' && (
               <div className="mt-4 space-y-3 pt-2 border-t border-stone-200 dark:border-stone-700">
                 <div>
-                  <label htmlFor="card_number" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  <label htmlFor="card_number" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                     Card number
                   </label>
                   <input
@@ -597,7 +598,7 @@ export default function Checkout() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="card_expiry" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                    <label htmlFor="card_expiry" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                       Expiry (MM/YY)
                     </label>
                     <input
@@ -614,7 +615,7 @@ export default function Checkout() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="card_cvc" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                    <label htmlFor="card_cvc" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
                       CVC
                     </label>
                     <input
@@ -634,7 +635,7 @@ export default function Checkout() {
             )}
           </section>
 
-          <label className="flex items-start gap-3 text-sm text-stone-700 dark:text-stone-300 cursor-pointer rounded-xl border border-transparent px-1 py-0.5">
+          <label className="flex items-start gap-3 text-base text-stone-700 dark:text-stone-300 cursor-pointer rounded-xl border border-transparent px-1 py-0.5">
             <input
               type="checkbox"
               checked={acceptTerms}
@@ -644,7 +645,7 @@ export default function Checkout() {
             <span>I agree to the delivery, returns, and privacy policies.</span>
           </label>
 
-          {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
+          {error && <p className="text-red-600 dark:text-red-400 text-base">{error}</p>}
 
           <button
             type="submit"
@@ -684,7 +685,7 @@ function OrderSummaryLines({
         {items.map((row) => {
           const line = (row.quantity || 0) * (row.products?.price ?? 0)
           return (
-            <li key={row.id} className="flex justify-between gap-3 text-sm text-stone-700 dark:text-stone-300">
+            <li key={row.id} className="flex justify-between gap-3 text-base text-stone-700 dark:text-stone-300">
               <span className="min-w-0 truncate">
                 {row.products?.name ?? 'Item'} <span className="text-stone-500">×{row.quantity}</span>
               </span>
@@ -695,12 +696,12 @@ function OrderSummaryLines({
       </ul>
 
       <div className="border-t border-emerald-100 dark:border-emerald-900/80 pt-4 space-y-3">
-        <p className="text-xs font-medium text-stone-600 dark:text-stone-400 uppercase tracking-wide">Discount codes</p>
+        <p className="text-base font-medium text-stone-600 dark:text-stone-400 uppercase tracking-wide">Discount codes</p>
         {appliedPromoCodes.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {appliedPromoCodes.map((code) => (
               <li key={code}>
-                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/50 pl-2.5 pr-1 py-0.5 text-xs font-mono font-medium text-emerald-900 dark:text-emerald-100">
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/50 pl-2.5 pr-1 py-0.5 text-base font-mono font-medium text-emerald-900 dark:text-emerald-100">
                   {code}
                   <button
                     type="button"
@@ -708,7 +709,7 @@ function OrderSummaryLines({
                     className="rounded-full p-0.5 hover:bg-emerald-200/80 dark:hover:bg-emerald-800/80 text-emerald-800 dark:text-emerald-200"
                     aria-label={`Remove ${code}`}
                   >
-                    <span aria-hidden className="text-sm leading-none px-0.5">
+                    <span aria-hidden className="text-base leading-none px-0.5">
                       ×
                     </span>
                   </button>
@@ -723,7 +724,7 @@ function OrderSummaryLines({
             value={promoInput}
             onChange={(e) => setPromoInput(e.target.value)}
             placeholder="Enter code"
-            className="flex-1 min-w-0 px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-sm text-stone-900 dark:text-stone-100"
+            className="flex-1 min-w-0 px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-base text-stone-900 dark:text-stone-100"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
@@ -734,19 +735,19 @@ function OrderSummaryLines({
           <button
             type="button"
             onClick={applyPromo}
-            className="shrink-0 px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
+            className="shrink-0 px-4 py-2 text-base font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
           >
             Apply
           </button>
         </div>
         {promoMessage && (
-          <p className={`text-xs ${promoMessage.type === 'ok' ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+          <p className={`text-base ${promoMessage.type === 'ok' ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
             {promoMessage.text}
           </p>
         )}
       </div>
 
-      <div className="border-t border-emerald-100 dark:border-emerald-900/80 pt-4 mt-4 space-y-2 text-sm">
+      <div className="border-t border-emerald-100 dark:border-emerald-900/80 pt-4 mt-4 space-y-2 text-base">
         <div className="flex justify-between text-stone-700 dark:text-stone-300">
           <span>Subtotal</span>
           <span className="tabular-nums">{format(total)}</span>
@@ -775,7 +776,7 @@ function OrderSummaryLines({
         <div className="flex justify-between gap-2 text-stone-700 dark:text-stone-300">
           <span className="min-w-0">
             <span className="font-medium">Delivery</span>
-            <span className="text-stone-500 dark:text-stone-400 text-xs font-normal block sm:inline sm:ml-1">
+            <span className="text-stone-500 dark:text-stone-400 text-base font-normal block sm:inline sm:ml-1">
               ({deliveryOptionTitle})
             </span>
           </span>

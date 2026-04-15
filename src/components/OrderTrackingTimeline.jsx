@@ -9,10 +9,10 @@ export default function OrderTrackingTimeline({ order }) {
   return (
     <details className="group rounded-lg border border-emerald-200/90 dark:border-emerald-800/80 bg-emerald-50/60 dark:bg-emerald-950/35 overflow-hidden">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 sm:px-4 sm:py-3 select-none [&::-webkit-details-marker]:hidden">
-        <span className="text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-300 shrink-0">
+        <span className="text-base font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-300 shrink-0">
           Shipment progress
         </span>
-        <span className="min-w-0 flex-1 truncate text-right text-xs font-medium text-emerald-900 dark:text-emerald-200">
+        <span className="min-w-0 flex-1 truncate text-right text-base font-medium text-emerald-900 dark:text-emerald-200">
           {collapsedHint}
         </span>
         <svg
@@ -29,7 +29,7 @@ export default function OrderTrackingTimeline({ order }) {
         </svg>
       </summary>
       <div className="border-t border-emerald-200/80 dark:border-emerald-800/60 px-3 pb-3 pt-2 sm:px-4">
-        <p className="text-xs text-emerald-900/90 dark:text-emerald-200/90 mb-3 leading-snug">{summary}</p>
+        <p className="text-base text-emerald-900/90 dark:text-emerald-200/90 mb-3 leading-snug">{summary}</p>
         <ol className="space-y-0" aria-label="Order tracking steps">
           {steps.map((step, i) => {
             const isLast = i === steps.length - 1
@@ -68,7 +68,7 @@ export default function OrderTrackingTimeline({ order }) {
                 </div>
                 <div className="min-w-0 pb-4">
                   <p
-                    className={`text-sm font-semibold leading-tight ${
+                    className={`text-base font-semibold leading-tight ${
                       step.status === 'pending'
                         ? 'text-stone-500 dark:text-stone-500'
                         : 'text-emerald-950 dark:text-emerald-100'
@@ -77,7 +77,7 @@ export default function OrderTrackingTimeline({ order }) {
                     {step.label}
                   </p>
                   <p
-                    className={`text-xs mt-0.5 leading-relaxed ${
+                    className={`text-base mt-0.5 leading-relaxed ${
                       step.status === 'pending'
                         ? 'text-stone-500 dark:text-stone-600'
                         : 'text-emerald-800/90 dark:text-emerald-300/85'

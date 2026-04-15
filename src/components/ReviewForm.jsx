@@ -14,7 +14,7 @@ export default function ReviewForm({ productId, canReview, onSubmitted }) {
     return (
       <div className="mt-4 p-4 bg-stone-50 rounded-lg">
         <h3 className="font-medium text-stone-800 mb-1">Write a review</h3>
-        <p className="text-sm text-stone-600">You can review this product after you buy it.</p>
+        <p className="text-base text-stone-600">You can review this product after you buy it.</p>
       </div>
     )
   }
@@ -58,13 +58,13 @@ export default function ReviewForm({ productId, canReview, onSubmitted }) {
         onChange={(e) => setBody(e.target.value)}
         placeholder="Your review (optional)"
         rows={3}
-        className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+        className="w-full px-3 py-2 border border-stone-300 rounded-lg text-base focus:ring-2 focus:ring-emerald-500"
       />
-      {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
+      {error && <p className="text-red-600 text-base mt-1">{error}</p>}
       <button
         type="submit"
         disabled={submitting}
-        className="mt-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+        className="mt-2 px-4 py-2 bg-emerald-600 text-white text-base font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50"
       >
         {submitting ? 'Submitting...' : 'Submit review'}
       </button>

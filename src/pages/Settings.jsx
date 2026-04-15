@@ -18,7 +18,7 @@ function ToggleRow({ id, label, description, checked, onChange, disabled }) {
           {label}
         </label>
         {description && (
-          <p className="text-stone-500 dark:text-stone-400 text-sm mt-1.5 leading-relaxed max-w-xl">{description}</p>
+          <p className="text-stone-500 dark:text-stone-400 text-base mt-1.5 leading-relaxed max-w-xl">{description}</p>
         )}
       </div>
       <button
@@ -105,7 +105,7 @@ export default function Settings() {
         <p className="mb-3">
           <Link
             to="/account"
-            className="text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+            className="text-base font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
           >
             ← Your account
           </Link>
@@ -124,7 +124,7 @@ export default function Settings() {
           <section className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Country / region</h2>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mt-2 leading-relaxed max-w-lg">
+              <p className="text-base text-stone-500 dark:text-stone-400 mt-2 leading-relaxed max-w-lg">
                 Used for number and date formatting. Does not change shipping or tax (demo shop).
               </p>
             </div>
@@ -146,7 +146,7 @@ export default function Settings() {
           <section className="space-y-4 pt-2 border-t border-stone-200 dark:border-stone-700">
             <div>
               <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Currency</h2>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mt-2 leading-relaxed max-w-lg">
+              <p className="text-base text-stone-500 dark:text-stone-400 mt-2 leading-relaxed max-w-lg">
                 Prices are stored in GBP. Other currencies use indicative rates for display only; checkout totals stay
                 in GBP.
               </p>
@@ -169,7 +169,7 @@ export default function Settings() {
           <section className="space-y-6 pt-2 border-t border-stone-200 dark:border-stone-700">
             <div>
               <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Appearance</h2>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">Theme applies in this browser only.</p>
+              <p className="text-base text-stone-500 dark:text-stone-400 mt-2">Theme applies in this browser only.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="radiogroup" aria-label="Color theme">
               {themeOptions.map(({ value, label, Icon }) => {
@@ -188,12 +188,12 @@ export default function Settings() {
                     }`}
                   >
                     <Icon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-sm font-semibold">{label}</span>
+                    <span className="text-base font-semibold">{label}</span>
                   </button>
                 )
               })}
             </div>
-            <p className="text-sm text-stone-500 dark:text-stone-400">
+            <p className="text-base text-stone-500 dark:text-stone-400">
               Active:{' '}
               <span className="font-medium text-stone-800 dark:text-stone-200 capitalize">{resolvedTheme}</span>
               {theme === 'system' ? ' (follows your device)' : ''}.
@@ -209,7 +209,7 @@ export default function Settings() {
           </section>
 
           <section className="pt-2 border-t border-stone-200 dark:border-stone-700">
-            <p className="text-sm text-stone-600 dark:text-stone-400">
+            <p className="text-base text-stone-600 dark:text-stone-400">
               Signed in as <span className="font-medium text-stone-900 dark:text-stone-100">{email || 'n/a'}</span>.{' '}
               <Link to="/profile" className="text-emerald-700 dark:text-emerald-400 font-medium hover:underline">
                 Edit profile
@@ -220,7 +220,7 @@ export default function Settings() {
       </div>
 
       <details className="mt-10 rounded-2xl border border-red-200/80 dark:border-red-900/40 bg-red-50/40 dark:bg-red-950/20 overflow-hidden group">
-        <summary className="px-6 py-4 sm:px-8 cursor-pointer text-sm font-semibold text-red-900 dark:text-red-300 list-none flex items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
+        <summary className="px-6 py-4 sm:px-8 cursor-pointer text-base font-semibold text-red-900 dark:text-red-300 list-none flex items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
           <span>Delete account</span>
           <svg
             className="w-5 h-5 shrink-0 text-stone-400 transition-transform group-open:rotate-180"
@@ -235,12 +235,12 @@ export default function Settings() {
           </svg>
         </summary>
         <div className="px-6 sm:px-8 pb-8 pt-2 border-t border-red-100 dark:border-red-900/30">
-          <p className="text-stone-700 dark:text-stone-300 text-sm leading-relaxed max-w-lg">
+          <p className="text-stone-700 dark:text-stone-300 text-base leading-relaxed max-w-lg">
             Permanently remove your account, orders history, wishlist, and reviews. This cannot be undone.
           </p>
           <div className="mt-6 space-y-4 max-w-md">
             <div>
-              <label htmlFor="delete-password" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+              <label htmlFor="delete-password" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-2">
                 Your password
               </label>
               <input
@@ -254,7 +254,7 @@ export default function Settings() {
               />
             </div>
             <div>
-              <label htmlFor="delete-confirm" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+              <label htmlFor="delete-confirm" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-2">
                 Type <span className="font-mono bg-stone-100 dark:bg-stone-800 px-1 rounded">{CONFIRM_PHRASE}</span> to
                 confirm
               </label>
@@ -271,7 +271,7 @@ export default function Settings() {
             </div>
           </div>
           {error && (
-            <p className="text-red-700 dark:text-red-400 text-sm mt-4" role="alert">
+            <p className="text-red-700 dark:text-red-400 text-base mt-4" role="alert">
               {error}
             </p>
           )}

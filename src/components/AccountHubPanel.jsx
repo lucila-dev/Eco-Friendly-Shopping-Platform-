@@ -69,10 +69,10 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
   return (
     <>
       <header className="mb-6 sm:mb-8">
-        <TitleTag className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
+        <TitleTag className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
           Your account
         </TitleTag>
-        <p className="mt-2 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
+        <p className="mt-2 text-stone-600 dark:text-stone-400 text-base sm:text-lg">
           Signed in as{' '}
           <span className="font-medium text-stone-800 dark:text-stone-200">{email || 'n/a'}</span>
         </p>
@@ -91,7 +91,7 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
               <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300">
                 {title}
               </span>
-              <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-3 flex-1">
+              <p className="text-base text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-3 flex-1">
                 {description}
               </p>
             </div>
@@ -126,7 +126,7 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
                     <Link
                       role="menuitem"
                       to="/admin/products"
-                      className="block px-4 py-2.5 text-sm font-medium text-stone-800 hover:bg-emerald-50 dark:text-stone-100 dark:hover:bg-emerald-950/50"
+                      className="block px-4 py-2.5 text-base font-medium text-stone-800 hover:bg-emerald-50 dark:text-stone-100 dark:hover:bg-emerald-950/50"
                       onClick={() => onNavigate?.()}
                     >
                       Products
@@ -134,7 +134,7 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
                     <Link
                       role="menuitem"
                       to="/admin/categories"
-                      className="block px-4 py-2.5 text-sm font-medium text-stone-800 hover:bg-emerald-50 dark:text-stone-100 dark:hover:bg-emerald-950/50"
+                      className="block px-4 py-2.5 text-base font-medium text-stone-800 hover:bg-emerald-50 dark:text-stone-100 dark:hover:bg-emerald-950/50"
                       onClick={() => onNavigate?.()}
                     >
                       Category images
@@ -148,7 +148,7 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
                 Dev tools
               </span>
               {!inlineDevTools && (
-                <p className="mt-1 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+                <p className="mt-1 text-base leading-relaxed text-stone-600 dark:text-stone-400">
                   Hover the icon for products or category images. On a phone, use the links below.
                 </p>
               )}
@@ -157,14 +157,14 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
               >
                 <Link
                   to="/admin/products"
-                  className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                  className="text-base font-medium text-emerald-700 hover:underline dark:text-emerald-400"
                   onClick={() => onNavigate?.()}
                 >
                   Products →
                 </Link>
                 <Link
                   to="/admin/categories"
-                  className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                  className="text-base font-medium text-emerald-700 hover:underline dark:text-emerald-400"
                   onClick={() => onNavigate?.()}
                 >
                   Category images →
