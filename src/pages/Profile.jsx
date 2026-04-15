@@ -10,7 +10,7 @@ import {
   setProfileAvatarLocal,
   notifyProfileAvatarUpdated,
 } from '../lib/profileAvatarLocal'
-import { CartIcon, LeafIcon, TruckIcon } from '../components/Icons'
+import { CartIcon, HeartIcon, ImpactChartIcon, TruckIcon } from '../components/Icons'
 
 const DEFAULT_AVATAR = '/favicon-96x96.png'
 
@@ -290,7 +290,7 @@ export default function Profile() {
             <span className="text-base text-stone-500 dark:text-stone-400">Browse products</span>
           </Link>
           <Link to="/dashboard" className={shortcutClass}>
-            <LeafIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+            <ImpactChartIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
             <span className="text-base font-semibold text-stone-800 dark:text-stone-100">Impact</span>
             <span className="text-base text-stone-500 dark:text-stone-400">Your dashboard</span>
           </Link>
@@ -300,9 +300,7 @@ export default function Profile() {
             <span className="text-base text-stone-500 dark:text-stone-400">Track shipments</span>
           </Link>
           <Link to="/wishlist" className={shortcutClass}>
-            <span className="text-xl" aria-hidden>
-              ♡
-            </span>
+            <HeartIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
             <span className="text-base font-semibold text-stone-800 dark:text-stone-100">Wishlist</span>
             <span className="text-base text-stone-500 dark:text-stone-400">Saved items</span>
           </Link>
