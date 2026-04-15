@@ -128,7 +128,7 @@ export default function Home() {
       const { data, error } = await supabase
         .from('products')
         .select(
-          'id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)',
+          'id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug, name)',
         )
         .order('sustainability_score', { ascending: false, nullsFirst: false })
         .order('carbon_footprint_saving_kg', { ascending: false, nullsFirst: false })
@@ -175,70 +175,70 @@ export default function Home() {
       <section className="relative rounded-2xl overflow-hidden mb-8 sm:mb-10 min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem]">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50/90 to-teal-50/80 dark:from-emerald-950/80 dark:via-stone-900 dark:to-emerald-950/60" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1600')] bg-cover bg-center opacity-20 mix-blend-multiply dark:opacity-10 dark:mix-blend-soft-light" />
-        <div className="relative z-10 flex min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] flex-col items-center justify-center text-center px-4 py-12 sm:py-14 md:py-16 max-w-3xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-950 dark:text-emerald-100 mb-4 leading-tight">
+        <div className="relative z-10 flex min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] flex-col items-center justify-center text-center px-4 py-12 sm:py-14 md:py-16 max-w-4xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-emerald-950 dark:text-emerald-100 mb-5 leading-tight">
             Shop Sustainably, Live Better
           </h1>
-          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-base sm:text-lg md:text-xl mb-6 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-lg sm:text-xl md:text-2xl mb-8 max-w-2xl mx-auto leading-relaxed">
             Discover eco-friendly products that make a difference. Every purchase helps reduce your carbon footprint.
           </p>
           <Link
             to="/products"
-            className="inline-flex items-center justify-center px-6 py-2.5 text-sm sm:text-base font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            className="inline-flex items-center justify-center px-8 py-3.5 text-base sm:text-lg font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
           >
             Shop Now
           </Link>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 sm:mb-10">
-        <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-4">
-          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 sm:mb-10">
+        <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-5 sm:p-6">
+          <p className="text-base font-semibold text-stone-900 dark:text-stone-100">
             Free delivery on orders {format(FREE_SHIPPING_MIN_SUBTOTAL)}+
           </p>
-          <p className="text-sm text-stone-700 dark:text-stone-300 mt-1 leading-relaxed">Automatic at checkout.</p>
+          <p className="text-base text-stone-700 dark:text-stone-300 mt-2 leading-relaxed">Automatic at checkout.</p>
         </div>
-        <div className="rounded-lg border border-teal-200 dark:border-teal-800 bg-teal-50 dark:bg-teal-950/35 p-4">
-          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">Tracked orders</p>
-          <p className="text-sm text-stone-700 dark:text-stone-300 mt-1 leading-relaxed">Live status in your dashboard.</p>
+        <div className="rounded-lg border border-teal-200 dark:border-teal-800 bg-teal-50 dark:bg-teal-950/35 p-5 sm:p-6">
+          <p className="text-base font-semibold text-stone-900 dark:text-stone-100">Tracked orders</p>
+          <p className="text-base text-stone-700 dark:text-stone-300 mt-2 leading-relaxed">Live status in your dashboard.</p>
         </div>
-        <div className="rounded-lg border border-lime-200 dark:border-lime-800 bg-lime-50 dark:bg-lime-950/30 p-4">
-          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">30-day returns</p>
-          <p className="text-sm text-stone-700 dark:text-stone-300 mt-1 leading-relaxed">Simple and transparent policy.</p>
+        <div className="rounded-lg border border-lime-200 dark:border-lime-800 bg-lime-50 dark:bg-lime-950/30 p-5 sm:p-6">
+          <p className="text-base font-semibold text-stone-900 dark:text-stone-100">30-day returns</p>
+          <p className="text-base text-stone-700 dark:text-stone-300 mt-2 leading-relaxed">Simple and transparent policy.</p>
         </div>
       </section>
 
       <section className="mb-8 sm:mb-10">
-        <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 text-center mb-2">
+        <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 text-center mb-3">
           Our Environmental Commitment
         </h2>
-        <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base text-center max-w-xl mx-auto mb-6 leading-relaxed">
+        <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg text-center max-w-2xl mx-auto mb-8 leading-relaxed">
           We're dedicated to reducing environmental impact through every aspect of our platform.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {COMMITMENTS.map(({ title, description, Icon }) => (
             <div
               key={title}
-              className="rounded-xl border border-emerald-100 dark:border-emerald-800/80 bg-white dark:bg-stone-900 p-4 sm:p-5 shadow-sm"
+              className="rounded-xl border border-emerald-100 dark:border-emerald-800/80 bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-sm"
             >
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
-                  <Icon className="w-4 h-4" />
+              <div className="flex items-center gap-3 mb-3">
+                <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
+                  <Icon className="w-5 h-5" />
                 </span>
-                <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm sm:text-base leading-snug">{title}</h3>
+                <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-base sm:text-lg leading-snug">{title}</h3>
               </div>
-              <p className="text-stone-700 dark:text-stone-300 text-sm leading-relaxed">{description}</p>
+              <p className="text-stone-700 dark:text-stone-300 text-base leading-relaxed">{description}</p>
             </div>
           ))}
         </div>
       </section>
 
       <section className="pb-2">
-        <h2 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-1.5">Shop by category</h2>
-        <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mb-5 max-w-2xl leading-relaxed">
+        <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Shop by category</h2>
+        <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg mb-6 max-w-2xl leading-relaxed">
           Choose a category to find eco-friendly products quickly.
         </p>
-        <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {displayCategories.map((cat) => {
             const cardSubtitle = categoryCardDescription(cat)
             return (
@@ -257,16 +257,16 @@ export default function Home() {
                     decoding="async"
                   />
                 </div>
-                <div className="p-3 sm:p-4">
-                  <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm sm:text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{cat.name}</h3>
+                <div className="p-4 sm:p-5">
+                  <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-base sm:text-lg group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{cat.name}</h3>
                   {cardSubtitle && (
-                    <p className="text-stone-700 dark:text-stone-300 text-sm mt-1.5 line-clamp-2 leading-relaxed">{cardSubtitle}</p>
+                    <p className="text-stone-700 dark:text-stone-300 text-base mt-2 line-clamp-2 leading-relaxed">{cardSubtitle}</p>
                   )}
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     {(CATEGORY_ITEM_TAGS[cat.slug] ?? ['Eco Picks']).map((item) => (
                       <span
                         key={`${cat.slug}-${item}`}
-                        className="inline-flex items-center rounded-md bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:text-emerald-200"
+                        className="inline-flex items-center rounded-md bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-1 text-base font-semibold text-emerald-800 dark:text-emerald-200"
                       >
                         {item}
                       </span>
@@ -278,7 +278,7 @@ export default function Home() {
           })}
         </div>
         {displayCategories.length === 0 && (
-          <p className="text-stone-500 dark:text-stone-400">No categories yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 hover:underline">Browse all products</Link>.</p>
+          <p className="text-stone-500 dark:text-stone-400 text-base">No categories yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 hover:underline">Browse all products</Link>.</p>
         )}
       </section>
 
@@ -288,13 +288,13 @@ export default function Home() {
             <h2 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100">Recommended picks</h2>
             <Link
               to="/products?sort=score-desc"
-              className="shrink-0 inline-flex items-center justify-center text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 underline-offset-2 hover:underline"
+              className="shrink-0 inline-flex items-center justify-center text-base font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 underline-offset-2 hover:underline"
             >
               View all products
             </Link>
           </div>
           {featuredLoading ? (
-            <p className="text-stone-500 dark:text-stone-400 text-sm py-8 text-center">Loading recommendations…</p>
+            <p className="text-stone-500 dark:text-stone-400 text-base py-8 text-center">Loading recommendations…</p>
           ) : (
             <div className="relative min-w-0 rounded-2xl border border-stone-200/60 dark:border-stone-600/45 bg-white/80 dark:bg-stone-900/40 py-3 sm:py-4 shadow-sm">
               <div
@@ -345,27 +345,27 @@ export default function Home() {
         className="relative w-screen max-w-[100vw] left-1/2 -translate-x-1/2 mt-10 sm:mt-12 bg-emerald-600 dark:bg-emerald-700 text-white py-10 sm:py-14 px-4 sm:px-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
         aria-labelledby="impact-heading"
       >
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 id="impact-heading" className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">
+        <div className="max-w-4xl mx-auto text-center px-2">
+          <h2 id="impact-heading" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4">
             Together We&apos;re Making a Difference
           </h2>
-          <p className="text-sm sm:text-base text-emerald-50/95 max-w-xl mx-auto leading-relaxed mb-8 sm:mb-10">
+          <p className="text-base sm:text-lg text-emerald-50/95 max-w-2xl mx-auto leading-relaxed mb-10 sm:mb-12">
             Join thousands of eco-conscious shoppers reducing their carbon footprint
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
             <div>
-              <p className="text-3xl sm:text-4xl font-bold tabular-nums text-white">12,500+</p>
-              <p className="text-sm sm:text-base text-emerald-100/90 mt-1 font-medium">Products Sold</p>
+              <p className="text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums text-white">12,500+</p>
+              <p className="text-base sm:text-lg text-emerald-100/90 mt-2 font-medium">Products Sold</p>
             </div>
             <div>
-              <p className="text-3xl sm:text-4xl font-bold tabular-nums text-white">25 tons</p>
-              <p className="text-sm sm:text-base text-emerald-100/90 mt-1 font-medium">
+              <p className="text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums text-white">25 tons</p>
+              <p className="text-base sm:text-lg text-emerald-100/90 mt-2 font-medium">
                 CO<span className="text-[0.75em]">₂</span> Saved
               </p>
             </div>
             <div>
-              <p className="text-3xl sm:text-4xl font-bold tabular-nums text-white">8,300+</p>
-              <p className="text-sm sm:text-base text-emerald-100/90 mt-1 font-medium">Happy Customers</p>
+              <p className="text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums text-white">8,300+</p>
+              <p className="text-base sm:text-lg text-emerald-100/90 mt-2 font-medium">Happy Customers</p>
             </div>
           </div>
         </div>

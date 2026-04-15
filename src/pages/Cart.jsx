@@ -21,8 +21,8 @@ export default function Cart() {
     return (
       <div>
         <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Your cart</h1>
-        <p className="text-red-600 dark:text-red-400 text-sm mb-3">Could not load your cart: {error}</p>
-        <p className="text-stone-600 dark:text-stone-400 text-sm">
+        <p className="text-red-600 dark:text-red-400 text-base mb-3">Could not load your cart: {error}</p>
+        <p className="text-stone-600 dark:text-stone-400 text-base">
           Check your connection and Supabase settings, then{' '}
           <Link to="/products" className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium">
             continue shopping
@@ -58,7 +58,7 @@ export default function Cart() {
           <div className="mt-5 flex items-center justify-between border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/40 rounded-xl p-3 sm:p-4">
             <div>
               <p className="text-base font-semibold text-stone-800 dark:text-stone-100">Subtotal: {format(total)}</p>
-              <p className="text-sm text-stone-500 dark:text-stone-400">
+              <p className="text-base text-stone-500 dark:text-stone-400">
                 Delivery:{' '}
                 {deliveryFee === 0 ? (
                   <>
@@ -72,18 +72,18 @@ export default function Cart() {
                   format(deliveryFee)
                 )}
               </p>
-              <p className="text-sm text-stone-700 dark:text-stone-300 font-medium mt-1">
+              <p className="text-base text-stone-700 dark:text-stone-300 font-medium mt-1">
                 Estimated total: {format(finalTotal)}
               </p>
             </div>
             <div className="text-right">
               <Link
                 to="/checkout"
-                className="inline-block px-5 py-2.5 text-sm bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
+                className="inline-block px-5 py-2.5 text-base bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700"
               >
                 Proceed to checkout
               </Link>
-              <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">Secure checkout • Easy returns • Order tracking</p>
+              <p className="text-base text-stone-500 dark:text-stone-400 mt-2">Secure checkout • Easy returns • Order tracking</p>
             </div>
           </div>
         </>

@@ -11,12 +11,12 @@ export default function CartItem({ item, onUpdate, onRemove }) {
       <div className="flex gap-3 py-3 border-b border-stone-200 dark:border-stone-600 last:border-0">
         <div className="shrink-0 w-[4.5rem] h-[4.5rem] rounded-lg bg-stone-200 dark:bg-stone-700" aria-hidden />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-stone-800 dark:text-stone-100">Product unavailable</p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">This item may have been removed from the catalog.</p>
+          <p className="text-base font-medium text-stone-800 dark:text-stone-100">Product unavailable</p>
+          <p className="text-base text-stone-500 dark:text-stone-400 mt-0.5">This item may have been removed from the catalog.</p>
           <button
             type="button"
             onClick={() => onRemove(item.id)}
-            className="mt-2 text-red-600 dark:text-red-400 text-sm hover:underline"
+            className="mt-2 text-red-600 dark:text-red-400 text-base hover:underline"
           >
             Remove from cart
           </button>
@@ -38,12 +38,12 @@ export default function CartItem({ item, onUpdate, onRemove }) {
       <div className="flex-1 min-w-0">
         <Link
           to={`/products/${product.slug}`}
-          className="text-sm font-medium text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400"
+          className="text-base font-medium text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400"
         >
           {displayName}
         </Link>
         {item.size && (
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Size: {item.size}</p>
+          <p className="text-base text-stone-500 dark:text-stone-400 mt-0.5">Size: {item.size}</p>
         )}
         <p className="text-emerald-700 dark:text-emerald-400 font-medium">{format(Number(product.price))} each</p>
         <div className="flex items-center gap-2 mt-1">
@@ -57,7 +57,7 @@ export default function CartItem({ item, onUpdate, onRemove }) {
           >
             −
           </button>
-          <span className="w-8 text-center text-sm text-stone-800 dark:text-stone-200">{item.quantity}</span>
+          <span className="w-8 text-center text-base text-stone-800 dark:text-stone-200">{item.quantity}</span>
           <button
             type="button"
             onClick={() => onUpdate(item.id, item.quantity + 1)}
@@ -69,13 +69,13 @@ export default function CartItem({ item, onUpdate, onRemove }) {
           <button
             type="button"
             onClick={() => onRemove(item.id)}
-            className="ml-2 text-red-600 dark:text-red-400 text-sm hover:underline"
+            className="ml-2 text-red-600 dark:text-red-400 text-base hover:underline"
           >
             Remove
           </button>
         </div>
       </div>
-      <div className="text-right text-sm font-medium text-stone-800 dark:text-stone-100 tabular-nums">
+      <div className="text-right text-base font-medium text-stone-800 dark:text-stone-100 tabular-nums">
         {format(item.quantity * Number(product.price))}
       </div>
     </div>

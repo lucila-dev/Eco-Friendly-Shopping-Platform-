@@ -10,7 +10,7 @@ export default function Account() {
   }, [])
 
   return (
-    <div className="max-w-5xl mx-auto pb-8">
+    <div className="pb-8">
       <AccountHubPanel heading="h1" />
     </div>
   )

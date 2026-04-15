@@ -12,7 +12,7 @@ export default function SustainabilityBadge({ product }) {
     <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 space-y-3">
       <h3 className="font-semibold text-stone-800">Sustainability</h3>
       <div>
-        <div className="flex items-center justify-between text-sm mb-1">
+        <div className="flex items-center justify-between text-base mb-1">
           <span className="text-stone-600">Score</span>
           <span className="font-medium text-emerald-700">{score}/{maxScore}</span>
         </div>
@@ -24,11 +24,11 @@ export default function SustainabilityBadge({ product }) {
         </div>
       </div>
       <div>
-        <p className="text-sm text-stone-600 mb-0.5">{materialsHeading}</p>
-        <p className="text-stone-800 text-sm">{materials}</p>
+        <p className="text-base text-stone-600 mb-0.5">{materialsHeading}</p>
+        <p className="text-stone-800 text-base">{materials}</p>
       </div>
       <div>
-        <p className="text-sm text-stone-600 mb-0.5">Carbon footprint saving</p>
+        <p className="text-base text-stone-600 mb-0.5">Carbon footprint saving</p>
         <p className="text-emerald-700 font-medium">
           ~{Number(carbonSaving).toFixed(1)} kg CO₂ saved per unit
         </p>

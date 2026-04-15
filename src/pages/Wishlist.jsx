@@ -24,7 +24,7 @@ export default function Wishlist() {
       setLoading(true)
       const { data } = await supabase
         .from('products')
-        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)')
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug, name)')
         .in('id', ids)
       const ordered = ids.map((id) => (data ?? []).find((p) => p.id === id)).filter(Boolean)
       setProducts(ordered)
@@ -33,13 +33,13 @@ export default function Wishlist() {
     fetchWishlist()
   }, [ids])
 
-  if (loading) return <p className="text-stone-500 dark:text-stone-400">Loading wishlist...</p>
+  if (loading) return <p className="text-stone-500 dark:text-stone-400 text-base py-4">Loading wishlist...</p>
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-4">Your wishlist</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 mb-5">Your wishlist</h1>
       {products.length === 0 ? (
-        <p className="text-stone-600 dark:text-stone-300">
+        <p className="text-stone-600 dark:text-stone-300 text-base leading-relaxed max-w-2xl">
           No saved items yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline">Browse products</Link>
         </p>
       ) : (

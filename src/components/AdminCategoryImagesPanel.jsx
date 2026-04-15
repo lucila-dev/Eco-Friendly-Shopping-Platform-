@@ -205,13 +205,13 @@ export default function AdminCategoryImagesPanel() {
   }
 
   if (loading) {
-    return <p className="text-stone-500 dark:text-stone-400 text-sm py-2">Loading categories…</p>
+    return <p className="text-stone-500 dark:text-stone-400 text-base py-2">Loading categories…</p>
   }
 
   return (
     <div className="space-y-4">
       {message.text && message.type === 'err' && (
-        <p className="px-3 py-2 rounded-lg text-sm bg-red-50 dark:bg-red-950/50 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800">
+        <p className="px-3 py-2 rounded-lg text-base bg-red-50 dark:bg-red-950/50 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800">
           {message.text}
         </p>
       )}
@@ -229,9 +229,9 @@ export default function AdminCategoryImagesPanel() {
             >
               <div>
                 <h3 className="font-semibold text-stone-800 dark:text-stone-100">{cat.name}</h3>
-                {subtitle && <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 line-clamp-2">{subtitle}</p>}
+                {subtitle && <p className="text-base text-stone-500 dark:text-stone-400 mt-0.5 line-clamp-2">{subtitle}</p>}
                 {showSlugHint && (
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                  <p className="text-base text-stone-500 dark:text-stone-400 mt-0.5">
                     URL key:{' '}
                     <code className="font-mono text-stone-600 dark:text-stone-300 bg-stone-50 dark:bg-stone-900 px-1 rounded">
                       {cat.slug}
@@ -250,13 +250,13 @@ export default function AdminCategoryImagesPanel() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Image URL</label>
+                <label className="block text-base font-medium text-stone-600 dark:text-stone-300 mb-1">Image URL</label>
                 <input
                   type="url"
                   value={cat.image_url ?? ''}
                   onChange={(e) => setCatField(cat.id, 'image_url', e.target.value)}
                   placeholder="https://…"
-                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 text-base border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -275,7 +275,7 @@ export default function AdminCategoryImagesPanel() {
                   type="button"
                   onClick={() => document.getElementById(`dev-cat-file-${cat.id}`)?.click()}
                   disabled={uploadingId === cat.id}
-                  className="px-3 py-1.5 text-sm bg-stone-100 dark:bg-stone-700 text-stone-800 dark:text-stone-100 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-600 disabled:opacity-50"
+                  className="px-3 py-1.5 text-base bg-stone-100 dark:bg-stone-700 text-stone-800 dark:text-stone-100 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-600 disabled:opacity-50"
                 >
                   {uploadingId === cat.id ? 'Reading…' : 'Upload file'}
                 </button>
@@ -283,8 +283,8 @@ export default function AdminCategoryImagesPanel() {
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium text-stone-700 dark:text-stone-300">Vertical framing</span>
-                  <span className="text-xs tabular-nums text-stone-600 dark:text-stone-400">
+                  <span className="text-base font-medium text-stone-700 dark:text-stone-300">Vertical framing</span>
+                  <span className="text-base tabular-nums text-stone-600 dark:text-stone-400">
                     {clampFocus(cat.image_focus_y)}%
                   </span>
                 </div>
@@ -292,7 +292,7 @@ export default function AdminCategoryImagesPanel() {
                   <button
                     type="button"
                     onClick={() => nudgeFocus(cat, -5)}
-                    className="px-2 py-1.5 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    className="px-2 py-1.5 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-base text-stone-800 dark:text-stone-200"
                     aria-label="Show higher part"
                   >
                     ↑
@@ -308,7 +308,7 @@ export default function AdminCategoryImagesPanel() {
                   <button
                     type="button"
                     onClick={() => nudgeFocus(cat, 5)}
-                    className="px-2 py-1.5 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    className="px-2 py-1.5 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-base text-stone-800 dark:text-stone-200"
                     aria-label="Show lower part"
                   >
                     ↓
@@ -320,7 +320,7 @@ export default function AdminCategoryImagesPanel() {
                 type="button"
                 onClick={() => saveCategory(cat)}
                 disabled={savingId === cat.id}
-                className="w-full sm:w-auto px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                className="w-full sm:w-auto px-4 py-2 bg-emerald-600 text-white text-base font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50"
               >
                 {savingId === cat.id ? 'Saving…' : 'Save category'}
               </button>
@@ -330,7 +330,7 @@ export default function AdminCategoryImagesPanel() {
       </div>
 
       {categories.length === 0 && (
-        <p className="text-stone-500 dark:text-stone-400 text-sm">No categories in the database.</p>
+        <p className="text-stone-500 dark:text-stone-400 text-base">No categories in the database.</p>
       )}
     </div>
   )

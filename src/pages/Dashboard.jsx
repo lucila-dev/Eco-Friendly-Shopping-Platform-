@@ -4,19 +4,45 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
 import { formatCatalogProductName } from '../lib/catalogProductName'
+import { getProductMetrics } from '../lib/productMetrics'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 import { SUPPORT_EMAIL } from '../lib/supportContact'
 import { PackageIcon, ImpactChartIcon } from '../components/Icons'
 import co2SavedIcon from '../assets/co2-saved-icon.png'
 
 const LEADERBOARD_MIN_KG = 0.01
+const ORDER_ITEMS_CARBON_CHUNK = 120
+/** Illustrative kg CO₂ per £ order total when lines exist but sum to 0 (missing product / legacy data). */
+const ESTIMATED_CARBON_KG_PER_GBP_SPENT = 0.012
+
+function normalizeEmbedProduct(raw) {
+  if (raw == null) return null
+  return Array.isArray(raw) ? raw[0] ?? null : raw
+}
+
+/**
+ * Prefer stored line carbon; then DB product footprint × qty; then catalog-style display carbon (same as product cards).
+ */
+function effectiveOrderLineCarbonKg(item) {
+  const fromLine = Number(item.carbon_saving_kg) || 0
+  if (fromLine > 0) return fromLine
+  const qty = Number(item.quantity) || 1
+  const prod = normalizeEmbedProduct(item.products)
+  const perUnitDb = Number(prod?.carbon_footprint_saving_kg ?? 0) || 0
+  if (perUnitDb > 0) return perUnitDb * qty
+  if (prod && (prod.id || prod.slug || prod.name)) {
+    const { displayCarbon } = getProductMetrics(prod)
+    return displayCarbon * qty
+  }
+  return 0
+}
 
 /** Shared shell so all stat cards share one row height (grid stretch + h-full). */
 const DASHBOARD_SUMMARY_CARD_CLASS =
   'rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900 p-4 sm:p-5 shadow-sm flex flex-col gap-1.5 min-h-[9.5rem] h-full'
 
 /**
- * Illustrative equivalents from the user's total kg CO2 saved on orders (sum of order_items.carbon_saving_kg).
+ * Illustrative equivalents from the user's total kg CO2 saved on orders (order_items carbon, with product fallback).
  * Ratios: tree-equivalent index = 50x kg CO2, water = 15 L per kg CO2, waste = 2 kg diverted per kg CO2.
  */
 function environmentalEquivalentsFromCo2Kg(totalCarbonKg) {
@@ -489,16 +515,36 @@ export default function Dashboard() {
       )
 
       const orderIds = realOrders.map((o) => o.id)
-      let myItems = []
+      const myItems = []
       if (orderIds.length > 0) {
-        const { data: orderItems } = await supabase.from('order_items').select('order_id, carbon_saving_kg').in('order_id', orderIds)
-        myItems = orderItems ?? []
+        for (let i = 0; i < orderIds.length; i += ORDER_ITEMS_CARBON_CHUNK) {
+          const chunk = orderIds.slice(i, i + ORDER_ITEMS_CARBON_CHUNK)
+          const { data: orderItems, error: itemsErr } = await supabase
+            .from('order_items')
+            .select(
+              'order_id, carbon_saving_kg, quantity, product_id, products(id, name, slug, price, sustainability_score, carbon_footprint_saving_kg)',
+            )
+            .in('order_id', chunk)
+          if (itemsErr && import.meta.env.DEV) {
+            console.warn('[EcoShop] dashboard order_items:', itemsErr.message)
+          }
+          if (orderItems?.length) myItems.push(...orderItems)
+        }
       }
       if (cancelled) return
 
       const carbonByOrderIdNext = {}
       for (const item of myItems) {
-        carbonByOrderIdNext[item.order_id] = (carbonByOrderIdNext[item.order_id] || 0) + (Number(item.carbon_saving_kg) || 0)
+        const add = effectiveOrderLineCarbonKg(item)
+        carbonByOrderIdNext[item.order_id] = (carbonByOrderIdNext[item.order_id] || 0) + add
+      }
+      for (const o of realOrders) {
+        if (carbonByOrderIdSynthetic[o.id] != null) continue
+        const kg = Number(carbonByOrderIdNext[o.id] ?? 0) || 0
+        if (kg > 0) continue
+        const amt = Number(o.total_amount) || 0
+        if (amt <= 0) continue
+        carbonByOrderIdNext[o.id] = Number((Math.max(0.5, amt * ESTIMATED_CARBON_KG_PER_GBP_SPENT)).toFixed(2))
       }
       Object.assign(carbonByOrderIdNext, carbonByOrderIdSynthetic)
       const totalCarbonSaved = Object.values(carbonByOrderIdNext).reduce((sum, value) => sum + value, 0)
@@ -549,13 +595,13 @@ export default function Dashboard() {
             className="w-8 h-8 shrink-0 object-contain"
             decoding="async"
           />
-          <p className="text-[0.7rem] sm:text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
+          <p className="text-base font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
             Total CO₂ Saved
           </p>
           <p className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5">
             {greenImpact.totalCarbonSaved.toFixed(1)} kg
           </p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
+          <p className="text-base text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
             Equal to {kmDrivingEquiv.toLocaleString()} km driven
           </p>
         </div>
@@ -563,13 +609,13 @@ export default function Dashboard() {
           <span className="text-blue-600 dark:text-blue-400">
             <PackageIcon className="w-8 h-8 shrink-0" />
           </span>
-          <p className="text-[0.7rem] sm:text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
+          <p className="text-base font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
             Total Orders
           </p>
           <p className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tabular-nums mt-0.5">
             {realOrderStats.count.toLocaleString()}
           </p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
+          <p className="text-base text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
             Since joining EcoShop
           </p>
         </div>
@@ -577,23 +623,23 @@ export default function Dashboard() {
           <span className="text-violet-600 dark:text-violet-400">
             <ImpactChartIcon className="w-8 h-8 shrink-0" />
           </span>
-          <p className="text-[0.7rem] sm:text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
+          <p className="text-base font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
             Total Spent
           </p>
           <p className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tabular-nums mt-0.5">
             {format(realOrderStats.totalSpent)}
           </p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
+          <p className="text-base text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
             On sustainable products
           </p>
         </div>
         <div className={DASHBOARD_SUMMARY_CARD_CLASS}>
           <SummaryMedalIcon className="w-8 h-8 shrink-0" />
-          <p className="text-[0.7rem] sm:text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
+          <p className="text-base font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide leading-tight">
             Eco Level
           </p>
           <p className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 mt-0.5">{ecoLevel.label}</p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
+          <p className="text-base text-stone-500 dark:text-stone-400 mt-auto min-h-[3rem] flex flex-col justify-end leading-snug">
             {ecoLevel.hint}
           </p>
         </div>
@@ -614,7 +660,7 @@ export default function Dashboard() {
             <p className="text-2xl sm:text-3xl font-bold tabular-nums text-stone-900 dark:text-stone-100">
               {impactEquivalents.treesEquivalent.toLocaleString()}
             </p>
-            <p className="text-sm font-semibold text-stone-700 dark:text-stone-300 mt-2">Trees planted equivalent</p>
+            <p className="text-base font-semibold text-stone-700 dark:text-stone-300 mt-2">Trees planted equivalent</p>
           </div>
           <div className="flex flex-col items-center text-center">
             <span className="text-4xl sm:text-5xl leading-none mb-4" aria-hidden>
@@ -623,7 +669,7 @@ export default function Dashboard() {
             <p className="text-2xl sm:text-3xl font-bold tabular-nums text-stone-900 dark:text-stone-100">
               {impactEquivalents.waterLiters.toLocaleString()} L
             </p>
-            <p className="text-sm font-semibold text-stone-700 dark:text-stone-300 mt-2">Water saved</p>
+            <p className="text-base font-semibold text-stone-700 dark:text-stone-300 mt-2">Water saved</p>
           </div>
           <div className="flex flex-col items-center text-center">
             <span className="text-4xl sm:text-5xl leading-none mb-4" aria-hidden>
@@ -632,7 +678,7 @@ export default function Dashboard() {
             <p className="text-2xl sm:text-3xl font-bold tabular-nums text-stone-900 dark:text-stone-100">
               {impactEquivalents.wasteDivertedKg.toLocaleString()} kg
             </p>
-            <p className="text-sm font-semibold text-stone-700 dark:text-stone-300 mt-2">Waste diverted from landfill</p>
+            <p className="text-base font-semibold text-stone-700 dark:text-stone-300 mt-2">Waste diverted from landfill</p>
           </div>
         </div>
       </section>
@@ -657,7 +703,7 @@ export default function Dashboard() {
                   key={id}
                   type="button"
                   onClick={() => setChartGranularity(id)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${
+                  className={`px-3 py-1.5 text-base font-medium rounded-md transition ${
                     chartGranularity === id
                       ? 'bg-emerald-600 text-white shadow'
                       : 'text-stone-600 dark:text-stone-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/60'
@@ -678,7 +724,7 @@ export default function Dashboard() {
         <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">Community leaderboard</h2>
         <ul className="space-y-2">
           {communityBoard.length === 0 && (
-            <li className="text-sm text-stone-600 dark:text-stone-400 py-2">
+            <li className="text-base text-stone-600 dark:text-stone-400 py-2">
               No shoppers meet the minimum yet. Place an order to get on the board.
             </li>
           )}
@@ -691,10 +737,10 @@ export default function Dashboard() {
                   : 'bg-white dark:bg-stone-900 border-lime-200 dark:border-lime-900/50'
               }`}
             >
-              <span className="text-sm font-medium text-stone-800 dark:text-stone-200">
+              <span className="text-base font-medium text-stone-800 dark:text-stone-200">
                 #{idx + 1} {u.name}
               </span>
-              <span className="text-sm tabular-nums text-emerald-800 dark:text-emerald-300 font-semibold">{u.score.toFixed(1)} kg CO₂</span>
+              <span className="text-base tabular-nums text-emerald-800 dark:text-emerald-300 font-semibold">{u.score.toFixed(1)} kg CO₂</span>
             </li>
           ))}
         </ul>
@@ -703,7 +749,7 @@ export default function Dashboard() {
       <section className="mb-6 rounded-xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/30 dark:bg-teal-950/25 p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Purchase history</h2>
-          <Link to="/orders" className="text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline">Track orders</Link>
+          <Link to="/orders" className="text-base font-medium text-emerald-600 dark:text-emerald-400 hover:underline">Track orders</Link>
         </div>
         {orders.length === 0 ? (
           <p className="text-stone-600 dark:text-stone-400">You have not placed any orders yet.</p>
@@ -715,8 +761,8 @@ export default function Dashboard() {
                 className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-4"
               >
                 <div className="min-w-0">
-                  <span className="font-mono text-sm text-stone-700 dark:text-stone-300">{order.id.slice(0, 8)}…</span>
-                  <span className="ml-2 text-stone-600 dark:text-stone-400 text-sm">
+                  <span className="font-mono text-base text-stone-700 dark:text-stone-300">{order.id.slice(0, 8)}…</span>
+                  <span className="ml-2 text-stone-600 dark:text-stone-400 text-base">
                     {new Date(order.created_at).toLocaleDateString()}
                   </span>
                 </div>
@@ -738,9 +784,9 @@ export default function Dashboard() {
                 <Link to={`/products/${r.products?.slug}`} className="font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
                   {formatCatalogProductName(r.products?.name ?? '') || 'Product'}
                 </Link>
-                <p className="text-amber-500 dark:text-amber-400 text-sm mt-0.5">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</p>
-                {r.body && <p className="text-stone-700 dark:text-stone-300 text-sm mt-1">{r.body}</p>}
-                <p className="text-stone-500 dark:text-stone-500 text-xs mt-1">{new Date(r.created_at).toLocaleDateString()}</p>
+                <p className="text-amber-500 dark:text-amber-400 text-base mt-0.5">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</p>
+                {r.body && <p className="text-stone-700 dark:text-stone-300 text-base mt-1">{r.body}</p>}
+                <p className="text-stone-500 dark:text-stone-500 text-base mt-1">{new Date(r.created_at).toLocaleDateString()}</p>
               </li>
             ))}
           </ul>
@@ -749,10 +795,10 @@ export default function Dashboard() {
 
       <section className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 mt-6">
         <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">Need help with an order?</h2>
-        <p className="text-sm text-stone-700 dark:text-stone-300 mb-3">Our support team can help with delivery updates, returns, and payment questions.</p>
+        <p className="text-base text-stone-700 dark:text-stone-300 mb-3">Our support team can help with delivery updates, returns, and payment questions.</p>
         <div className="flex flex-wrap gap-2">
-          <Link to="/about" className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">Open help center</Link>
-          <a href={`mailto:${SUPPORT_EMAIL}`} className="px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-sm font-medium hover:bg-stone-200 dark:hover:bg-stone-700">Email support</a>
+          <Link to="/about" className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-base font-medium hover:bg-emerald-700">Open help center</Link>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-base font-medium hover:bg-stone-200 dark:hover:bg-stone-700">Email support</a>
         </div>
       </section>
     </div>

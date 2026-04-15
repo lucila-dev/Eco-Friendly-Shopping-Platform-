@@ -4,11 +4,13 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import ReviewList from '../components/ReviewList'
 import ReviewForm from '../components/ReviewForm'
+import { showToast } from '../lib/toast'
 import { getProductImage } from '../lib/productImageOverrides'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 import ProductCard from '../components/ProductCard'
 import { pickRelatedSlices } from '../lib/productRecommendations'
+import { getSizeGuide } from '../lib/productSizeGuide'
 
 function parseMaterialTags(materials) {
   if (!materials) return []
@@ -127,63 +129,6 @@ function getCertificationDisplay(product, materials) {
   return { chips }
 }
 
-function getSizeGuide(product) {
-  const text = `${product?.name || ''} ${product?.category?.name || ''}`.toLowerCase()
-  if (!/shirt|jacket|hoodie|dress|pant|trouser|sweater|tee|fashion|onesie|sock/.test(text)) return null
-
-  const isBottom = /pant|trouser|short|legging/.test(text)
-  const isDress = /dress/.test(text)
-
-  if (isBottom) {
-    return {
-      title: 'Size and Fit',
-      description: 'Choose your usual size. If you are between sizes, we suggest sizing up for comfort.',
-      columns: ['Size', 'Waist (cm)', 'Hip (cm)', 'Inseam (cm)'],
-      rows: [
-        ['XS', '60-67', '84-91', '72'],
-        ['S', '68-75', '92-99', '74'],
-        ['M', '76-83', '100-107', '76'],
-        ['L', '84-91', '108-115', '78'],
-        ['XL', '92-100', '116-124', '79'],
-        ['XXL', '101-110', '125-134', '80'],
-      ],
-      options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    }
-  }
-
-  if (isDress) {
-    return {
-      title: 'Size and Fit',
-      description: 'Regular fit. For a looser silhouette, choose one size up.',
-      columns: ['Size', 'Bust (cm)', 'Waist (cm)', 'Length (cm)'],
-      rows: [
-        ['XS', '76-83', '58-64', '92'],
-        ['S', '84-91', '65-71', '95'],
-        ['M', '92-99', '72-79', '98'],
-        ['L', '100-107', '80-87', '101'],
-        ['XL', '108-116', '88-96', '103'],
-        ['XXL', '117-126', '97-106', '105'],
-      ],
-      options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    }
-  }
-
-  return {
-    title: 'Size and Fit',
-    description: 'Standard fit. Check measurements below to pick your best size.',
-    columns: ['Size', 'Chest (cm)', 'Shoulder (cm)', 'Length (cm)'],
-    rows: [
-      ['XS', '80-87', '40', '64'],
-      ['S', '88-95', '42', '67'],
-      ['M', '96-103', '45', '70'],
-      ['L', '104-111', '48', '73'],
-      ['XL', '112-120', '51', '76'],
-      ['XXL', '121-130', '54', '79'],
-    ],
-    options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-  }
-}
-
 export default function ProductDetail() {
   const { format } = useFormatPrice()
   const { slug } = useParams()
@@ -257,7 +202,7 @@ export default function ProductDetail() {
     async function fetchRelated() {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)')
+        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug, name)')
         .eq('category_id', product.category_id)
         .neq('id', product.id)
         .limit(80)
@@ -288,7 +233,7 @@ export default function ProductDetail() {
   const productUse = useMemo(() => getProductUseLabel(product), [product])
   const sizeGuide = useMemo(() => getSizeGuide(product), [product])
 
-  if (loading) return <p className="text-stone-500 dark:text-stone-400 text-sm py-3">Loading...</p>
+  if (loading) return <p className="text-stone-500 dark:text-stone-400 text-base py-3">Loading...</p>
   if (!product) return <p className="text-stone-600">Product not found. <Link to="/products" className="text-emerald-600 hover:underline">Back to products</Link></p>
 
   const displayImage = getProductImage(product)
@@ -302,7 +247,7 @@ export default function ProductDetail() {
       <div className="grid w-full max-w-none grid-cols-1 items-stretch gap-x-4 gap-y-4 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4">
         <Link
           to={categoryLink}
-          className="col-span-full block text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400"
+          className="col-span-full block text-base text-stone-600 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400"
         >
           ← Back to Category
         </Link>
@@ -319,14 +264,14 @@ export default function ProductDetail() {
         </div>
 
         <div className="min-h-0 min-w-0 w-full space-y-2 sm:space-y-3 self-stretch">
-          <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+          <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 text-base font-semibold text-emerald-700 dark:text-emerald-300">
             Sustainability Score: {score100}/100
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100 leading-tight">{displayName}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
             <p className="text-2xl sm:text-3xl text-emerald-700 dark:text-emerald-400 font-bold tabular-nums">{format(Number(product.price))}</p>
-            <span className="text-sm px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium">In stock</span>
-            <span className="text-sm px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 font-medium">{productUse}</span>
+            <span className="text-base px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium">In stock</span>
+            <span className="text-base px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 font-medium">{productUse}</span>
           </div>
           {product.description?.trim() ? (
             <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg leading-relaxed">{product.description.trim()}</p>
@@ -335,14 +280,14 @@ export default function ProductDetail() {
           {sizeGuide && (
             <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 bg-emerald-100/35 dark:bg-emerald-950/30 p-3 sm:p-4">
               <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-base">{sizeGuide.title}</h3>
-              <p className="mt-1 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">{sizeGuide.description}</p>
+              <p className="mt-1 text-base text-stone-600 dark:text-stone-400 leading-relaxed">{sizeGuide.description}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {sizeGuide.options.map((size) => (
                   <button
                     key={size}
                     type="button"
                     onClick={() => setSelectedSize(size)}
-                    className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
+                    className={`rounded-md border px-3 py-1.5 text-base font-medium ${
                       selectedSize === size
                         ? 'border-emerald-500 bg-emerald-100 text-emerald-700'
                         : 'border-stone-300 bg-emerald-50 text-stone-700 hover:border-emerald-300'
@@ -356,14 +301,14 @@ export default function ProductDetail() {
                 <button
                   type="button"
                   onClick={() => setShowSizeMeasurements((v) => !v)}
-                  className="inline-flex items-center rounded-md border border-stone-300/80 dark:border-stone-600 bg-emerald-100/40 dark:bg-emerald-900/30 px-3 py-1.5 text-sm font-medium text-stone-700 dark:text-stone-200 hover:border-emerald-400"
+                  className="inline-flex items-center rounded-md border border-stone-300/80 dark:border-stone-600 bg-emerald-100/40 dark:bg-emerald-900/30 px-3 py-1.5 text-base font-medium text-stone-700 dark:text-stone-200 hover:border-emerald-400"
                 >
                   {showSizeMeasurements ? 'Hide measurements' : 'View measurements'}
                 </button>
               </div>
               <div className={`${showSizeMeasurements ? 'mt-4' : 'mt-0'} overflow-x-auto`}>
                 {showSizeMeasurements && (
-                  <table className="min-w-full text-sm">
+                  <table className="min-w-full text-base">
                     <thead>
                       <tr className="text-left text-stone-600 border-b border-stone-200">
                         {sizeGuide.columns.map((col) => (
@@ -401,7 +346,7 @@ export default function ProductDetail() {
           >
             <div className="flex flex-wrap gap-1.5">
               {(materials.length > 0 ? materials : ['Not specified']).map((m) => (
-                <span key={m} className="inline-flex items-center rounded-md bg-purple-100 dark:bg-purple-950/50 px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-300">{m}</span>
+                <span key={m} className="inline-flex items-center rounded-md bg-purple-100 dark:bg-purple-950/50 px-3 py-1.5 text-base font-medium text-purple-700 dark:text-purple-300">{m}</span>
               ))}
             </div>
           </InfoAccordion>
@@ -414,7 +359,7 @@ export default function ProductDetail() {
           >
             <ul className="mt-2 space-y-2">
               {sustainabilityReasons.map((reason) => (
-                <li key={reason} className="text-sm sm:text-base text-stone-700 dark:text-stone-300 leading-relaxed">✓ {reason}</li>
+                <li key={reason} className="text-base sm:text-lg text-stone-700 dark:text-stone-300 leading-relaxed">✓ {reason}</li>
               ))}
             </ul>
           </InfoAccordion>
@@ -426,7 +371,7 @@ export default function ProductDetail() {
             titleClassName="text-sky-800"
           >
             <div className="mt-3">
-              <div className="flex items-center justify-between text-sm text-stone-600 dark:text-stone-400">
+              <div className="flex items-center justify-between text-base text-stone-600 dark:text-stone-400">
                 <span>Sustainability Score</span>
                 <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-base">{score100}/100</span>
               </div>
@@ -435,7 +380,7 @@ export default function ProductDetail() {
               </div>
             </div>
             <div className="mt-2 rounded-md border border-sky-200/70 bg-sky-100/35 p-3">
-              <p className="text-sm font-semibold text-sky-900 dark:text-sky-200">Carbon Footprint Savings</p>
+              <p className="text-base font-semibold text-sky-900 dark:text-sky-200">Carbon Footprint Savings</p>
               <p className="text-base text-stone-700 dark:text-stone-300 mt-1.5 leading-relaxed">
                 This product saves approximately <span className="font-semibold text-emerald-700">{carbonSaving.toFixed(1)} kg CO2</span> compared to traditional alternatives.
               </p>
@@ -452,7 +397,7 @@ export default function ProductDetail() {
               {certificationChips.map((cert) => (
                 <span
                   key={cert}
-                  className="inline-flex items-center rounded-md border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/40 px-3 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-200"
+                  className="inline-flex items-center rounded-md border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/40 px-3 py-1.5 text-base font-medium text-amber-800 dark:text-amber-200"
                 >
                   {cert}
                 </span>
@@ -462,14 +407,22 @@ export default function ProductDetail() {
         </div>
       </div>
       <div className="mt-3 sm:mt-4 border-t border-emerald-200/50 pt-3 sm:pt-4">
-        <ReviewList productId={product.id} productName={displayName} key={`${product.id}-${reviewVersion}`} />
+        <ReviewList
+          productId={product.id}
+          productName={displayName}
+          productDescription={product.description}
+          materials={product.materials}
+          categoryName={product.category?.name}
+          categorySlug={product.category?.slug}
+          key={`${product.id}-${reviewVersion}`}
+        />
         <ReviewForm productId={product.id} canReview={canReview} onSubmitted={() => setReviewVersion((v) => v + 1)} />
       </div>
 
       {(relatedLoading || relatedSimilar.length > 0 || relatedTogether.length > 0) && (
         <div className="mt-10 sm:mt-12 space-y-10 sm:space-y-12 border-t border-stone-200 dark:border-stone-700 pt-8 sm:pt-10">
           {relatedLoading && (
-            <p className="text-sm text-stone-500 dark:text-stone-400">Loading recommendations…</p>
+            <p className="text-base text-stone-500 dark:text-stone-400">Loading recommendations…</p>
           )}
 
           {!relatedLoading && relatedSimilar.length > 0 && (
@@ -479,13 +432,13 @@ export default function ProductDetail() {
                   <h2 id="related-similar-heading" className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
                     You may also like
                   </h2>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
+                  <p className="text-base text-stone-600 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
                     Similar items from {product.category?.name || 'this category'}.
                   </p>
                 </div>
                 <Link
                   to={categoryLink}
-                  className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:underline shrink-0"
+                  className="text-base font-semibold text-emerald-700 dark:text-emerald-400 hover:underline shrink-0"
                 >
                   View all in category →
                 </Link>
@@ -504,7 +457,7 @@ export default function ProductDetail() {
                 <h2 id="related-together-heading" className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
                   Frequently bought together
                 </h2>
-                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
+                <p className="text-base text-stone-600 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
                   Popular pairings shoppers add alongside products like this one (same category).
                 </p>
               </div>
@@ -566,6 +519,7 @@ function AddToCartButton({ product, isAuthenticated, requiresSize = false, selec
     if (!error) {
       window.dispatchEvent(new Event('ecoshop-cart-updated'))
       setDone(true)
+      showToast('Added to cart')
     }
   }
 
@@ -576,16 +530,16 @@ function AddToCartButton({ product, isAuthenticated, requiresSize = false, selec
           <button
             type="button"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="px-2.5 py-2 text-stone-700 hover:bg-stone-50 text-sm"
+            className="px-2.5 py-2 text-stone-700 hover:bg-stone-50 text-base"
             aria-label="Decrease quantity"
           >
             -
           </button>
-          <span className="w-9 text-center text-sm font-medium text-stone-700">{qty}</span>
+          <span className="w-9 text-center text-base font-medium text-stone-700">{qty}</span>
           <button
             type="button"
             onClick={() => setQty((q) => Math.min(9, q + 1))}
-            className="px-2.5 py-2 text-stone-700 hover:bg-stone-50 text-sm"
+            className="px-2.5 py-2 text-stone-700 hover:bg-stone-50 text-base"
             aria-label="Increase quantity"
           >
             +
@@ -596,23 +550,23 @@ function AddToCartButton({ product, isAuthenticated, requiresSize = false, selec
             type="button"
             onClick={handleAdd}
             disabled={adding || (requiresSize && !selectedSize)}
-            className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-base font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-50"
           >
             {adding ? 'Adding...' : done ? 'Added to Cart' : 'Add to Cart'}
           </button>
         ) : (
-          <Link to="/login" className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-center text-sm font-semibold rounded-lg hover:bg-emerald-700">
+          <Link to="/login" className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-center text-base font-semibold rounded-lg hover:bg-emerald-700">
             Sign In to Add
           </Link>
         )}
       </div>
       {done && isAuthenticated && (
-        <Link to="/cart" className="inline-block mt-2 text-emerald-600 hover:underline text-sm">
+        <Link to="/cart" className="inline-block mt-2 text-emerald-600 hover:underline text-base">
           View cart
         </Link>
       )}
       {requiresSize && !selectedSize && (
-        <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">Choose a size to add this item to cart.</p>
+        <p className="mt-2 text-base text-stone-600 dark:text-stone-400">Choose a size to add this item to cart.</p>
       )}
     </div>
   )

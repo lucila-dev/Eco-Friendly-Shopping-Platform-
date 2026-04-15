@@ -6,14 +6,13 @@ import { CartIcon, PersonIcon } from './Icons'
 import AccountDropdown from './AccountDropdown'
 import HomeAnnouncementBar from './HomeAnnouncementBar'
 import SiteFooter from './SiteFooter'
-
-const contentPad = 'px-4 sm:px-6 lg:px-8'
-const contentWidth = 'max-w-7xl mx-auto w-full'
+import ToastHost from './ToastHost'
+import { layoutContentPadClass, layoutContentWidthClass } from '../lib/layoutContent'
 
 const navLinkClass =
-  'text-sm sm:text-[0.9375rem] font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 px-1.5 py-1.5 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
+  'text-base sm:text-[1.0625rem] font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 px-2 py-2 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 const navLinkActiveClass =
-  'text-sm sm:text-[0.9375rem] font-semibold text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 px-1.5 py-1.5 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
+  'text-base sm:text-[1.0625rem] font-semibold text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 px-2 py-2 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 
 export default function Layout() {
   const { signOut, isAuthenticated } = useAuth()
@@ -22,7 +21,7 @@ export default function Layout() {
   const navigate = useNavigate()
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isProductDetail = /^\/products\/[^/]+$/.test(location.pathname)
-  const mainHorizontalPadding = isAuthPage ? 'px-0' : contentPad
+  const mainHorizontalPadding = isAuthPage ? 'px-0' : layoutContentPadClass
   const cartCount = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
   const isHome = location.pathname === '/'
 
@@ -38,13 +37,13 @@ export default function Layout() {
     >
       {isHome && <HomeAnnouncementBar />}
       <header className="overflow-visible border-b border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-white via-emerald-50 to-teal-50 dark:from-stone-900 dark:via-emerald-950/50 dark:to-stone-900 shadow-sm sticky top-0 z-20">
-        <div className={`${contentWidth} ${contentPad} py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3`}>
+        <div className={`${layoutContentWidthClass} ${layoutContentPadClass} py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3`}>
           <Link
             to="/"
             className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 hover:text-emerald-700 dark:hover:text-emerald-200 shrink-0 py-0.5"
           >
             <img src="/favicon-96x96.png" alt="" aria-hidden="true" className="w-8 h-8 sm:w-9 sm:h-9" />
-            <span className="text-lg sm:text-xl font-bold tracking-tight">EcoShop</span>
+            <span className="text-xl sm:text-2xl font-bold tracking-tight">EcoShop</span>
           </Link>
           <nav className="w-full sm:w-auto flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2 sm:gap-y-1.5">
             <Link to="/" className={navLinkActiveClass}>
@@ -63,7 +62,7 @@ export default function Layout() {
               <CartIcon className="w-5 h-5 shrink-0" aria-hidden />
               <span>Cart</span>
               {cartCount > 0 && (
-                <span className="min-w-[1.125rem] h-5 px-1 flex items-center justify-center bg-emerald-600 text-white text-[0.65rem] font-semibold rounded-full leading-none">
+                <span className="min-w-[1.25rem] h-5 px-1 flex items-center justify-center bg-emerald-600 text-white text-xs font-semibold rounded-full leading-none">
                   {cartCount}
                 </span>
               )}
@@ -85,7 +84,7 @@ export default function Layout() {
                       navigate('/login', { replace: true })
                     }
                   }}
-                  className="text-sm sm:text-[0.9375rem] font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-1.5 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                  className="text-base sm:text-[1.0625rem] font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                   aria-label="Log out"
                 >
                   Log out
@@ -95,7 +94,7 @@ export default function Layout() {
               <span className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2 bg-emerald-600 text-white text-sm sm:text-[0.9375rem] font-semibold rounded-xl hover:bg-emerald-700 shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-2.5 bg-emerald-600 text-white text-base sm:text-[1.0625rem] font-semibold rounded-xl hover:bg-emerald-700 shadow-sm"
                   aria-label="Log in"
                 >
                   <PersonIcon className="w-5 h-5 shrink-0" />
@@ -103,7 +102,7 @@ export default function Layout() {
                 </Link>
                 <Link
                   to="/signup"
-                  className="text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-sm sm:text-[0.9375rem] font-semibold px-3 py-2 rounded-xl hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30 border border-transparent hover:border-emerald-200/80 dark:hover:border-emerald-700/50"
+                  className="text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-base sm:text-[1.0625rem] font-semibold px-3 py-2.5 rounded-xl hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30 border border-transparent hover:border-emerald-200/80 dark:hover:border-emerald-700/50"
                 >
                   Sign up
                 </Link>
@@ -114,7 +113,7 @@ export default function Layout() {
       </header>
       {!isSupabaseConfigured && (
         <div
-          className="bg-amber-100 dark:bg-amber-950/80 border-b border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-100 text-center text-xs sm:text-sm px-4 py-2"
+          className="bg-amber-100 dark:bg-amber-950/80 border-b border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-100 text-center text-base sm:text-lg px-4 py-2.5"
           role="status"
         >
           <strong className="font-semibold">Backend not configured.</strong> Add{' '}
@@ -127,12 +126,13 @@ export default function Layout() {
         className={`flex-1 text-stone-900 dark:text-stone-100 ${
           isAuthPage
             ? 'w-full max-w-none mx-0 px-0 py-0'
-            : `${contentWidth} ${mainHorizontalPadding} py-4 sm:py-6`
-        } ${!isAuthPage ? 'text-sm sm:text-base leading-relaxed' : ''}`}
+            : `${layoutContentWidthClass} ${mainHorizontalPadding} py-5 sm:py-8`
+        } ${!isAuthPage ? 'text-base sm:text-lg leading-relaxed' : ''}`}
       >
         <Outlet />
       </main>
       <SiteFooter />
+      <ToastHost />
     </div>
   )
 }

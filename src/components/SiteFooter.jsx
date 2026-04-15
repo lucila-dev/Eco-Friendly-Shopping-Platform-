@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { layoutContentPadClass, layoutContentWidthClass } from '../lib/layoutContent'
 
 const SITE_FOOTER_COLUMNS = [
   {
@@ -53,19 +54,19 @@ export default function SiteFooter() {
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}
       aria-label="Site directory"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <div className={`${layoutContentWidthClass} ${layoutContentPadClass} py-10 sm:py-12`}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {SITE_FOOTER_COLUMNS.map((col) => (
             <div key={col.heading}>
-              <h3 className="text-sm font-semibold text-white tracking-tight mb-4">
+              <h3 className="text-base font-semibold text-white tracking-tight mb-4">
                 {col.heading}
               </h3>
-              <ul className="space-y-2.5">
+              <ul className="space-y-3">
                 {col.links.map(({ label, to }) => (
                   <li key={`${col.heading}-${label}`}>
                     <Link
                       to={to}
-                      className="text-sm text-emerald-50/95 hover:text-white hover:underline underline-offset-2"
+                      className="text-base text-emerald-50/95 hover:text-white hover:underline underline-offset-2"
                     >
                       {label}
                     </Link>
@@ -75,7 +76,7 @@ export default function SiteFooter() {
             </div>
           ))}
         </div>
-        <div className="mt-12 pt-8 border-t border-white/20 text-center text-xs sm:text-sm text-emerald-100/85 space-y-3">
+        <div className="mt-12 pt-8 border-t border-white/20 text-center text-base sm:text-lg text-emerald-100/85 space-y-3">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link to="/about#delivery" className="hover:text-white hover:underline underline-offset-2">
               Conditions & delivery

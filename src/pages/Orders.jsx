@@ -184,12 +184,12 @@ export default function Orders() {
             <li key={order.id} className="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
-                  <p className="font-mono text-sm text-stone-700 dark:text-stone-300">{order.id.slice(0, 8)}...</p>
-                  <p className="text-sm text-stone-600 dark:text-stone-400">{new Date(order.created_at).toLocaleString()}</p>
+                  <p className="font-mono text-base text-stone-700 dark:text-stone-300">{order.id.slice(0, 8)}...</p>
+                  <p className="text-base text-stone-600 dark:text-stone-400">{new Date(order.created_at).toLocaleString()}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">{format(total)}</p>
-                  <p className="text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400">{order.status}</p>
+                  <p className="text-base uppercase tracking-wide text-stone-500 dark:text-stone-400">{order.status}</p>
                 </div>
               </div>
 
@@ -199,7 +199,7 @@ export default function Orders() {
 
               <div className="space-y-2">
                 {items.length === 0 && (
-                  <p className="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  <p className="text-base text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                     No products are listed for this order. That can happen if checkout was interrupted. New checkouts roll back the order if line items fail to save.
                   </p>
                 )}
@@ -226,14 +226,14 @@ export default function Orders() {
                           }}
                         />
                       </div>
-                      <Link to={`/products/${item.products?.slug}`} className="text-sm text-stone-800 dark:text-stone-200 truncate hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline">
+                      <Link to={`/products/${item.products?.slug}`} className="text-base text-stone-800 dark:text-stone-200 truncate hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline">
                         {lineName || 'Product'}
                       </Link>
                       {item.selected_size && (
-                        <span className="text-xs text-stone-600 dark:text-stone-400">Size {item.selected_size}</span>
+                        <span className="text-base text-stone-600 dark:text-stone-400">Size {item.selected_size}</span>
                       )}
                     </div>
-                    <div className="text-xs text-stone-600 dark:text-stone-400 shrink-0 text-right tabular-nums">
+                    <div className="text-base text-stone-600 dark:text-stone-400 shrink-0 text-right tabular-nums">
                       <span className="block text-stone-500 dark:text-stone-500">×{item.quantity} @ {format(unit)}</span>
                       <span className="font-medium text-stone-800 dark:text-stone-200">{format(lineTotal)}</span>
                     </div>
@@ -242,7 +242,7 @@ export default function Orders() {
                 })}
               </div>
               {items.length > 0 && (
-                  <div className="border-t border-stone-200 dark:border-stone-700 pt-3 mt-3 space-y-1.5 text-sm">
+                  <div className="border-t border-stone-200 dark:border-stone-700 pt-3 mt-3 space-y-1.5 text-base">
                     <div className="flex justify-between text-stone-700 dark:text-stone-300">
                       <span>Subtotal (items)</span>
                       <span className="tabular-nums">{format(subtotal)}</span>
@@ -279,7 +279,7 @@ export default function Orders() {
                       <span className="tabular-nums">{format(total)}</span>
                     </div>
                     {mismatch && (
-                      <p className="text-xs text-amber-800 pt-1">
+                      <p className="text-base text-amber-800 pt-1">
                         Line totals plus delivery do not match this order total (missing lines, older data, or price updates). The order total is what was stored at checkout.
                       </p>
                     )}

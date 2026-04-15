@@ -104,12 +104,12 @@ export default function AdminProducts() {
         <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Products</h1>
         <Link
           to="/admin/categories"
-          className="text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+          className="text-base font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
         >
           Category images →
         </Link>
       </div>
-      <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Add, edit, or remove catalogue items.</p>
+      <p className="text-base text-stone-600 dark:text-stone-400 mb-4">Add, edit, or remove catalogue items.</p>
       <div className="mb-6">
         <Link
           to="/admin/products/new"
@@ -119,7 +119,7 @@ export default function AdminProducts() {
         </Link>
       </div>
       <div className="mb-4">
-        <label htmlFor="dev-product-search" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+        <label htmlFor="dev-product-search" className="block text-base font-medium text-stone-700 dark:text-stone-300 mb-1">
           Search product to edit
         </label>
         <input
@@ -136,7 +136,7 @@ export default function AdminProducts() {
           type="button"
           onClick={toggleAllVisible}
           disabled={filteredProducts.length === 0}
-          className="px-3 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-lg text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-50"
+          className="px-3 py-1.5 text-base border border-stone-300 dark:border-stone-600 rounded-lg text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-50"
         >
           {isAllVisibleSelected ? 'Unselect all' : 'Select all'}
         </button>
@@ -144,7 +144,7 @@ export default function AdminProducts() {
           type="button"
           onClick={handleBulkDelete}
           disabled={selectedIds.length === 0 || bulkDeleting}
-          className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+          className="px-3 py-1.5 text-base bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
         >
           {bulkDeleting ? 'Deleting...' : `Delete selected (${selectedIds.length})`}
         </button>
@@ -210,7 +210,7 @@ export default function AdminProducts() {
                   <td className="p-3 text-right">
                     <Link
                       to={`/admin/products/${p.id}`}
-                      className="text-emerald-600 hover:underline text-sm mr-3"
+                      className="text-emerald-600 hover:underline text-base mr-3"
                     >
                       Edit
                     </Link>
@@ -218,7 +218,7 @@ export default function AdminProducts() {
                       type="button"
                       onClick={() => handleDelete(p.id)}
                       disabled={deletingId === p.id}
-                      className="text-red-600 dark:text-red-400 hover:underline text-sm disabled:opacity-50"
+                      className="text-red-600 dark:text-red-400 hover:underline text-base disabled:opacity-50"
                     >
                       {deletingId === p.id ? 'Deleting...' : 'Remove'}
                     </button>

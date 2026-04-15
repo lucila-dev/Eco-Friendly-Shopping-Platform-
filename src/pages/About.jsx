@@ -20,27 +20,27 @@ const SECTIONS = [
   { id: 'help', label: 'Quick links', title: 'Quick links' },
 ]
 
-const bodyText = 'text-sm sm:text-base text-stone-800 dark:text-stone-200 leading-6 sm:leading-7'
+const bodyText = 'text-base sm:text-lg text-stone-800 dark:text-stone-200 leading-6 sm:leading-7'
 
 const navInactive =
-  'w-full text-left rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-900 px-3 py-2.5 text-sm font-medium text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50/90 dark:hover:bg-stone-800'
+  'w-full text-left rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-900 px-3 py-2.5 text-base font-medium text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50/90 dark:hover:bg-stone-800'
 const navActive =
-  'w-full text-left rounded-lg border border-emerald-800 dark:border-emerald-600 bg-emerald-700 dark:bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-900/10'
+  'w-full text-left rounded-lg border border-emerald-800 dark:border-emerald-600 bg-emerald-700 dark:bg-emerald-600 px-3 py-2.5 text-base font-semibold text-white shadow-md shadow-emerald-900/10'
 
 const panelClass =
   'relative overflow-hidden rounded-2xl border border-emerald-200/90 dark:border-emerald-800/80 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 dark:from-stone-900 dark:via-emerald-950/35 dark:to-stone-900 p-5 shadow-md ring-1 ring-emerald-100/80 dark:ring-emerald-900/40 sm:p-6 lg:min-h-[360px] lg:p-8'
 
 const subAccordion =
-  'w-full text-left rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white/90 dark:bg-stone-900/95 px-3 py-2.5 text-sm font-medium text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-stone-800'
+  'w-full text-left rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white/90 dark:bg-stone-900/95 px-3 py-2.5 text-base font-medium text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-stone-800'
 const subAccordionBody = `${bodyText} rounded-r-lg border-l-[3px] border-emerald-600 dark:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 py-3 pl-4 pr-3 ml-1 mt-2 mb-3`
 
 const inputClass =
-  'w-full rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-950 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-500 dark:placeholder:text-stone-500 shadow-inner shadow-stone-100/80 dark:shadow-none focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/25'
+  'w-full rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-950 px-3 py-2 text-base text-stone-900 dark:text-stone-100 placeholder:text-stone-500 dark:placeholder:text-stone-500 shadow-inner shadow-stone-100/80 dark:shadow-none focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/25'
 
 const panelProse = 'w-full max-w-5xl mx-auto'
 
 const certBadgeClass =
-  'inline-flex items-center rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/40 px-3 py-2 text-sm font-semibold text-amber-900 dark:text-amber-100 shadow-sm'
+  'inline-flex items-center rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/40 px-3 py-2 text-base font-semibold text-amber-900 dark:text-amber-100 shadow-sm'
 
 function CertBadge({ children }) {
   return <span className={certBadgeClass}>{children}</span>
@@ -49,8 +49,8 @@ function CertBadge({ children }) {
 function HeroStat({ title, detail }) {
   return (
     <div className="flex flex-1 flex-col justify-center rounded-xl border border-emerald-200/70 dark:border-emerald-800 bg-white/90 dark:bg-stone-900/90 px-4 py-3 text-center shadow-sm sm:py-4">
-      <p className="text-sm font-bold text-emerald-900 dark:text-emerald-200 sm:text-base">{title}</p>
-      <p className="mt-1 text-xs leading-snug text-stone-600 dark:text-stone-400 sm:text-sm">{detail}</p>
+      <p className="text-base font-bold text-emerald-900 dark:text-emerald-200 sm:text-base">{title}</p>
+      <p className="mt-1 text-base leading-snug text-stone-600 dark:text-stone-400 sm:text-base">{detail}</p>
     </div>
   )
 }
@@ -120,11 +120,11 @@ export default function About() {
           className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-teal-200/35 blur-2xl"
           aria-hidden
         />
-        <p className="relative text-xs font-semibold uppercase tracking-widest text-emerald-800 dark:text-emerald-300">Help center</p>
+        <p className="relative text-base font-semibold uppercase tracking-widest text-emerald-800 dark:text-emerald-300">Help center</p>
         <h1 className="relative mt-2 text-2xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 sm:text-3xl">
           About EcoShop
         </h1>
-        <p className="relative mx-auto mt-3 max-w-xl text-sm leading-relaxed text-emerald-950/90 dark:text-emerald-100/85 sm:text-base">
+        <p className="relative mx-auto mt-3 max-w-xl text-base leading-relaxed text-emerald-950/90 dark:text-emerald-100/85 sm:text-base">
           Delivery help, policies, and support.
         </p>
         <div className="relative mx-auto mt-6 flex max-w-3xl flex-col gap-2.5 sm:flex-row sm:gap-3">
@@ -137,7 +137,7 @@ export default function About() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 lg:items-start">
         <aside className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white/95 dark:bg-stone-900/95 p-4 shadow-sm sm:p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">Topics</p>
+            <p className="text-base font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">Topics</p>
             <nav className="mt-3 flex flex-wrap gap-2 lg:flex-col lg:gap-2" aria-label="About sections">
               {SECTIONS.map((s) => (
                 <button
@@ -167,7 +167,7 @@ export default function About() {
               <h2 className="text-xl font-bold text-emerald-950 dark:text-emerald-100 sm:text-2xl">
                 {activeMeta?.title ?? activeMeta?.label}
               </h2>
-              <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base leading-relaxed text-stone-700 dark:text-stone-300">
+              <p className="mx-auto mt-2 max-w-2xl text-base sm:text-lg leading-relaxed text-stone-700 dark:text-stone-300">
                 {activeSection === 'guarantee' && 'How we choose products and keep listings honest.'}
                 {activeSection === 'certifications' && 'Our in-house marks, impact tiers, and how products earn them.'}
                 {activeSection === 'essentials' && 'Before you check out.'}
@@ -192,12 +192,12 @@ export default function About() {
                       className="rounded-xl border border-emerald-200/80 dark:border-emerald-700/80 bg-white/90 dark:bg-stone-900/90 p-4 shadow-sm"
                     >
                       <p className="font-semibold text-emerald-950 dark:text-emerald-100">{h}</p>
-                      <p className="mt-2 text-sm leading-relaxed text-stone-700 dark:text-stone-300">{d}</p>
+                      <p className="mt-2 text-base leading-relaxed text-stone-700 dark:text-stone-300">{d}</p>
                     </div>
                   ))}
                 </div>
                 <div className="rounded-xl border border-emerald-300/60 dark:border-emerald-600/50 bg-emerald-100/40 dark:bg-emerald-950/40 px-5 py-4 sm:px-6">
-                  <p className="text-center text-sm font-semibold text-emerald-950 dark:text-emerald-100 sm:text-base">
+                  <p className="text-center text-base font-semibold text-emerald-950 dark:text-emerald-100 sm:text-base">
                     Our environmental promise is about real impact, not greenwashing.
                   </p>
                 </div>
@@ -268,7 +268,7 @@ export default function About() {
                     three classes so you can compare at a glance:
                   </p>
                   <div className="mt-4 overflow-x-auto rounded-lg border border-emerald-100 dark:border-emerald-800">
-                    <table className="w-full min-w-[280px] border-collapse text-left text-sm sm:text-base">
+                    <table className="w-full min-w-[280px] border-collapse text-left text-base sm:text-lg">
                       <thead>
                         <tr className="border-b border-emerald-200 dark:border-emerald-700 bg-emerald-50/80 dark:bg-emerald-950/50">
                           <th className="px-4 py-3 font-semibold text-emerald-950 dark:text-emerald-100">Class</th>
@@ -295,7 +295,7 @@ export default function About() {
                       </tbody>
                     </table>
                   </div>
-                  <p className={`mt-4 text-sm sm:text-base text-stone-600 dark:text-stone-400`}>
+                  <p className={`mt-4 text-base sm:text-lg text-stone-600 dark:text-stone-400`}>
                     Scores are recalculated when we refresh supplier data or our methodology; the class on the product page
                     always matches the current score.
                   </p>
@@ -355,14 +355,14 @@ export default function About() {
               <div className={`relative ${panelProse} space-y-6`}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-xl border border-emerald-200 dark:border-emerald-700 bg-white/95 dark:bg-stone-900/95 p-4 shadow-sm">
-                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-300">Free shipping</p>
-                    <p className="mt-1 text-sm text-stone-700 dark:text-stone-300">
+                    <p className="text-base font-semibold text-emerald-900 dark:text-emerald-300">Free shipping</p>
+                    <p className="mt-1 text-base text-stone-700 dark:text-stone-300">
                       On qualifying orders over {format(FREE_SHIPPING_MIN_SUBTOTAL)} at checkout.
                     </p>
                   </div>
                   <div className="rounded-xl border border-emerald-200 dark:border-emerald-700 bg-white/95 dark:bg-stone-900/95 p-4 shadow-sm">
-                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-300">Tracking</p>
-                    <p className="mt-1 text-sm text-stone-700 dark:text-stone-300">We email tracking details as soon as your order ships.</p>
+                    <p className="text-base font-semibold text-emerald-900 dark:text-emerald-300">Tracking</p>
+                    <p className="mt-1 text-base text-stone-700 dark:text-stone-300">We email tracking details as soon as your order ships.</p>
                   </div>
                 </div>
                 <p className={bodyText}>
@@ -370,7 +370,7 @@ export default function About() {
                 </p>
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-emerald-900 dark:text-emerald-300">Destination</label>
+                    <label className="mb-2 block text-base font-medium text-emerald-900 dark:text-emerald-300">Destination</label>
                     <select value={country} onChange={(e) => setCountry(e.target.value)} className={inputClass}>
                       <option>UK</option>
                       <option>EU</option>
@@ -378,7 +378,7 @@ export default function About() {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-emerald-900 dark:text-emerald-300">Shipping type</label>
+                    <label className="mb-2 block text-base font-medium text-emerald-900 dark:text-emerald-300">Shipping type</label>
                     <select
                       value={shippingType}
                       onChange={(e) => setShippingType(e.target.value)}
@@ -450,7 +450,7 @@ export default function About() {
             {activeSection === 'contact' && (
               <div className="relative mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-5">
                 <div className="space-y-4 rounded-2xl border border-emerald-200 dark:border-emerald-700 bg-white/95 dark:bg-stone-900/95 p-5 shadow-sm lg:col-span-2">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-400">Direct contact</p>
+                  <p className="text-base font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-400">Direct contact</p>
                   <div className={`${bodyText} space-y-3`}>
                     <p>
                       <span className="font-medium text-stone-900 dark:text-stone-100">Email</span>
@@ -472,7 +472,7 @@ export default function About() {
                         {SUPPORT_PHONE_DISPLAY}
                       </a>
                     </p>
-                    <p className="text-sm text-stone-600 dark:text-stone-400">Mon to Fri, 9:00 to 18:00 UK time</p>
+                    <p className="text-base text-stone-600 dark:text-stone-400">Mon to Fri, 9:00 to 18:00 UK time</p>
                   </div>
                   <div className="flex flex-col gap-2 border-t border-emerald-100 dark:border-emerald-800 pt-4">
                     <button
@@ -481,11 +481,11 @@ export default function About() {
                         setLiveChatMessage('')
                         setLiveChatOpen(true)
                       }}
-                      className="w-full rounded-lg bg-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-emerald-800"
+                      className="w-full rounded-lg bg-emerald-700 px-4 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-emerald-800"
                     >
                       Start live chat
                     </button>
-                    <p className="text-xs leading-relaxed text-stone-600 dark:text-stone-400">
+                    <p className="text-base leading-relaxed text-stone-600 dark:text-stone-400">
                       Opens WhatsApp to chat with us on this number. Replies usually within 2 hours during business hours.
                     </p>
                   </div>
@@ -617,25 +617,25 @@ export default function About() {
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <a
                     href="/orders"
-                    className="flex min-h-16 flex-col items-center justify-center rounded-xl bg-emerald-700 px-3 py-3 text-center text-sm font-semibold text-white shadow-md transition-colors hover:bg-emerald-800"
+                    className="flex min-h-16 flex-col items-center justify-center rounded-xl bg-emerald-700 px-3 py-3 text-center text-base font-semibold text-white shadow-md transition-colors hover:bg-emerald-800"
                   >
                     Track order
                   </a>
                   <a
                     href="/profile"
-                    className="flex min-h-16 flex-col items-center justify-center rounded-xl border-2 border-emerald-300 dark:border-emerald-600 bg-white dark:bg-stone-900 px-3 py-3 text-center text-sm font-semibold text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:bg-emerald-50 dark:hover:bg-stone-800"
+                    className="flex min-h-16 flex-col items-center justify-center rounded-xl border-2 border-emerald-300 dark:border-emerald-600 bg-white dark:bg-stone-900 px-3 py-3 text-center text-base font-semibold text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:bg-emerald-50 dark:hover:bg-stone-800"
                   >
                     Profile
                   </a>
                   <a
                     href="/products"
-                    className="flex min-h-16 flex-col items-center justify-center rounded-xl border-2 border-emerald-300 dark:border-emerald-600 bg-white dark:bg-stone-900 px-3 py-3 text-center text-sm font-semibold text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:bg-emerald-50 dark:hover:bg-stone-800"
+                    className="flex min-h-16 flex-col items-center justify-center rounded-xl border-2 border-emerald-300 dark:border-emerald-600 bg-white dark:bg-stone-900 px-3 py-3 text-center text-base font-semibold text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:bg-emerald-50 dark:hover:bg-stone-800"
                   >
                     Products
                   </a>
                   <a
                     href="/cart"
-                    className="flex min-h-16 flex-col items-center justify-center rounded-xl border-2 border-emerald-300 dark:border-emerald-600 bg-white dark:bg-stone-900 px-3 py-3 text-center text-sm font-semibold text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:bg-emerald-50 dark:hover:bg-stone-800"
+                    className="flex min-h-16 flex-col items-center justify-center rounded-xl border-2 border-emerald-300 dark:border-emerald-600 bg-white dark:bg-stone-900 px-3 py-3 text-center text-base font-semibold text-emerald-950 dark:text-emerald-100 shadow-sm transition-colors hover:bg-emerald-50 dark:hover:bg-stone-800"
                   >
                     Cart
                   </a>
@@ -678,7 +678,7 @@ export default function About() {
             <p className={`mt-3 ${bodyText}`}>
               Add your question below, then open WhatsApp to start a chat with our team on {SUPPORT_PHONE_DISPLAY}.
             </p>
-            <label className="mt-4 block text-sm font-medium text-emerald-900 dark:text-emerald-300" htmlFor="live-chat-msg">
+            <label className="mt-4 block text-base font-medium text-emerald-900 dark:text-emerald-300" htmlFor="live-chat-msg">
               Your message
             </label>
             <textarea
@@ -693,7 +693,7 @@ export default function About() {
               <button
                 type="button"
                 onClick={() => setLiveChatOpen(false)}
-                className="rounded-lg border border-emerald-200 dark:border-emerald-600 px-4 py-2.5 text-sm font-semibold text-emerald-900 dark:text-emerald-100 hover:bg-emerald-50 dark:hover:bg-stone-800"
+                className="rounded-lg border border-emerald-200 dark:border-emerald-600 px-4 py-2.5 text-base font-semibold text-emerald-900 dark:text-emerald-100 hover:bg-emerald-50 dark:hover:bg-stone-800"
               >
                 Cancel
               </button>
@@ -707,7 +707,7 @@ export default function About() {
                   window.open(url, '_blank', 'noopener,noreferrer')
                   setLiveChatOpen(false)
                 }}
-                className="rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-emerald-800"
+                className="rounded-lg bg-emerald-700 px-4 py-2.5 text-base font-semibold text-white shadow-md hover:bg-emerald-800"
               >
                 Open WhatsApp
               </button>
