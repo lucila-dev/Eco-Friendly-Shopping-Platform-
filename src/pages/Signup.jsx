@@ -20,6 +20,15 @@ function LockIcon({ className = 'w-4 h-4' }) {
   )
 }
 
+/** Returns an error message if the password does not meet the policy shown on the form. */
+function signupPasswordError(password) {
+  if (password.length < 8) return 'Password must be at least 8 characters.'
+  if (!/[a-z]/.test(password)) return 'Password must include a lowercase letter.'
+  if (!/[A-Z]/.test(password)) return 'Password must include an uppercase letter.'
+  if (!/[0-9]/.test(password)) return 'Password must include a number.'
+  return null
+}
+
 export default function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,6 +47,11 @@ export default function Signup() {
     e.preventDefault()
     setError('')
     setSuccess('')
+    const pwErr = signupPasswordError(password)
+    if (pwErr) {
+      setError(pwErr)
+      return
+    }
     const { error: err } = await signUp(email, password, { full_name: username })
     if (err) {
       setError(err.message)
@@ -48,18 +62,18 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] w-full flex items-center justify-center px-4 py-4 sm:py-6">
-      <div className="w-full max-w-sm mx-auto rounded-xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-5 py-6 shadow-md dark:shadow-lg dark:shadow-black/25">
-        <div className="mb-4 flex flex-col items-center text-center">
-          <img src="/favicon-96x96.png" alt="" className="mb-2 h-10 w-10 sm:h-11 sm:w-11" />
-          <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-stone-900 dark:text-stone-50">
+    <div className="min-h-[calc(100vh-7rem)] w-full flex items-center justify-center px-4 py-6 sm:py-10">
+      <div className="w-full max-w-lg mx-auto rounded-2xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-6 sm:px-10 py-8 sm:py-10 shadow-lg dark:shadow-xl dark:shadow-black/30">
+        <div className="mb-6 sm:mb-8 flex flex-col items-center text-center">
+          <img src="/favicon-96x96.png" alt="" className="mb-3 h-12 w-12 sm:h-14 sm:w-14" />
+          <h1 className="text-3xl sm:text-4xl font-bold leading-snug text-stone-900 dark:text-stone-50">
             Create Your Account
           </h1>
-          <p className="mt-1 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-[18rem]">
+          <p className="mt-2 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
             Join us in making sustainable shopping choices
           </p>
         </div>
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
             Email
@@ -74,7 +88,7 @@ export default function Signup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
               placeholder="Enter your email"
             />
           </div>
@@ -92,7 +106,7 @@ export default function Signup() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
               placeholder="Choose a username"
             />
           </div>
@@ -112,7 +126,7 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
               placeholder="Create a password"
             />
           </div>
@@ -124,12 +138,12 @@ export default function Signup() {
         {success && <p className="text-emerald-600 dark:text-emerald-400 text-base sm:text-lg">{success}</p>}
         <button
           type="submit"
-          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-base font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
+          className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
         >
           Create Account
         </button>
       </form>
-      <p className="mt-4 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
+      <p className="mt-6 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
         Already have an account?{' '}
         <Link to="/login" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
           Log In

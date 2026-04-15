@@ -58,20 +58,20 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] w-full flex items-center justify-center px-4 py-4 sm:py-6">
-      <div className="w-full max-w-sm mx-auto rounded-xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-5 py-6 shadow-md dark:shadow-lg dark:shadow-black/25">
-        <div className="mb-4 flex flex-col items-center text-center">
-          <img src="/favicon-96x96.png" alt="" className="mb-2 h-10 w-10 sm:h-11 sm:w-11" />
-          <h1 className="text-2xl sm:text-3xl font-bold leading-snug text-stone-900 dark:text-stone-50">
+    <div className="min-h-[calc(100vh-7rem)] w-full flex items-center justify-center px-4 py-6 sm:py-10">
+      <div className="w-full max-w-lg mx-auto rounded-2xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-6 sm:px-10 py-8 sm:py-10 shadow-lg dark:shadow-xl dark:shadow-black/30">
+        <div className="mb-6 sm:mb-8 flex flex-col items-center text-center">
+          <img src="/favicon-96x96.png" alt="" className="mb-3 h-12 w-12 sm:h-14 sm:w-14" />
+          <h1 className="text-3xl sm:text-4xl font-bold leading-snug text-stone-900 dark:text-stone-50">
             {forgotMode ? 'Reset Password' : 'Welcome Back'}
           </h1>
-          <p className="mt-1 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-[18rem]">
+          <p className="mt-2 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
             {forgotMode
               ? 'Enter your email and we will send you a reset link'
               : 'Sign in to continue your sustainable shopping journey'}
           </p>
         </div>
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
             Email
@@ -86,7 +86,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
               placeholder="Enter your email"
             />
           </div>
@@ -107,7 +107,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2 pl-10 pr-3 text-base text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
                 placeholder="Enter your password"
               />
             </div>
@@ -117,13 +117,13 @@ export default function Login() {
         {success && <p className="text-emerald-600 dark:text-emerald-400 text-base sm:text-lg">{success}</p>}
         <button
           type="submit"
-          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-base font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
+          className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
         >
           {forgotMode ? 'Send Reset Link' : 'Sign In'}
         </button>
       </form>
       {!forgotMode && (
-        <p className="mt-4 text-center">
+        <p className="mt-6 text-center">
           <button
             type="button"
             onClick={() => setForgotMode(true)}
@@ -134,7 +134,7 @@ export default function Login() {
         </p>
       )}
       {forgotMode && (
-        <p className="mt-4 text-center">
+        <p className="mt-6 text-center">
           <button
             type="button"
             onClick={() => setForgotMode(false)}
@@ -144,7 +144,7 @@ export default function Login() {
           </button>
         </p>
       )}
-      <p className="mt-4 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
+      <p className="mt-6 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
         Don’t have an account?{' '}
         <Link to="/signup" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
           Create Account
