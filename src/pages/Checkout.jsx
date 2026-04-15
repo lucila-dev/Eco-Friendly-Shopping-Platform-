@@ -20,6 +20,8 @@ import {
   totalDiscountForCodes,
 } from '../lib/checkoutPromo'
 import { useFormatPrice } from '../hooks/useFormatPrice'
+import { loyaltyCreditsToMoney } from '../lib/loyaltyValue'
+import { usdToGbpApprox } from '../lib/shopMoney'
 import {
   PaymentApplePayMark,
   PaymentCardBrandsMark,
@@ -31,6 +33,12 @@ import { showToast } from '../lib/toast'
 
 const inputClass =
   'w-full px-3 py-2.5 text-base border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-500'
+
+function formatCreditsBalance(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '0'
+  return n.toLocaleString(undefined, { maximumFractionDigits: 2 })
+}
 
 const PAYMENT_OPTIONS = [
   { id: 'loyalty', title: 'Loyalty credits', description: 'Pay with your EcoShop balance', Mark: PaymentLoyaltyIcon },
@@ -109,6 +117,11 @@ export default function Checkout() {
   const deliveryFee = getDeliveryFeeForMethod(discountedSubtotal, deliveryMethod)
   const giftWrapFee = giftWrap ? GIFT_WRAP_FEE : 0
   const finalTotal = discountedSubtotal + deliveryFee + giftWrapFee
+
+  const loyaltyWorthGbp = useMemo(
+    () => usdToGbpApprox(loyaltyCreditsToMoney(loyaltyCredits)),
+    [loyaltyCredits],
+  )
 
   const applyPromo = () => {
     setPromoMessage(null)
@@ -614,7 +627,18 @@ export default function Checkout() {
 
             {paymentMethod === 'loyalty' && (
               <p className="mt-4 text-base text-stone-600 dark:text-stone-400 tabular-nums">
-                Available credits: {loadingCredits ? 'Loading...' : format(loyaltyCredits)} · This order: {format(finalTotal)}
+                Available credits:{' '}
+                {loadingCredits ? (
+                  'Loading...'
+                ) : (
+                  <>
+                    {formatCreditsBalance(loyaltyCredits)}{' '}
+                    <span className="text-stone-500 dark:text-stone-400">
+                      (≈ {format(loyaltyWorthGbp)})
+                    </span>
+                  </>
+                )}{' '}
+                · This order: {format(finalTotal)}
               </p>
             )}
 
