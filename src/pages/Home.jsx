@@ -56,6 +56,8 @@ const CATEGORY_ITEM_TAGS = {
 }
 
 const FEATURED_PRODUCT_LIMIT = 12
+/** Ignore tiny scroll offsets so the left fade/button never appear at the true start. */
+const FEATURED_SCROLL_EDGE_SLACK = 16
 
 export default function Home() {
   const { format } = useFormatPrice()
@@ -63,6 +65,7 @@ export default function Home() {
   const [localVersion, setLocalVersion] = useState(0)
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [featuredLoading, setFeaturedLoading] = useState(true)
+  const [featuredCanScrollLeft, setFeaturedCanScrollLeft] = useState(false)
   const [featuredCanScrollRight, setFeaturedCanScrollRight] = useState(false)
   const featuredScrollRef = useRef(null)
 
@@ -70,7 +73,9 @@ export default function Home() {
     const el = featuredScrollRef.current
     if (!el) return
     const { scrollLeft, scrollWidth, clientWidth } = el
-    setFeaturedCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4)
+    const maxScroll = Math.max(0, scrollWidth - clientWidth)
+    setFeaturedCanScrollLeft(scrollLeft > FEATURED_SCROLL_EDGE_SLACK)
+    setFeaturedCanScrollRight(scrollLeft < maxScroll - FEATURED_SCROLL_EDGE_SLACK)
   }, [])
 
   const scrollFeaturedRow = useCallback(
@@ -78,7 +83,7 @@ export default function Home() {
       const el = featuredScrollRef.current
       if (!el) return
       const step = Math.min(el.clientWidth * 0.75, 320)
-      el.scrollBy({ left: direction === 'next' ? step : -step, behavior: 'smooth' })
+      el.scrollBy({ left: direction === 'prev' ? -step : step, behavior: 'smooth' })
     },
     [],
   )
@@ -139,17 +144,23 @@ export default function Home() {
 
   useEffect(() => {
     if (featuredLoading || featuredProducts.length === 0) return
-    updateFeaturedScrollState()
     const el = featuredScrollRef.current
     if (!el) return
-    const onScroll = () => updateFeaturedScrollState()
-    el.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onScroll) : null
+
+    const sync = () => updateFeaturedScrollState()
+    /** Hard left edge on load so a tiny layout offset never shows the “previous” overlay on the first card. */
+    el.scrollLeft = 0
+    sync()
+    const raf = requestAnimationFrame(sync)
+
+    el.addEventListener('scroll', sync, { passive: true })
+    window.addEventListener('resize', sync)
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(sync) : null
     ro?.observe(el)
     return () => {
-      el.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(raf)
+      el.removeEventListener('scroll', sync)
+      window.removeEventListener('resize', sync)
       ro?.disconnect()
     }
   }, [featuredLoading, featuredProducts, updateFeaturedScrollState])
@@ -285,37 +296,45 @@ export default function Home() {
           {featuredLoading ? (
             <p className="text-stone-500 dark:text-stone-400 text-sm py-8 text-center">Loading recommendations…</p>
           ) : (
-            <div className="relative">
+            <div className="relative min-w-0 rounded-2xl border border-stone-200/60 dark:border-stone-600/45 bg-white/80 dark:bg-stone-900/40 py-3 sm:py-4 shadow-sm">
               <div
                 ref={featuredScrollRef}
-                className="flex gap-4 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-2 pt-1 -mx-1 px-1 [scrollbar-width:thin]"
+                className={`flex gap-4 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-1 pt-0.5 [scrollbar-width:thin] transition-[padding] duration-200 ease-out ${
+                  featuredCanScrollLeft ? 'pl-12 scroll-pl-12' : 'pl-3 scroll-pl-3'
+                } ${featuredCanScrollRight ? 'pr-12 scroll-pr-12' : 'pr-3 scroll-pr-3'}`}
               >
                 {featuredProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="shrink-0 w-[min(17.5rem,calc(100vw-2.5rem))] sm:w-[17.5rem] snap-start"
+                    className="shrink-0 w-[min(17.5rem,calc(100vw-3.5rem))] sm:w-[17.5rem] snap-start"
                   >
                     <ProductCard product={product} />
                   </div>
                 ))}
               </div>
+              {featuredCanScrollLeft && (
+                <button
+                  type="button"
+                  onClick={() => scrollFeaturedRow('prev')}
+                  className="absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-stone-200/90 bg-white text-stone-800 shadow-md transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/80 dark:hover:text-emerald-200"
+                  aria-label="See previous recommended products"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
               {featuredCanScrollRight && (
-                <>
-                  <div
-                    className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-20 bg-gradient-to-l from-white via-white/90 to-transparent dark:from-stone-900 dark:via-stone-900/90 dark:to-transparent rounded-r-lg"
-                    aria-hidden
-                  />
-                  <button
-                    type="button"
-                    onClick={() => scrollFeaturedRow('next')}
-                    className="absolute right-1 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-stone-200/90 bg-white/95 text-stone-800 shadow-md backdrop-blur-sm transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 dark:border-stone-600 dark:bg-stone-900/95 dark:text-stone-100 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/80 dark:hover:text-emerald-200"
-                    aria-label="See more recommended products"
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </>
+                <button
+                  type="button"
+                  onClick={() => scrollFeaturedRow('next')}
+                  className="absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-stone-200/90 bg-white text-stone-800 shadow-md transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/80 dark:hover:text-emerald-200"
+                  aria-label="See more recommended products"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               )}
             </div>
           )}
