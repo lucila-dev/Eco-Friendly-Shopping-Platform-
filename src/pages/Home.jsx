@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getCategoryCardSrc, getCategoryImageObjectPosition } from '../lib/categoryCardImage'
@@ -6,6 +6,7 @@ import { mergeCategoryRowForHome } from '../lib/categoryImageLocalStorage'
 import { mergeGardenOutdoorsForHome, mergeHomeOfficeForHome } from '../lib/storefrontCategoryMerge'
 import { categoryCardDescription } from '../lib/categoryCardCopy'
 import { MaterialsIcon, TruckIcon, PackageIcon, WasteReductionIcon, CheckCircleIcon, CarbonReductionIcon } from '../components/Icons'
+import ProductCard from '../components/ProductCard'
 import { FREE_SHIPPING_MIN_SUBTOTAL } from '../lib/shipping'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
@@ -54,10 +55,33 @@ const CATEGORY_ITEM_TAGS = {
   tech: ['Solar Chargers', 'LED Lights', 'Accessories'],
 }
 
+const FEATURED_PRODUCT_LIMIT = 12
+
 export default function Home() {
   const { format } = useFormatPrice()
   const [categories, setCategories] = useState([])
   const [localVersion, setLocalVersion] = useState(0)
+  const [featuredProducts, setFeaturedProducts] = useState([])
+  const [featuredLoading, setFeaturedLoading] = useState(true)
+  const [featuredCanScrollRight, setFeaturedCanScrollRight] = useState(false)
+  const featuredScrollRef = useRef(null)
+
+  const updateFeaturedScrollState = useCallback(() => {
+    const el = featuredScrollRef.current
+    if (!el) return
+    const { scrollLeft, scrollWidth, clientWidth } = el
+    setFeaturedCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4)
+  }, [])
+
+  const scrollFeaturedRow = useCallback(
+    (direction) => {
+      const el = featuredScrollRef.current
+      if (!el) return
+      const step = Math.min(el.clientWidth * 0.75, 320)
+      el.scrollBy({ left: direction === 'next' ? step : -step, behavior: 'smooth' })
+    },
+    [],
+  )
 
   useEffect(() => {
     document.title = 'EcoShop · Sustainable Shopping'
@@ -93,6 +117,43 @@ export default function Home() {
     fetchCategories()
   }, [])
 
+  useEffect(() => {
+    async function fetchFeatured() {
+      setFeaturedLoading(true)
+      const { data, error } = await supabase
+        .from('products')
+        .select(
+          'id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug)',
+        )
+        .order('sustainability_score', { ascending: false, nullsFirst: false })
+        .order('carbon_footprint_saving_kg', { ascending: false, nullsFirst: false })
+        .limit(FEATURED_PRODUCT_LIMIT)
+      if (error && import.meta.env.DEV) {
+        console.warn('[EcoShop] home featured products:', error.message)
+      }
+      setFeaturedProducts(data ?? [])
+      setFeaturedLoading(false)
+    }
+    fetchFeatured()
+  }, [])
+
+  useEffect(() => {
+    if (featuredLoading || featuredProducts.length === 0) return
+    updateFeaturedScrollState()
+    const el = featuredScrollRef.current
+    if (!el) return
+    const onScroll = () => updateFeaturedScrollState()
+    el.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onScroll) : null
+    ro?.observe(el)
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      ro?.disconnect()
+    }
+  }, [featuredLoading, featuredProducts, updateFeaturedScrollState])
+
   const displayCategories = useMemo(() => {
     const withLocal = categories.map((c) => mergeCategoryRowForHome(c))
     return mergeGardenOutdoorsForHome(mergeHomeOfficeForHome(withLocal))
@@ -100,19 +161,19 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative rounded-2xl overflow-hidden mb-8 sm:mb-10">
+      <section className="relative rounded-2xl overflow-hidden mb-8 sm:mb-10 min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem]">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50/90 to-teal-50/80 dark:from-emerald-950/80 dark:via-stone-900 dark:to-emerald-950/60" />
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1200')] bg-cover bg-center opacity-20 mix-blend-multiply dark:opacity-10 dark:mix-blend-soft-light" />
-        <div className="relative max-w-2xl mx-auto text-center px-4 py-8 sm:py-12">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-emerald-950 dark:text-emerald-100 mb-3 leading-tight">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1600')] bg-cover bg-center opacity-20 mix-blend-multiply dark:opacity-10 dark:mix-blend-soft-light" />
+        <div className="relative z-10 flex min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] flex-col items-center justify-center text-center px-4 py-12 sm:py-14 md:py-16 max-w-3xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-950 dark:text-emerald-100 mb-4 leading-tight">
             Shop Sustainably, Live Better
           </h1>
-          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-base sm:text-lg mb-5 max-w-xl mx-auto leading-relaxed">
+          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-base sm:text-lg md:text-xl mb-6 max-w-2xl mx-auto leading-relaxed">
             Discover eco-friendly products that make a difference. Every purchase helps reduce your carbon footprint.
           </p>
           <Link
             to="/products"
-            className="inline-flex items-center justify-center px-5 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            className="inline-flex items-center justify-center px-6 py-2.5 text-sm sm:text-base font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
           >
             Shop Now
           </Link>
@@ -161,7 +222,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section>
+      <section className="pb-2">
         <h2 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-1.5">Shop by category</h2>
         <p className="text-stone-700 dark:text-stone-300 text-sm sm:text-base mb-5 max-w-2xl leading-relaxed">
           Choose a category to find eco-friendly products quickly.
@@ -209,6 +270,57 @@ export default function Home() {
           <p className="text-stone-500 dark:text-stone-400">No categories yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 hover:underline">Browse all products</Link>.</p>
         )}
       </section>
+
+      {(featuredLoading || featuredProducts.length > 0) && (
+        <section className="mb-8 sm:mb-10 mt-12 sm:mt-16 pt-2 sm:pt-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+            <h2 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100">Recommended picks</h2>
+            <Link
+              to="/products?sort=score-desc"
+              className="shrink-0 inline-flex items-center justify-center text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 underline-offset-2 hover:underline"
+            >
+              View all products
+            </Link>
+          </div>
+          {featuredLoading ? (
+            <p className="text-stone-500 dark:text-stone-400 text-sm py-8 text-center">Loading recommendations…</p>
+          ) : (
+            <div className="relative">
+              <div
+                ref={featuredScrollRef}
+                className="flex gap-4 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-2 pt-1 -mx-1 px-1 [scrollbar-width:thin]"
+              >
+                {featuredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="shrink-0 w-[min(17.5rem,calc(100vw-2.5rem))] sm:w-[17.5rem] snap-start"
+                  >
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+              {featuredCanScrollRight && (
+                <>
+                  <div
+                    className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-20 bg-gradient-to-l from-white via-white/90 to-transparent dark:from-stone-900 dark:via-stone-900/90 dark:to-transparent rounded-r-lg"
+                    aria-hidden
+                  />
+                  <button
+                    type="button"
+                    onClick={() => scrollFeaturedRow('next')}
+                    className="absolute right-1 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-stone-200/90 bg-white/95 text-stone-800 shadow-md backdrop-blur-sm transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 dark:border-stone-600 dark:bg-stone-900/95 dark:text-stone-100 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/80 dark:hover:text-emerald-200"
+                    aria-label="See more recommended products"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       <section
         className="relative w-screen max-w-[100vw] left-1/2 -translate-x-1/2 mt-10 sm:mt-12 bg-emerald-600 dark:bg-emerald-700 text-white py-10 sm:py-14 px-4 sm:px-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
