@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getProductImage } from '../lib/productImageOverrides'
 import { formatCatalogProductName } from '../lib/catalogProductName'
@@ -40,7 +40,6 @@ export default function ProductCard({ product }) {
   const [sizePickerOpen, setSizePickerOpen] = useState(false)
   const [pendingSize, setPendingSize] = useState('')
   const navigate = useNavigate()
-  const location = useLocation()
   const sizeGuide = getSizeGuide(product)
   const requiresSize = Boolean(sizeGuide)
 
@@ -89,7 +88,7 @@ export default function ProductCard({ product }) {
 
   const onWishlistClick = () => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: { pathname: location.pathname } } })
+      navigate('/login')
       return
     }
     toggle(product.id)

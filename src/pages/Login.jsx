@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 function MailIcon({ className = 'w-4 h-4' }) {
@@ -28,8 +28,6 @@ export default function Login() {
   const [success, setSuccess] = useState('')
   const { signIn, resetPassword } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
-  const from = location.state?.from?.pathname || '/'
 
   useEffect(() => {
     document.title = forgotMode ? 'Reset password · EcoShop' : 'Sign in · EcoShop'
@@ -54,7 +52,7 @@ export default function Login() {
       setError(err.message)
       return
     }
-    navigate(from, { replace: true })
+    navigate('/', { replace: true })
   }
 
   return (
