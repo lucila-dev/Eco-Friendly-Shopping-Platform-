@@ -27,6 +27,7 @@ import {
   PaymentPayPalMark,
 } from '../components/Icons'
 import { layoutContentWidthClass } from '../lib/layoutContent'
+import { showToast } from '../lib/toast'
 
 const inputClass =
   'w-full px-3 py-2.5 text-base border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-500'
@@ -56,6 +57,8 @@ export default function Checkout() {
   const [giftWrap, setGiftWrap] = useState(false)
   const [isGift, setIsGift] = useState(false)
   const [giftMessage, setGiftMessage] = useState('')
+  /** When the textarea has text, user must tap Save so the note is clearly “accepted” before placing the order. */
+  const [giftMessageAcknowledged, setGiftMessageAcknowledged] = useState(false)
   const [form, setForm] = useState({
     shipping_name: '',
     shipping_email: user?.email ?? '',
@@ -92,6 +95,10 @@ export default function Checkout() {
     }
     fetchCredits()
   }, [user?.id])
+
+  useEffect(() => {
+    if (!isGift) setGiftMessageAcknowledged(false)
+  }, [isGift])
 
   const discountAmount = useMemo(
     () => totalDiscountForCodes(appliedPromoCodes, total),
@@ -147,6 +154,10 @@ export default function Checkout() {
     }
     if (!acceptTerms) {
       setError('Please accept the terms to continue.')
+      return
+    }
+    if (isGift && giftMessage.trim() && !giftMessageAcknowledged) {
+      setError('Tap “Save message” to include your gift note with this order.')
       return
     }
     if (paymentMethod === 'card') {
@@ -477,12 +488,41 @@ export default function Checkout() {
                     id="gift_message"
                     rows={3}
                     value={giftMessage}
-                    onChange={(e) => setGiftMessage(e.target.value)}
+                    onChange={(e) => {
+                      setGiftMessage(e.target.value)
+                      setGiftMessageAcknowledged(false)
+                    }}
                     placeholder="Add a short message for the recipient"
                     className={`${inputClass} resize-y min-h-[5rem]`}
                     maxLength={500}
                   />
-                  <p className="text-base text-stone-500 mt-1">{giftMessage.length}/500</p>
+                  <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                    <p className="text-base text-stone-500">{giftMessage.length}/500</p>
+                    {giftMessage.trim().length > 0 ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGiftMessageAcknowledged(true)
+                            showToast('Gift message saved — it will be included when you place your order.')
+                          }}
+                          disabled={giftMessageAcknowledged}
+                          className="rounded-lg border-2 border-emerald-600 bg-emerald-600 px-4 py-2 text-base font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-stone-300 disabled:bg-stone-200 disabled:text-stone-500 dark:disabled:border-stone-600 dark:disabled:bg-stone-800 dark:disabled:text-stone-400"
+                        >
+                          Save message
+                        </button>
+                        {giftMessageAcknowledged && (
+                          <span className="text-base font-medium text-emerald-700 dark:text-emerald-400">
+                            Saved for this order
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-base text-stone-500 dark:text-stone-400">
+                        Leave blank for no printed message. If you type a note, use Save message before placing your order.
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
               <label className="flex items-start gap-3 cursor-pointer">
