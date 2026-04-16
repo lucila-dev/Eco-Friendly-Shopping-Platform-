@@ -100,7 +100,7 @@ export default function Settings() {
   ]
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 pb-16 pt-2">
+    <div className="w-full max-w-xl mx-auto px-4 sm:px-6 pb-16 pt-2">
       <header className="mb-10">
         <p className="mb-3">
           <Link

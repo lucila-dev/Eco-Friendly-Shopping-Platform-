@@ -175,11 +175,11 @@ export default function Home() {
       <section className="relative rounded-2xl overflow-hidden mb-8 sm:mb-10 min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem]">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50/90 to-teal-50/80 dark:from-emerald-950/80 dark:via-stone-900 dark:to-emerald-950/60" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1600')] bg-cover bg-center opacity-20 mix-blend-multiply dark:opacity-10 dark:mix-blend-soft-light" />
-        <div className="relative z-10 flex min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] flex-col items-center justify-center text-center px-4 py-12 sm:py-14 md:py-16 max-w-4xl mx-auto">
+        <div className="relative z-10 flex min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] flex-col items-center justify-center text-center px-4 py-12 sm:py-14 md:py-16 max-w-3xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-emerald-950 dark:text-emerald-100 mb-5 leading-tight">
             Shop Sustainably, Live Better
           </h1>
-          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-lg sm:text-xl md:text-2xl mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-lg sm:text-xl md:text-2xl mb-8 max-w-xl mx-auto leading-relaxed">
             Discover eco-friendly products that make a difference. Every purchase helps reduce your carbon footprint.
           </p>
           <Link
@@ -212,7 +212,7 @@ export default function Home() {
         <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 text-center mb-3">
           Our Environmental Commitment
         </h2>
-        <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg text-center max-w-2xl mx-auto mb-8 leading-relaxed">
+        <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg text-center max-w-xl mx-auto mb-8 leading-relaxed">
           We're dedicated to reducing environmental impact through every aspect of our platform.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -235,10 +235,10 @@ export default function Home() {
 
       <section className="pb-2">
         <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Shop by category</h2>
-        <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg mb-6 max-w-2xl leading-relaxed">
+        <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg mb-6 max-w-xl leading-relaxed">
           Choose a category to find eco-friendly products quickly.
         </p>
-        <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-4">
           {displayCategories.map((cat) => {
             const cardSubtitle = categoryCardDescription(cat)
             return (
@@ -345,11 +345,11 @@ export default function Home() {
         className="relative w-screen max-w-[100vw] left-1/2 -translate-x-1/2 mt-10 sm:mt-12 bg-emerald-600 dark:bg-emerald-700 text-white py-10 sm:py-14 px-4 sm:px-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
         aria-labelledby="impact-heading"
       >
-        <div className="max-w-4xl mx-auto text-center px-2">
+        <div className="max-w-3xl mx-auto text-center px-2">
           <h2 id="impact-heading" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4">
             Together We&apos;re Making a Difference
           </h2>
-          <p className="text-base sm:text-lg text-emerald-50/95 max-w-2xl mx-auto leading-relaxed mb-10 sm:mb-12">
+          <p className="text-base sm:text-lg text-emerald-50/95 max-w-xl mx-auto leading-relaxed mb-10 sm:mb-12">
             Join thousands of eco-conscious shoppers reducing their carbon footprint
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">

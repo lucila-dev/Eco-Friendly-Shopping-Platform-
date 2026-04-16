@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import ProductCard from '../components/ProductCard'
 import { useWishlist } from '../hooks/useWishlist'
+import { enrichProductsWithReviewStats } from '../lib/productReviewStats'
 
 export default function Wishlist() {
   const { ids } = useWishlist()
@@ -24,10 +25,10 @@ export default function Wishlist() {
       setLoading(true)
       const { data } = await supabase
         .from('products')
-        .select('id, name, slug, price, image_url, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug, name)')
+        .select('id, name, slug, price, image_url, description, sustainability_score, materials, carbon_footprint_saving_kg, category:categories(slug, name)')
         .in('id', ids)
       const ordered = ids.map((id) => (data ?? []).find((p) => p.id === id)).filter(Boolean)
-      setProducts(ordered)
+      setProducts(await enrichProductsWithReviewStats(supabase, ordered))
       setLoading(false)
     }
     fetchWishlist()
@@ -39,11 +40,11 @@ export default function Wishlist() {
     <div>
       <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 mb-5">Your wishlist</h1>
       {products.length === 0 ? (
-        <p className="text-stone-600 dark:text-stone-300 text-base leading-relaxed max-w-2xl">
+        <p className="text-stone-600 dark:text-stone-300 text-base leading-relaxed max-w-xl">
           No saved items yet. <Link to="/products" className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline">Browse products</Link>
         </p>
       ) : (
-        <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {products.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       )}

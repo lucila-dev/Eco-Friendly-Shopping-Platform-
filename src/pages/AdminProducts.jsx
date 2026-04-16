@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useProfile } from '../hooks/useProfile'
-import { getProductImage } from '../lib/productImageOverrides'
+import { getProductImage, productCatalogImageClassName } from '../lib/productImageOverrides'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
 export default function AdminProducts() {
@@ -184,11 +184,11 @@ export default function AdminProducts() {
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800">
                         <img
                           src={getProductImage(p)}
                           alt={formatCatalogProductName(p.name)}
-                          className="h-full w-full object-cover object-center"
+                          className={productCatalogImageClassName}
                           loading="lazy"
                         />
                       </div>

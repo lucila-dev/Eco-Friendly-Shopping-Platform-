@@ -13,7 +13,7 @@ export default function AdminCategoryImages() {
 
   if (profileLoading || !canManageProducts) {
     return (
-      <div className="w-full max-w-6xl mx-auto">
+      <div className="w-full max-w-5xl mx-auto">
         <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Category images</h1>
         {!profileLoading && !canManageProducts && (
           <p className="text-stone-600 dark:text-stone-300">
@@ -26,7 +26,7 @@ export default function AdminCategoryImages() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto">
       <Link
         to="/admin/products"
         className="text-base text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 mb-3 inline-block"

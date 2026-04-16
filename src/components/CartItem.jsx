@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { getProductImage } from '../lib/productImageOverrides'
+import { getProductImage, productCatalogImageClassName } from '../lib/productImageOverrides'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
@@ -31,9 +31,14 @@ export default function CartItem({ item, onUpdate, onRemove }) {
     <div className="flex gap-3 py-3 border-b border-stone-200 dark:border-stone-600 last:border-0">
       <Link
         to={`/products/${product.slug}`}
-        className="shrink-0 w-[4.5rem] h-[4.5rem] rounded-lg overflow-hidden bg-stone-100 dark:bg-stone-800"
+        className="relative shrink-0 w-[4.5rem] h-[4.5rem] rounded-lg overflow-hidden bg-stone-100 dark:bg-stone-800"
       >
-        <img src={getProductImage(product)} alt={displayName} className="h-full w-full object-cover object-center" loading="lazy" />
+        <img
+          src={getProductImage(product)}
+          alt={displayName}
+          className={productCatalogImageClassName}
+          loading="lazy"
+        />
       </Link>
       <div className="flex-1 min-w-0">
         <Link
