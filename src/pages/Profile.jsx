@@ -61,7 +61,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-3xl mx-auto flex justify-center py-10">
+      <div className="w-full max-w-2xl mx-auto flex justify-center py-10">
         <p className="text-stone-500 dark:text-stone-400 text-base">Loading profile...</p>
       </div>
     )
@@ -168,7 +168,7 @@ export default function Profile() {
     'group flex flex-col items-center justify-center gap-1.5 rounded-xl border border-emerald-100 dark:border-emerald-800/70 bg-white dark:bg-stone-900 px-3 py-4 text-center shadow-sm transition hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-stone-800/80 hover:shadow'
 
   return (
-    <div className="w-full max-w-3xl mx-auto pb-8">
+    <div className="w-full max-w-2xl mx-auto pb-8">
       <header className="text-center mb-6 sm:mb-8">
         <p className="mb-2">
           <Link

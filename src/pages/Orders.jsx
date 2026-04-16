@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-import { getProductImage } from '../lib/productImageOverrides'
+import { getProductImage, productCatalogImageClassName } from '../lib/productImageOverrides'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { augmentOrdersWithPresentationHistory } from '../lib/presentationOrders'
 import { GIFT_WRAP_FEE, parsePromoReceiptFromShippingAddress } from '../lib/checkoutPromo'
@@ -210,7 +210,7 @@ export default function Orders() {
                   return (
                   <div key={item.id} className="flex items-center justify-between border border-stone-200 dark:border-stone-700 rounded-md px-2 py-2 bg-stone-50/50 dark:bg-stone-950/30">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100 dark:bg-stone-800">
                         <img
                           src={getProductImage({
                             name: item.products?.name,
@@ -218,7 +218,7 @@ export default function Orders() {
                             image_url: item.products?.image_url,
                           })}
                           alt={lineName || 'Product'}
-                          className="h-full w-full object-cover object-center"
+                          className={productCatalogImageClassName}
                           loading="lazy"
                           onError={(e) => {
                             e.currentTarget.onerror = null

@@ -56,7 +56,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] w-full flex items-center justify-center px-4 py-6 sm:py-10">
+    <div className="w-full flex items-center justify-center">
       <div className="w-full max-w-lg mx-auto rounded-2xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-6 sm:px-10 py-8 sm:py-10 shadow-lg dark:shadow-xl dark:shadow-black/30">
         <div className="mb-6 sm:mb-8 flex flex-col items-center text-center">
           <img src="/favicon-96x96.png" alt="" className="mb-3 h-12 w-12 sm:h-14 sm:w-14" />

@@ -1,16 +1,24 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useLayoutEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import ReviewList from '../components/ReviewList'
 import ReviewForm from '../components/ReviewForm'
 import { showToast } from '../lib/toast'
-import { getProductImage } from '../lib/productImageOverrides'
+import { getProductImage, productDetailHeroFrameClass, productDetailHeroImageClassName } from '../lib/productImageOverrides'
 import { formatCatalogProductName } from '../lib/catalogProductName'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 import ProductCard from '../components/ProductCard'
 import { pickRelatedSlices } from '../lib/productRecommendations'
-import { getSizeGuide } from '../lib/productSizeGuide'
+import {
+  getSizeGuide,
+  getShoeVariantTable,
+  shoeCartSizeLabel,
+  measurementTableForUnit,
+  sizeGuideHasFootLengthUnitToggle,
+  sizeGuideHasMeasurementUnitToggle,
+} from '../lib/productSizeGuide'
 
 function parseMaterialTags(materials) {
   if (!materials) return []
@@ -137,7 +145,16 @@ export default function ProductDetail() {
   const [reviewVersion, setReviewVersion] = useState(0)
   const [canReview, setCanReview] = useState(false)
   const [selectedSize, setSelectedSize] = useState('')
-  const [showSizeMeasurements, setShowSizeMeasurements] = useState(false)
+  const [shoeVariant, setShoeVariant] = useState('mens')
+  /** Shoes: 'mens' | 'womens' size picker popup, or null when closed. */
+  const [shoePickerModal, setShoePickerModal] = useState(null)
+  /** UK size highlighted in shoe modal before user confirms. */
+  const [shoeModalPendingSize, setShoeModalPendingSize] = useState('')
+  /** Apparel (sweaters, etc.): size picker popup without gender split. */
+  const [apparelSizeModalOpen, setApparelSizeModalOpen] = useState(false)
+  const [apparelModalPendingSize, setApparelModalPendingSize] = useState('')
+  const [sizeMeasurementsModalOpen, setSizeMeasurementsModalOpen] = useState(false)
+  const [measurementUnit, setMeasurementUnit] = useState('cm')
   const [openInfo, setOpenInfo] = useState({
     materials: false,
     certifications: false,
@@ -156,6 +173,10 @@ export default function ProductDetail() {
     document.title = product ? `${displayName || product.name} · EcoShop` : 'EcoShop · Sustainable Shopping'
     return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [product?.name, displayName])
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [slug])
 
   useEffect(() => {
     async function fetchProduct() {
@@ -233,6 +254,74 @@ export default function ProductDetail() {
   const productUse = useMemo(() => getProductUseLabel(product), [product])
   const sizeGuide = useMemo(() => getSizeGuide(product), [product])
 
+  useEffect(() => {
+    setSelectedSize('')
+    setSizeMeasurementsModalOpen(false)
+    setShoePickerModal(null)
+    setApparelSizeModalOpen(false)
+    setApparelModalPendingSize('')
+    if (sizeGuide?.isShoe && sizeGuide.defaultVariant) {
+      setShoeVariant(sizeGuide.defaultVariant)
+    } else {
+      setShoeVariant('mens')
+    }
+  }, [product?.id, sizeGuide?.isShoe, sizeGuide?.defaultVariant])
+
+  useEffect(() => {
+    setMeasurementUnit('cm')
+  }, [product?.id, shoeVariant])
+
+  useEffect(() => {
+    if (!shoePickerModal) {
+      setShoeModalPendingSize('')
+      return
+    }
+    if (selectedSize && shoeVariant === shoePickerModal) {
+      setShoeModalPendingSize(selectedSize)
+    } else {
+      setShoeModalPendingSize('')
+    }
+  }, [shoePickerModal, selectedSize, shoeVariant])
+
+  useEffect(() => {
+    if (!apparelSizeModalOpen) {
+      setApparelModalPendingSize('')
+      return
+    }
+    if (selectedSize) setApparelModalPendingSize(selectedSize)
+    else setApparelModalPendingSize('')
+  }, [apparelSizeModalOpen, selectedSize])
+
+  useEffect(() => {
+    if (!shoePickerModal && !apparelSizeModalOpen && !sizeMeasurementsModalOpen) return
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return
+      if (shoePickerModal) setShoePickerModal(null)
+      else if (apparelSizeModalOpen) setApparelSizeModalOpen(false)
+      else if (sizeMeasurementsModalOpen) setSizeMeasurementsModalOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [shoePickerModal, apparelSizeModalOpen, sizeMeasurementsModalOpen])
+
+  const displayGuide = sizeGuide?.isShoe ? getShoeVariantTable(sizeGuide, shoeVariant) : sizeGuide
+  const measurementTable = useMemo(
+    () => (displayGuide ? measurementTableForUnit(displayGuide, measurementUnit) : null),
+    [displayGuide, measurementUnit],
+  )
+  const sizeForCart =
+    sizeGuide?.isShoe && selectedSize
+      ? shoeCartSizeLabel(shoeVariant, selectedSize)
+      : sizeGuide?.isShoe
+        ? ''
+        : selectedSize
+
+  const shoeModalGuide =
+    shoePickerModal && sizeGuide?.isShoe ? getShoeVariantTable(sizeGuide, shoePickerModal) : null
+
+  const apparelModalGuide =
+    apparelSizeModalOpen && sizeGuide && !sizeGuide.isShoe ? sizeGuide : null
+
   if (loading) return <p className="text-stone-500 dark:text-stone-400 text-base py-3">Loading...</p>
   if (!product) return <p className="text-stone-600">Product not found. <Link to="/products" className="text-emerald-600 hover:underline">Back to products</Link></p>
 
@@ -244,26 +333,26 @@ export default function ProductDetail() {
 
   return (
     <div className="w-full py-3 sm:py-4">
-      <div className="grid w-full max-w-none grid-cols-1 items-stretch gap-x-4 gap-y-4 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4">
-        <Link
-          to={categoryLink}
-          className="col-span-full block text-base text-stone-600 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400"
-        >
-          ← Back to Category
-        </Link>
-
-        <div className="flex h-full min-h-0 w-full min-w-0 flex-col self-stretch max-lg:items-center lg:min-h-0">
-          <div className="aspect-square w-full max-w-[30rem] shrink-0 overflow-hidden rounded-xl border border-emerald-100 bg-stone-100 lg:aspect-auto lg:h-full lg:min-h-0 lg:w-full lg:max-w-none lg:flex-1">
+      <Link
+        to={categoryLink}
+        className="mb-3 sm:mb-4 inline-block text-base text-stone-600 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400"
+      >
+        ← Back to Category
+      </Link>
+      <div className="grid w-full max-w-none grid-cols-1 items-start gap-x-4 gap-y-4 lg:grid-cols-[minmax(35rem,auto)_minmax(0,1fr)] lg:items-start lg:gap-x-2 lg:gap-y-0 xl:gap-x-3">
+        <div className="flex w-full justify-center self-start overflow-x-auto lg:justify-end">
+          <div className={productDetailHeroFrameClass}>
             <img
               src={displayImage}
               alt={displayName}
               loading="lazy"
-              className="h-full w-full object-cover object-center"
+              className={productDetailHeroImageClassName}
+              decoding="async"
             />
           </div>
         </div>
 
-        <div className="min-h-0 min-w-0 w-full space-y-2 sm:space-y-3 self-stretch">
+        <div className="min-h-0 min-w-0 w-full self-start space-y-2 sm:space-y-3 lg:min-h-0">
           <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 text-base font-semibold text-emerald-700 dark:text-emerald-300">
             Sustainability Score: {score100}/100
           </span>
@@ -277,57 +366,50 @@ export default function ProductDetail() {
             <p className="text-stone-700 dark:text-stone-300 text-base sm:text-lg leading-relaxed">{product.description.trim()}</p>
           ) : null}
 
-          {sizeGuide && (
+          {sizeGuide && displayGuide && (
             <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 bg-emerald-100/35 dark:bg-emerald-950/30 p-3 sm:p-4">
-              <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-base">{sizeGuide.title}</h3>
-              <p className="mt-1 text-base text-stone-600 dark:text-stone-400 leading-relaxed">{sizeGuide.description}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {sizeGuide.options.map((size) => (
+              {sizeGuide.isShoe ? (
+                <>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShoePickerModal('mens')}
+                      className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-3 text-base font-semibold text-stone-800 shadow-sm hover:border-emerald-500 hover:bg-emerald-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-emerald-500 dark:hover:bg-emerald-950/40"
+                    >
+                      Men&apos;s UK sizes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShoePickerModal('womens')}
+                      className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-3 text-base font-semibold text-stone-800 shadow-sm hover:border-emerald-500 hover:bg-emerald-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-emerald-500 dark:hover:bg-emerald-950/40"
+                    >
+                      Women&apos;s UK sizes
+                    </button>
+                  </div>
+                  {selectedSize ? (
+                    <p className="mt-3 text-base text-stone-700 dark:text-stone-300">
+                      Selected:{' '}
+                      <span className="font-semibold text-stone-900 dark:text-stone-100">{sizeForCart}</span>
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <>
                   <button
-                    key={size}
                     type="button"
-                    onClick={() => setSelectedSize(size)}
-                    className={`rounded-md border px-3 py-1.5 text-base font-medium ${
-                      selectedSize === size
-                        ? 'border-emerald-500 bg-emerald-100 text-emerald-700'
-                        : 'border-stone-300 bg-emerald-50 text-stone-700 hover:border-emerald-300'
-                    }`}
+                    onClick={() => setApparelSizeModalOpen(true)}
+                    className="w-full rounded-lg border border-stone-300 bg-white px-4 py-3 text-base font-semibold text-stone-800 shadow-sm hover:border-emerald-500 hover:bg-emerald-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-emerald-500 dark:hover:bg-emerald-950/40"
                   >
-                    {size}
+                    Choose your size
                   </button>
-                ))}
-              </div>
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowSizeMeasurements((v) => !v)}
-                  className="inline-flex items-center rounded-md border border-stone-300/80 dark:border-stone-600 bg-emerald-100/40 dark:bg-emerald-900/30 px-3 py-1.5 text-base font-medium text-stone-700 dark:text-stone-200 hover:border-emerald-400"
-                >
-                  {showSizeMeasurements ? 'Hide measurements' : 'View measurements'}
-                </button>
-              </div>
-              <div className={`${showSizeMeasurements ? 'mt-4' : 'mt-0'} overflow-x-auto`}>
-                {showSizeMeasurements && (
-                  <table className="min-w-full text-base">
-                    <thead>
-                      <tr className="text-left text-stone-600 border-b border-stone-200">
-                        {sizeGuide.columns.map((col) => (
-                          <th key={col} className="py-2 pr-4 font-semibold">{col}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sizeGuide.rows.map((row) => (
-                        <tr key={row[0]} className="border-b border-stone-100 text-stone-700">
-                          {row.map((cell, idx) => (
-                            <td key={`${row[0]}-${idx}`} className="py-2 pr-4">{cell}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+                  {selectedSize ? (
+                    <p className="mt-3 text-base text-stone-700 dark:text-stone-300">
+                      Selected:{' '}
+                      <span className="font-semibold text-stone-900 dark:text-stone-100">{selectedSize}</span>
+                    </p>
+                  ) : null}
+                </>
+              )}
             </div>
           )}
 
@@ -335,7 +417,8 @@ export default function ProductDetail() {
             product={product}
             isAuthenticated={isAuthenticated}
             requiresSize={Boolean(sizeGuide)}
-            selectedSize={selectedSize}
+            selectedSize={sizeForCart}
+            isShoe={Boolean(sizeGuide?.isShoe)}
           />
           <InfoAccordion
             title={isFoodOrDrinkCategory(product) ? 'Ingredients Used' : 'Materials Used'}
@@ -406,16 +489,309 @@ export default function ProductDetail() {
           </InfoAccordion>
         </div>
       </div>
+
+      {shoePickerModal &&
+        shoeModalGuide &&
+        sizeGuide?.isShoe &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center p-0 sm:p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ecoshop-shoe-size-modal-title"
+          >
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/40"
+              aria-label="Close size picker"
+              onClick={() => setShoePickerModal(null)}
+            />
+            <div
+              className="relative z-10 flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-2xl border border-stone-200 bg-white shadow-xl dark:border-stone-600 dark:bg-stone-800 sm:max-h-[85vh] sm:rounded-2xl"
+              onClick={(ev) => ev.stopPropagation()}
+            >
+              <div className="shrink-0 border-b border-stone-200 px-5 pb-4 pt-5 dark:border-stone-600">
+                <h2
+                  id="ecoshop-shoe-size-modal-title"
+                  className="pr-8 text-lg font-semibold text-stone-900 dark:text-stone-100"
+                >
+                  {shoePickerModal === 'mens' ? "Men's UK sizes" : "Women's UK sizes"}
+                </h2>
+                <p className="mt-1 text-base text-stone-600 dark:text-stone-400">{displayName}</p>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShoeVariant(shoePickerModal)
+                    setSizeMeasurementsModalOpen(true)
+                    setShoePickerModal(null)
+                  }}
+                  className="mb-4 w-full rounded-lg border border-stone-300/80 dark:border-stone-600 bg-emerald-100/40 dark:bg-emerald-900/30 px-3 py-2 text-base font-medium text-stone-700 dark:text-stone-200 hover:border-emerald-400"
+                >
+                  Measurement chart
+                </button>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {shoeModalGuide.options.map((size) => {
+                    const isSel = shoeModalPendingSize === size
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => setShoeModalPendingSize(size)}
+                        className={`flex h-12 w-full min-w-0 items-center justify-center rounded-md border px-1 text-sm font-medium tabular-nums leading-tight ${
+                          isSel
+                            ? 'border-emerald-500 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-200'
+                            : 'border-stone-300 bg-emerald-50 text-stone-700 hover:border-emerald-300 dark:border-stone-600 dark:bg-emerald-950/30 dark:text-stone-200 dark:hover:border-emerald-500'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    )
+                  })}
+                </div>
+                {shoeModalPendingSize ? (
+                  <p className="mt-4 text-center text-base text-stone-600 dark:text-stone-400">
+                    UK {shoeModalPendingSize} selected — confirm below or tap another size.
+                  </p>
+                ) : (
+                  <p className="mt-4 text-center text-base text-stone-500 dark:text-stone-500">
+                    Tap a size, then use this size to confirm.
+                  </p>
+                )}
+              </div>
+              <div className="shrink-0 space-y-2 border-t border-stone-200 px-5 py-4 dark:border-stone-600">
+                <button
+                  type="button"
+                  disabled={!shoeModalPendingSize}
+                  onClick={() => {
+                    if (!shoeModalPendingSize) return
+                    setShoeVariant(shoePickerModal)
+                    setSelectedSize(shoeModalPendingSize)
+                    setShoePickerModal(null)
+                  }}
+                  className="w-full rounded-lg bg-emerald-600 px-3 py-3 text-base font-semibold text-white hover:bg-emerald-700 disabled:pointer-events-none disabled:opacity-50"
+                >
+                  Use this size
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShoePickerModal(null)}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-3 text-base font-semibold text-stone-700 hover:bg-stone-50 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-700/50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {apparelModalGuide &&
+        sizeGuide &&
+        !sizeGuide.isShoe &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center p-0 sm:p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ecoshop-apparel-size-modal-title"
+          >
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/40"
+              aria-label="Close size picker"
+              onClick={() => setApparelSizeModalOpen(false)}
+            />
+            <div
+              className="relative z-10 flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-2xl border border-stone-200 bg-white shadow-xl dark:border-stone-600 dark:bg-stone-800 sm:max-h-[85vh] sm:rounded-2xl"
+              onClick={(ev) => ev.stopPropagation()}
+            >
+              <div className="shrink-0 border-b border-stone-200 px-5 pb-4 pt-5 dark:border-stone-600">
+                <h2
+                  id="ecoshop-apparel-size-modal-title"
+                  className="pr-8 text-lg font-semibold text-stone-900 dark:text-stone-100"
+                >
+                  {sizeGuide.title?.trim() || 'Choose your size'}
+                </h2>
+                <p className="mt-1 text-base text-stone-600 dark:text-stone-400">{displayName}</p>
+                {sizeGuide.description?.trim() ? (
+                  <p className="mt-2 text-base text-stone-600 dark:text-stone-400 leading-relaxed">{sizeGuide.description}</p>
+                ) : null}
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSizeMeasurementsModalOpen(true)
+                    setApparelSizeModalOpen(false)
+                  }}
+                  className="mb-4 w-full rounded-lg border border-stone-300/80 dark:border-stone-600 bg-emerald-100/40 dark:bg-emerald-900/30 px-3 py-2 text-base font-medium text-stone-700 dark:text-stone-200 hover:border-emerald-400"
+                >
+                  Measurement chart
+                </button>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {apparelModalGuide.options.map((size) => {
+                    const isSel = apparelModalPendingSize === size
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => setApparelModalPendingSize(size)}
+                        className={`flex h-12 w-full min-w-0 items-center justify-center rounded-md border px-1 text-sm font-medium tabular-nums leading-tight ${
+                          isSel
+                            ? 'border-emerald-500 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-200'
+                            : 'border-stone-300 bg-emerald-50 text-stone-700 hover:border-emerald-300 dark:border-stone-600 dark:bg-emerald-950/30 dark:text-stone-200 dark:hover:border-emerald-500'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    )
+                  })}
+                </div>
+                {apparelModalPendingSize ? (
+                  <p className="mt-4 text-center text-base text-stone-600 dark:text-stone-400">
+                    Size {apparelModalPendingSize} selected — confirm below or tap another size.
+                  </p>
+                ) : (
+                  <p className="mt-4 text-center text-base text-stone-500 dark:text-stone-500">
+                    Tap a size, then use this size to confirm.
+                  </p>
+                )}
+              </div>
+              <div className="shrink-0 space-y-2 border-t border-stone-200 px-5 py-4 dark:border-stone-600">
+                <button
+                  type="button"
+                  disabled={!apparelModalPendingSize}
+                  onClick={() => {
+                    if (!apparelModalPendingSize) return
+                    setSelectedSize(apparelModalPendingSize)
+                    setApparelSizeModalOpen(false)
+                  }}
+                  className="w-full rounded-lg bg-emerald-600 px-3 py-3 text-base font-semibold text-white hover:bg-emerald-700 disabled:pointer-events-none disabled:opacity-50"
+                >
+                  Use this size
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setApparelSizeModalOpen(false)}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-3 text-base font-semibold text-stone-700 hover:bg-stone-50 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-700/50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {sizeMeasurementsModalOpen &&
+        sizeGuide &&
+        displayGuide &&
+        measurementTable &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[95] flex items-end justify-center sm:items-center p-0 sm:p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ecoshop-measurements-modal-title"
+          >
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/40"
+              aria-label="Close measurements"
+              onClick={() => setSizeMeasurementsModalOpen(false)}
+            />
+            <div
+              className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col rounded-t-2xl border border-stone-200 bg-white shadow-xl dark:border-stone-600 dark:bg-stone-800 sm:max-h-[85vh] sm:rounded-2xl"
+              onClick={(ev) => ev.stopPropagation()}
+            >
+              <div className="shrink-0 border-b border-stone-200 px-5 pb-4 pt-5 dark:border-stone-600">
+                <h2
+                  id="ecoshop-measurements-modal-title"
+                  className="pr-10 text-lg font-semibold text-stone-900 dark:text-stone-100"
+                >
+                  {sizeGuide.isShoe ? 'Measurements' : sizeGuide.title?.trim() || 'Measurements'}
+                </h2>
+                <p className="mt-1 text-base text-stone-600 dark:text-stone-400">{displayName}</p>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto overflow-x-auto px-5 py-4">
+                {sizeGuideHasMeasurementUnitToggle(displayGuide) ? (
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-base font-medium text-stone-700 dark:text-stone-300">
+                      {sizeGuideHasFootLengthUnitToggle(displayGuide) ? 'Foot length' : 'Measurements'}
+                    </span>
+                    <div className="flex rounded-lg border border-stone-300 dark:border-stone-600 bg-stone-100/90 p-0.5 dark:bg-stone-800/90 gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setMeasurementUnit('cm')}
+                        className={`rounded-md px-3 py-1.5 text-base font-semibold transition-colors ${
+                          measurementUnit === 'cm'
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-200/80 dark:hover:bg-stone-700/80'
+                        }`}
+                      >
+                        cm
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMeasurementUnit('in')}
+                        className={`rounded-md px-3 py-1.5 text-base font-semibold transition-colors ${
+                          measurementUnit === 'in'
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-200/80 dark:hover:bg-stone-700/80'
+                        }`}
+                      >
+                        in
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+                <table className="min-w-full text-base">
+                  <thead>
+                    <tr className="border-b border-stone-200 text-left text-stone-600 dark:border-stone-700">
+                      {measurementTable.columns.map((col) => (
+                        <th key={col} className="py-2 pr-4 font-semibold">
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {measurementTable.rows.map((row) => (
+                      <tr
+                        key={row.join('|')}
+                        className="border-b border-stone-100 text-stone-700 dark:border-stone-800 dark:text-stone-300"
+                      >
+                        {row.map((cell, idx) => (
+                          <td key={`${row.join('|')}-${idx}`} className="py-2 pr-4">
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="shrink-0 border-t border-stone-200 px-5 py-4 dark:border-stone-600">
+                <button
+                  type="button"
+                  onClick={() => setSizeMeasurementsModalOpen(false)}
+                  className="w-full rounded-lg bg-emerald-600 px-3 py-3 text-base font-semibold text-white hover:bg-emerald-700"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
       <div className="mt-3 sm:mt-4 border-t border-emerald-200/50 pt-3 sm:pt-4">
-        <ReviewList
-          productId={product.id}
-          productName={displayName}
-          productDescription={product.description}
-          materials={product.materials}
-          categoryName={product.category?.name}
-          categorySlug={product.category?.slug}
-          key={`${product.id}-${reviewVersion}`}
-        />
+        <ReviewList productId={product.id} key={`${product.id}-${reviewVersion}`} />
         <ReviewForm productId={product.id} canReview={canReview} onSubmitted={() => setReviewVersion((v) => v + 1)} />
       </div>
 
@@ -443,7 +819,7 @@ export default function ProductDetail() {
                   View all in category →
                 </Link>
               </div>
-              <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+              <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {relatedSimilar.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
@@ -461,7 +837,7 @@ export default function ProductDetail() {
                   Popular pairings shoppers add alongside products like this one (same category).
                 </p>
               </div>
-              <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-5xl">
+              <div className="ecoshop-product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 max-w-4xl">
                 {relatedTogether.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
@@ -490,7 +866,13 @@ function InfoAccordion({ title, open, onToggle, className = '', titleClassName =
     </section>
   )
 }
-function AddToCartButton({ product, isAuthenticated, requiresSize = false, selectedSize = '' }) {
+function AddToCartButton({
+  product,
+  isAuthenticated,
+  requiresSize = false,
+  selectedSize = '',
+  isShoe = false,
+}) {
   const [adding, setAdding] = useState(false)
   const [done, setDone] = useState(false)
   const [qty, setQty] = useState(1)
@@ -565,7 +947,7 @@ function AddToCartButton({ product, isAuthenticated, requiresSize = false, selec
           View cart
         </Link>
       )}
-      {requiresSize && !selectedSize && (
+      {requiresSize && !selectedSize && !isShoe && (
         <p className="mt-2 text-base text-stone-600 dark:text-stone-400">Choose a size to add this item to cart.</p>
       )}
     </div>

@@ -156,7 +156,7 @@ export default function AdminProductForm() {
       : 'e.g. Organic cotton, recycled polyester'
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-xl mx-auto">
       <Link
         to="/admin/products"
         className="text-base text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 mb-4 inline-block"

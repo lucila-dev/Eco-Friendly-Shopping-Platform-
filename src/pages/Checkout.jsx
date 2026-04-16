@@ -319,7 +319,7 @@ export default function Checkout() {
   return (
     <div className={`${layoutContentWidthClass} pb-10`}>
       <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 dark:text-stone-100 mb-2">Checkout</h1>
-      <p className="text-stone-600 dark:text-stone-400 text-base sm:text-lg mb-6 max-w-3xl leading-relaxed">
+      <p className="text-stone-600 dark:text-stone-400 text-base sm:text-lg mb-6 max-w-2xl leading-relaxed">
         Choose delivery speed, apply any discount codes, then pick a payment method.
       </p>
 

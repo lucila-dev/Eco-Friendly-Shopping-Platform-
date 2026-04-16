@@ -37,7 +37,7 @@ const subAccordionBody = `${bodyText} rounded-r-lg border-l-[3px] border-emerald
 const inputClass =
   'w-full rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-950 px-3 py-2 text-base text-stone-900 dark:text-stone-100 placeholder:text-stone-500 dark:placeholder:text-stone-500 shadow-inner shadow-stone-100/80 dark:shadow-none focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/25'
 
-const panelProse = 'w-full max-w-5xl mx-auto'
+const panelProse = 'w-full max-w-4xl mx-auto'
 
 const certBadgeClass =
   'inline-flex items-center rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/40 px-3 py-2 text-base font-semibold text-amber-900 dark:text-amber-100 shadow-sm'
@@ -127,7 +127,7 @@ export default function About() {
         <p className="relative mx-auto mt-3 max-w-xl text-base leading-relaxed text-emerald-950/90 dark:text-emerald-100/85 sm:text-base">
           Delivery help, policies, and support.
         </p>
-        <div className="relative mx-auto mt-6 flex max-w-3xl flex-col gap-2.5 sm:flex-row sm:gap-3">
+        <div className="relative mx-auto mt-6 flex max-w-2xl flex-col gap-2.5 sm:flex-row sm:gap-3">
           <HeroStat title="Free shipping" detail={`On orders over ${format(FREE_SHIPPING_MIN_SUBTOTAL)}`} />
           <HeroStat title="30 day returns" detail="Unused items, original packaging" />
           <HeroStat title="Secure checkout" detail="Encrypted payments" />
@@ -163,7 +163,7 @@ export default function About() {
               className="pointer-events-none absolute right-0 top-0 h-32 w-32 translate-x-1/3 -translate-y-1/3 rounded-full bg-emerald-200/25 blur-2xl"
               aria-hidden
             />
-            <header className="relative mx-auto mb-6 max-w-5xl border-b border-emerald-200/60 dark:border-emerald-800/70 pb-4 text-center">
+            <header className="relative mx-auto mb-6 max-w-4xl border-b border-emerald-200/60 dark:border-emerald-800/70 pb-4 text-center">
               <h2 className="text-xl font-bold text-emerald-950 dark:text-emerald-100 sm:text-2xl">
                 {activeMeta?.title ?? activeMeta?.label}
               </h2>
@@ -333,7 +333,7 @@ export default function About() {
             )}
 
             {activeSection === 'essentials' && (
-              <div className="relative mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="relative mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
                 {[
                   ['Order cutoff', 'Next day delivery for orders placed before 8pm.'],
                   ['Secure checkout', 'Encrypted card handling and account protection controls.'],
@@ -396,7 +396,7 @@ export default function About() {
             )}
 
             {activeSection === 'policies' && (
-              <div className="relative mx-auto w-full max-w-5xl space-y-1">
+              <div className="relative mx-auto w-full max-w-4xl space-y-1">
                 <p className={`mb-4 ${bodyText}`}>
                   Policies below expand when selected. Same rules apply at checkout and in your account.
                 </p>
@@ -448,7 +448,7 @@ export default function About() {
             )}
 
             {activeSection === 'contact' && (
-              <div className="relative mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-5">
+              <div className="relative mx-auto grid w-full max-w-4xl gap-8 lg:grid-cols-5">
                 <div className="space-y-4 rounded-2xl border border-emerald-200 dark:border-emerald-700 bg-white/95 dark:bg-stone-900/95 p-5 shadow-sm lg:col-span-2">
                   <p className="text-base font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-400">Direct contact</p>
                   <div className={`${bodyText} space-y-3`}>
@@ -543,7 +543,7 @@ export default function About() {
             )}
 
             {activeSection === 'questions' && (
-              <div className="relative mx-auto w-full max-w-5xl space-y-1">
+              <div className="relative mx-auto w-full max-w-4xl space-y-1">
                 <p className={`mb-4 ${bodyText}`}>
                   Tap a question to read the answer. Use policies or contact if you need official wording.
                 </p>
@@ -610,7 +610,7 @@ export default function About() {
             )}
 
             {activeSection === 'help' && (
-              <div className="relative mx-auto w-full max-w-5xl space-y-4">
+              <div className="relative mx-auto w-full max-w-4xl space-y-4">
                 <p className={`${bodyText} text-center sm:text-left`}>
                   Shortcuts to the main areas of the shop.
                 </p>

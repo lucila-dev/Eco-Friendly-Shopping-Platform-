@@ -125,7 +125,7 @@ export default function Layout() {
       <main
         className={`flex-1 text-stone-900 dark:text-stone-100 ${
           isAuthPage
-            ? 'w-full max-w-none mx-0 px-0 py-0'
+            ? `${layoutContentWidthClass} ${layoutContentPadClass} mx-auto flex w-full flex-col justify-center py-8 sm:py-10`
             : `${layoutContentWidthClass} ${mainHorizontalPadding} py-5 sm:py-8`
         } ${!isAuthPage ? 'text-base sm:text-lg leading-relaxed' : ''}`}
       >

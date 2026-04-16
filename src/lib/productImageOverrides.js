@@ -80,3 +80,17 @@ export function getProductImage(input = {}) {
   const fallback = image_url != null ? String(image_url).trim() : ''
   return fallback || '/placeholder.svg'
 }
+
+/** Parent must be `relative` + fixed aspect or explicit size + `overflow-hidden`. */
+export const productCatalogImageClassName =
+  'absolute inset-0 h-full w-full object-cover object-center'
+
+/**
+ * Product detail hero: square frame; image fills it with `object-cover` (no letterboxing / grey bands).
+ */
+/** Fixed physical size on all viewports (square); narrow screens may need horizontal scroll on the page. */
+export const productDetailHeroFrameClass =
+  'relative aspect-[1/1] shrink-0 overflow-hidden rounded-xl border border-stone-200/90 bg-stone-100 w-[35rem] min-w-[35rem] max-w-[35rem] dark:border-stone-600/80 dark:bg-stone-800/50'
+
+/** Fills `productDetailHeroFrameClass` edge-to-edge (parent must be `relative`). */
+export const productDetailHeroImageClassName = productCatalogImageClassName
