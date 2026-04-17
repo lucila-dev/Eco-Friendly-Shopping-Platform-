@@ -49,7 +49,7 @@ export default function AdminProducts() {
         <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Products</h1>
         {!profileLoading && !canManageProducts && (
           <p className="text-stone-600 dark:text-stone-300">
-            Access denied. Dev tools is only available to accounts on the project allowlist.
+            Access denied. The admin area is only available to accounts on the project allowlist.
           </p>
         )}
         {profileLoading && <p className="text-stone-500 dark:text-stone-400">Loading...</p>}

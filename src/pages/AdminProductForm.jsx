@@ -137,7 +137,7 @@ export default function AdminProductForm() {
       <div>
         <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">{isNew ? 'Add product' : 'Edit product'}</h1>
         {!profileLoading && !canManageProducts && (
-          <p className="text-stone-600 dark:text-stone-300">Access denied. Dev tools is allowlist-only.</p>
+          <p className="text-stone-600 dark:text-stone-300">Access denied. The admin area is allowlist-only.</p>
         )}
       </div>
     )

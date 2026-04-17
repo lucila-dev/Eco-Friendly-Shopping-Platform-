@@ -109,8 +109,8 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
                     ? ''
                     : 'cursor-pointer group-hover/devmenu:ring-emerald-400/60 dark:group-hover/devmenu:ring-emerald-600/50 group-focus-visible/devmenu:ring-emerald-500'
                 }`}
-                aria-label={inlineDevTools ? 'Dev tools' : 'Dev tools: open menu'}
-                title="Dev tools"
+                aria-label={inlineDevTools ? 'Admin' : 'Admin: open menu'}
+                title="Admin"
               >
                 <DevToolsIcon className={`w-6 h-6 sm:w-7 sm:h-7 ${inlineDevTools ? '' : 'pointer-events-none'}`} aria-hidden />
               </span>
@@ -120,7 +120,7 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
                     group-hover/devmenu:pointer-events-auto group-hover/devmenu:visible group-hover/devmenu:opacity-100
                     group-focus-within/devmenu:pointer-events-auto group-focus-within/devmenu:visible group-focus-within/devmenu:opacity-100"
                   role="menu"
-                  aria-label="Dev tools"
+                  aria-label="Admin"
                 >
                   <div className="rounded-lg border border-stone-200 bg-white py-1 shadow-lg dark:border-stone-600 dark:bg-stone-900">
                     <Link
@@ -145,7 +145,7 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
             </div>
             <div className="min-w-0 flex flex-1 flex-col">
               <span className="text-base font-semibold text-stone-900 dark:text-stone-100 sm:text-lg">
-                Dev tools
+                Admin
               </span>
               {!inlineDevTools && (
                 <p className="mt-1 text-base leading-relaxed text-stone-600 dark:text-stone-400">
