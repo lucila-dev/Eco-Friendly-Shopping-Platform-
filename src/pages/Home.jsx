@@ -173,8 +173,12 @@ export default function Home() {
   return (
     <div>
       <section className="relative rounded-2xl overflow-hidden mb-8 sm:mb-10 min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem]">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50/90 to-teal-50/80 dark:from-emerald-950/80 dark:via-stone-900 dark:to-emerald-950/60" />
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1600')] bg-cover bg-center opacity-20 mix-blend-multiply dark:opacity-10 dark:mix-blend-soft-light" />
+        {/* Image under the scrim so dark mode stays visible (avoids 10% opacity + soft-light on the photo) */}
+        <div
+          className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1600')] bg-cover bg-center"
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/90 via-emerald-50/86 to-teal-50/84 dark:from-emerald-950/68 dark:via-stone-900/62 dark:to-emerald-950/58" />
         <div className="relative z-10 flex min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] flex-col items-center justify-center text-center px-4 py-12 sm:py-14 md:py-16 max-w-3xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-emerald-950 dark:text-emerald-100 mb-5 leading-tight">
             Shop Sustainably, Live Better

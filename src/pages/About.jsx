@@ -485,9 +485,6 @@ export default function About() {
                     >
                       Start live chat
                     </button>
-                    <p className="text-base leading-relaxed text-stone-600 dark:text-stone-400">
-                      Opens WhatsApp to chat with us on this number. Replies usually within 2 hours during business hours.
-                    </p>
                   </div>
                 </div>
                 <div className="lg:col-span-3">
