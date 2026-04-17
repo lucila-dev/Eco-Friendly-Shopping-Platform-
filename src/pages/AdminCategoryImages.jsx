@@ -7,7 +7,7 @@ export default function AdminCategoryImages() {
   const { canManageProducts, loading: profileLoading } = useProfile()
 
   useEffect(() => {
-    document.title = 'Category images · Dev tools · EcoShop'
+    document.title = 'Category images · Admin · EcoShop'
     return () => { document.title = 'EcoShop · Sustainable Shopping' }
   }, [])
 
@@ -17,7 +17,7 @@ export default function AdminCategoryImages() {
         <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Category images</h1>
         {!profileLoading && !canManageProducts && (
           <p className="text-stone-600 dark:text-stone-300">
-            Access denied. Dev tools is only available to accounts on the project allowlist.
+            Access denied. The admin area is only available to accounts on the project allowlist.
           </p>
         )}
         {profileLoading && <p className="text-stone-500 dark:text-stone-400">Loading...</p>}
