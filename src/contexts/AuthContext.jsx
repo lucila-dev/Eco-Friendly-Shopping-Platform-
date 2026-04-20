@@ -1,13 +1,52 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useLayoutEffect, useState, useCallback } from 'react'
 import { supabase, deleteCurrentAuthUser, mapSupabaseAuthError } from '../lib/supabase'
 import { getAuthSiteUrl } from '../lib/authSiteUrl'
 
 const AuthContext = createContext(null)
 
+function readRecoveryFromHash() {
+  if (typeof window === 'undefined') return false
+  const hash = window.location.hash.replace(/^#/, '')
+  if (!hash) return false
+  return new URLSearchParams(hash).get('type') === 'recovery'
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  /** True when user arrived from password-reset email (must set new password). */
+  const [passwordRecoveryRequired, setPasswordRecoveryRequired] = useState(() =>
+    typeof window !== 'undefined' ? readRecoveryFromHash() : false,
+  )
+
+  const clearPasswordRecovery = useCallback(() => {
+    setPasswordRecoveryRequired(false)
+  }, [])
+
+  // Run before paint so we catch #...type=recovery before Supabase may strip the hash.
+  useLayoutEffect(() => {
+    if (readRecoveryFromHash()) {
+      setPasswordRecoveryRequired(true)
+    }
+  }, [])
+
+  // PKCE: reset link may be /login?code=... instead of hash (depends on project / flow).
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!window.location.pathname.endsWith('/login')) return
+    const code = new URLSearchParams(window.location.search).get('code')
+    if (!code) return
+    let cancelled = false
+    supabase.auth.exchangeCodeForSession(window.location.href).then(({ error }) => {
+      if (cancelled || error) return
+      setPasswordRecoveryRequired(true)
+      window.history.replaceState({}, '', window.location.pathname)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     supabase.auth
@@ -22,9 +61,18 @@ export function AuthProvider({ children }) {
         setLoading(false)
       })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      setSession(nextSession)
+      setUser(nextSession?.user ?? null)
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecoveryRequired(true)
+      }
+      if (event === 'SIGNED_OUT') {
+        setPasswordRecoveryRequired(false)
+      }
+      if (event === 'USER_UPDATED') {
+        setPasswordRecoveryRequired(false)
+      }
     })
 
     return () => subscription?.unsubscribe()
@@ -84,6 +132,8 @@ export function AuthProvider({ children }) {
     deleteAccount,
     resetPassword,
     isAuthenticated: !!user,
+    passwordRecoveryRequired,
+    clearPasswordRecovery,
   }
 
   return (

@@ -28,29 +28,22 @@ export default function Login() {
   const [newPassword2, setNewPassword2] = useState('')
   const [error, setError] = useState('')
   const [forgotMode, setForgotMode] = useState(false)
-  const [recoveryMode, setRecoveryMode] = useState(false)
   const [success, setSuccess] = useState('')
-  const { signIn, resetPassword } = useAuth()
+  const { signIn, resetPassword, passwordRecoveryRequired, clearPasswordRecovery } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    document.title = recoveryMode
+    document.title = passwordRecoveryRequired
       ? 'Set new password · EcoShop'
       : forgotMode
         ? 'Reset password · EcoShop'
         : 'Sign in · EcoShop'
     return () => { document.title = 'EcoShop · Sustainable Shopping' }
-  }, [forgotMode, recoveryMode])
+  }, [forgotMode, passwordRecoveryRequired])
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setRecoveryMode(true)
-        setForgotMode(false)
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [])
+    if (passwordRecoveryRequired) setForgotMode(false)
+  }, [passwordRecoveryRequired])
 
   const handleRecoverySubmit = async () => {
     setError('')
@@ -68,7 +61,7 @@ export default function Login() {
       setError(err.message)
       return
     }
-    setRecoveryMode(false)
+    clearPasswordRecovery()
     setNewPassword('')
     setNewPassword2('')
     navigate('/', { replace: true })
@@ -78,7 +71,7 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setSuccess('')
-    if (recoveryMode) {
+    if (passwordRecoveryRequired) {
       await handleRecoverySubmit()
       return
     }
@@ -105,10 +98,10 @@ export default function Login() {
         <div className="mb-6 sm:mb-8 flex flex-col items-center text-center">
           <img src="/favicon-96x96.png" alt="" className="mb-3 h-12 w-12 sm:h-14 sm:w-14" />
           <h1 className="text-3xl sm:text-4xl font-bold leading-snug text-stone-900 dark:text-stone-50">
-            {recoveryMode ? 'Set a new password' : forgotMode ? 'Reset Password' : 'Welcome Back'}
+            {passwordRecoveryRequired ? 'Set a new password' : forgotMode ? 'Reset Password' : 'Welcome Back'}
           </h1>
           <p className="mt-2 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
-            {recoveryMode
+            {passwordRecoveryRequired
               ? 'Choose a new password for your account.'
               : forgotMode
                 ? 'Enter your email and we will send you a reset link'
@@ -116,7 +109,7 @@ export default function Login() {
           </p>
         </div>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {recoveryMode ? (
+        {passwordRecoveryRequired ? (
           <>
             <div>
               <label htmlFor="new-password" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
@@ -212,10 +205,10 @@ export default function Login() {
           type="submit"
           className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
         >
-          {recoveryMode ? 'Update password' : forgotMode ? 'Send Reset Link' : 'Sign In'}
+          {passwordRecoveryRequired ? 'Update password' : forgotMode ? 'Send Reset Link' : 'Sign In'}
         </button>
       </form>
-      {!recoveryMode && !forgotMode && (
+      {!passwordRecoveryRequired && !forgotMode && (
         <p className="mt-6 text-center">
           <button
             type="button"
@@ -226,7 +219,7 @@ export default function Login() {
           </button>
         </p>
       )}
-      {!recoveryMode && forgotMode && (
+      {!passwordRecoveryRequired && forgotMode && (
         <p className="mt-6 text-center">
           <button
             type="button"
@@ -237,7 +230,7 @@ export default function Login() {
           </button>
         </p>
       )}
-      {!recoveryMode && (
+      {!passwordRecoveryRequired && (
       <p className="mt-6 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
         Don’t have an account?{' '}
         <Link to="/signup" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">

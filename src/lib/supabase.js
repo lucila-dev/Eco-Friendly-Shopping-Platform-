@@ -23,7 +23,11 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
 const clientUrl = supabaseUrl || 'https://missing-env-placeholder.supabase.co'
 const clientKey = supabaseAnonKey || 'sb-publishable-placeholder-not-a-real-key'
 
-export const supabase = createClient(clientUrl, clientKey)
+export const supabase = createClient(clientUrl, clientKey, {
+  auth: {
+    detectSessionInUrl: true,
+  },
+})
 
 /** Maps low-level fetch/parse failures to actionable copy; keeps real auth errors as-is. */
 export function mapSupabaseAuthError(err) {
