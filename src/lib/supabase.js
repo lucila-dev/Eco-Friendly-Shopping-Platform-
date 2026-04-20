@@ -25,12 +25,24 @@ const clientKey = supabaseAnonKey || 'sb-publishable-placeholder-not-a-real-key'
 
 export const supabase = createClient(clientUrl, clientKey)
 
+/** Maps low-level fetch/parse failures to actionable copy; keeps real auth errors as-is. */
 export function mapSupabaseAuthError(err) {
   if (!err) return err
-  const msg = String(err.message || err)
-  if (/unexpected end of json input/i.test(msg) || /failed to execute ['"]json['"] on ['"]response['"]/i.test(msg)) {
+  if (!isSupabaseConfigured) {
     return new Error(
-      'Could not reach Supabase. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment, then rebuild.'
+      'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY from Supabase → Project Settings → API. For local dev: put them in .env and restart npm run dev. For Vercel: Project → Settings → Environment Variables (Production) → Redeploy.',
+    )
+  }
+  const msg = String(err.message || err)
+  const looksLikeNetworkOrBadResponse =
+    /unexpected end of json input/i.test(msg) ||
+    /failed to execute ['"]json['"] on ['"]response['"]/i.test(msg) ||
+    /failed to fetch/i.test(msg) ||
+    /networkerror|load failed|aborted/i.test(msg)
+  if (looksLikeNetworkOrBadResponse) {
+    const devSuffix = import.meta.env.DEV ? ` (${msg})` : ''
+    return new Error(
+      `Could not get a valid response from Supabase.${devSuffix} Confirm VITE_SUPABASE_URL is your Project URL (…supabase.co), VITE_SUPABASE_ANON_KEY is the anon public key, and both are set for the environment you are running (Vercel: add to Production + redeploy after changes).`,
     )
   }
   return err
