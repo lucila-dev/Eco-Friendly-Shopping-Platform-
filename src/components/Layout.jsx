@@ -15,11 +15,14 @@ const navLinkActiveClass =
   'text-base sm:text-[1.0625rem] font-semibold text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 px-2 py-2 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 
 export default function Layout() {
-  const { signOut, isAuthenticated } = useAuth()
+  const { signOut, isAuthenticated, emailConfirmed } = useAuth()
   const { items } = useCart()
   const location = useLocation()
   const navigate = useNavigate()
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
+  const isAuthPage =
+    location.pathname === '/login' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/verify-email'
   const isProductDetail = /^\/products\/[^/]+$/.test(location.pathname)
   const mainHorizontalPadding = isAuthPage ? 'px-0' : layoutContentPadClass
   const cartCount = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
@@ -111,6 +114,17 @@ export default function Layout() {
           </nav>
         </div>
       </header>
+      {isAuthenticated && !emailConfirmed && location.pathname !== '/verify-email' && (
+        <div
+          className="bg-amber-100 dark:bg-amber-950/80 border-b border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-100 text-center text-base sm:text-lg px-4 py-2.5"
+          role="status"
+        >
+          <strong className="font-semibold">Confirm your email</strong> to use the cart, checkout, and your account.{' '}
+          <Link to="/verify-email" className="font-semibold text-emerald-800 dark:text-emerald-300 underline underline-offset-2">
+            Open confirmation page
+          </Link>
+        </div>
+      )}
       {!isSupabaseConfigured && (
         <div
           className="bg-amber-100 dark:bg-amber-950/80 border-b border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-100 text-center text-base sm:text-lg px-4 py-2.5"

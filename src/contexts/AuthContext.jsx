@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useState, useCallback } from 'react'
 import { supabase, deleteCurrentAuthUser, mapSupabaseAuthError } from '../lib/supabase'
 import { getAuthSiteUrl } from '../lib/authSiteUrl'
+import { isEmailConfirmed } from '../lib/authEmail'
 
 const AuthContext = createContext(null)
 
@@ -132,6 +133,8 @@ export function AuthProvider({ children }) {
     deleteAccount,
     resetPassword,
     isAuthenticated: !!user,
+    /** False until the user confirms their email (Supabase: Confirm email + link clicked). */
+    emailConfirmed: isEmailConfirmed(user),
     passwordRecoveryRequired,
     clearPasswordRecovery,
   }
