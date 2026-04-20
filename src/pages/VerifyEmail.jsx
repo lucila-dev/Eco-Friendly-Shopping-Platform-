@@ -4,10 +4,10 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { getAuthSiteUrl } from '../lib/authSiteUrl'
 import { isEmailConfirmed } from '../lib/authEmail'
+import { showToast } from '../lib/toast'
 
 export default function VerifyEmail() {
   const { user, loading, signOut } = useAuth()
-  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
   const navigate = useNavigate()
@@ -30,7 +30,6 @@ export default function VerifyEmail() {
   const handleResend = async () => {
     if (!user?.email) return
     setError('')
-    setMessage('')
     setSending(true)
     const origin = getAuthSiteUrl()
     const { error: err } = await supabase.auth.resend({
@@ -43,7 +42,7 @@ export default function VerifyEmail() {
       setError(err.message)
       return
     }
-    setMessage('Another confirmation email has been sent. Check your inbox and spam folder.')
+    showToast('Confirmation email sent. Check your inbox.')
   }
 
   return (
@@ -57,7 +56,6 @@ export default function VerifyEmail() {
           </p>
         </div>
         {error && <p className="text-red-600 dark:text-red-400 text-base mb-4">{error}</p>}
-        {message && <p className="text-emerald-700 dark:text-emerald-400 text-base mb-4">{message}</p>}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             type="button"

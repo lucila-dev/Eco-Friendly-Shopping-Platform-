@@ -8,8 +8,8 @@ function storageKey(userId) {
 const WishlistContext = createContext(null)
 
 export function WishlistProvider({ children }) {
-  const { user } = useAuth()
-  const userId = user?.id ?? null
+  const { user, passwordRecoveryRequired } = useAuth()
+  const userId = user?.id && !passwordRecoveryRequired ? user.id : null
   const [ids, setIds] = useState([])
 
   useEffect(() => {

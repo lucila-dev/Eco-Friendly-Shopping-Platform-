@@ -11,6 +11,7 @@ import {
   notifyProfileAvatarUpdated,
 } from '../lib/profileAvatarLocal'
 import { CartIcon, HeartIcon, ImpactChartIcon, TruckIcon } from '../components/Icons'
+import { showToast } from '../lib/toast'
 
 const DEFAULT_AVATAR = '/favicon-96x96.png'
 
@@ -107,7 +108,8 @@ export default function Profile() {
       notifyProfileAvatarUpdated()
       const { error: saveErr } = await persistAvatarUrl(publicUrl)
       setUploadingAvatar(false)
-      setProfileMessage(saveErr ? `Could not save: ${saveErr.message}` : '')
+      if (saveErr) setProfileMessage(`Could not save: ${saveErr.message}`)
+      else showToast('Photo updated.')
       return
     }
 
@@ -124,7 +126,8 @@ export default function Profile() {
       notifyProfileAvatarUpdated()
       setUploadingAvatar(false)
       const { error: saveErr } = await persistAvatarUrl(dataUrl)
-      setProfileMessage(saveErr ? `Could not save: ${saveErr.message}` : '')
+      if (saveErr) setProfileMessage(`Could not save: ${saveErr.message}`)
+      else showToast('Photo updated.')
     }
     reader.onerror = () => {
       setUploadingAvatar(false)
@@ -158,6 +161,7 @@ export default function Profile() {
     setProfile(data)
     notifyProfileAvatarUpdated()
     setProfileMessage('')
+    showToast('Profile saved.')
   }
 
   const memberSinceLabel = new Date(user?.created_at || Date.now()).toLocaleDateString(undefined, {

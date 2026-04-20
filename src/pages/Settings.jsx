@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { MonitorIcon, MoonIcon, SunIcon } from '../components/Icons'
 import { DISPLAY_CURRENCIES, REGION_OPTIONS } from '../lib/shopMoney'
+import { showToast } from '../lib/toast'
 
 const CONFIRM_PHRASE = 'DELETE'
 
@@ -86,6 +87,7 @@ export default function Settings() {
         setBusy(false)
         return
       }
+      showToast('Your account has been deleted.')
       navigate('/', { replace: true })
     } catch (e) {
       setError(e?.message || 'Something went wrong.')
