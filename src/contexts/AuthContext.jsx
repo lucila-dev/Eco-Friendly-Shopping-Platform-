@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase, deleteCurrentAuthUser, mapSupabaseAuthError } from '../lib/supabase'
+import { getAuthSiteUrl } from '../lib/authSiteUrl'
 
 const AuthContext = createContext(null)
 
@@ -31,10 +32,14 @@ export function AuthProvider({ children }) {
 
   const signUp = async (email, password, metadata = {}) => {
     try {
+      const origin = getAuthSiteUrl()
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: metadata },
+        options: {
+          data: metadata,
+          ...(origin ? { emailRedirectTo: `${origin}/login` } : {}),
+        },
       })
       return { data, error: error ? mapSupabaseAuthError(error) : null }
     } catch (e) {
@@ -59,8 +64,9 @@ export function AuthProvider({ children }) {
 
   const resetPassword = async (email) => {
     try {
+      const origin = getAuthSiteUrl() || (typeof window !== 'undefined' ? window.location.origin : '')
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login`,
+        redirectTo: origin ? `${origin}/login` : undefined,
       })
       return { data, error: error ? mapSupabaseAuthError(error) : null }
     } catch (e) {

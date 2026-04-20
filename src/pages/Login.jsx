@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
 function MailIcon({ className = 'w-4 h-4' }) {
   return (
@@ -23,21 +24,64 @@ function LockIcon({ className = 'w-4 h-4' }) {
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [newPassword2, setNewPassword2] = useState('')
   const [error, setError] = useState('')
   const [forgotMode, setForgotMode] = useState(false)
+  const [recoveryMode, setRecoveryMode] = useState(false)
   const [success, setSuccess] = useState('')
   const { signIn, resetPassword } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    document.title = forgotMode ? 'Reset password · EcoShop' : 'Sign in · EcoShop'
+    document.title = recoveryMode
+      ? 'Set new password · EcoShop'
+      : forgotMode
+        ? 'Reset password · EcoShop'
+        : 'Sign in · EcoShop'
     return () => { document.title = 'EcoShop · Sustainable Shopping' }
-  }, [forgotMode])
+  }, [forgotMode, recoveryMode])
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setRecoveryMode(true)
+        setForgotMode(false)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleRecoverySubmit = async () => {
+    setError('')
+    setSuccess('')
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+    if (newPassword !== newPassword2) {
+      setError('Passwords do not match.')
+      return
+    }
+    const { error: err } = await supabase.auth.updateUser({ password: newPassword })
+    if (err) {
+      setError(err.message)
+      return
+    }
+    setRecoveryMode(false)
+    setNewPassword('')
+    setNewPassword2('')
+    navigate('/', { replace: true })
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setSuccess('')
+    if (recoveryMode) {
+      await handleRecoverySubmit()
+      return
+    }
     if (forgotMode) {
       const { error: err } = await resetPassword(email)
       if (err) {
@@ -61,55 +105,106 @@ export default function Login() {
         <div className="mb-6 sm:mb-8 flex flex-col items-center text-center">
           <img src="/favicon-96x96.png" alt="" className="mb-3 h-12 w-12 sm:h-14 sm:w-14" />
           <h1 className="text-3xl sm:text-4xl font-bold leading-snug text-stone-900 dark:text-stone-50">
-            {forgotMode ? 'Reset Password' : 'Welcome Back'}
+            {recoveryMode ? 'Set a new password' : forgotMode ? 'Reset Password' : 'Welcome Back'}
           </h1>
           <p className="mt-2 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
-            {forgotMode
-              ? 'Enter your email and we will send you a reset link'
-              : 'Sign in to continue your sustainable shopping journey'}
+            {recoveryMode
+              ? 'Choose a new password for your account.'
+              : forgotMode
+                ? 'Enter your email and we will send you a reset link'
+                : 'Sign in to continue your sustainable shopping journey'}
           </p>
         </div>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
-            Email
-          </label>
-          <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
-              <MailIcon />
-            </span>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
-              placeholder="Enter your email"
-            />
-          </div>
-        </div>
-        {!forgotMode && (
-          <div>
-            <label htmlFor="password" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
-              Password
-            </label>
-            <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
-                <LockIcon />
-              </span>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
-                placeholder="Enter your password"
-              />
+        {recoveryMode ? (
+          <>
+            <div>
+              <label htmlFor="new-password" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+                New password
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
+                  <LockIcon />
+                </span>
+                <input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  placeholder="New password"
+                />
+              </div>
             </div>
-          </div>
+            <div>
+              <label htmlFor="new-password2" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+                Confirm new password
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
+                  <LockIcon />
+                </span>
+                <input
+                  id="new-password2"
+                  type="password"
+                  value={newPassword2}
+                  onChange={(e) => setNewPassword2(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  placeholder="Confirm new password"
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <label htmlFor="email" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+                Email
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
+                  <MailIcon />
+                </span>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  placeholder="Enter your email"
+                />
+              </div>
+            </div>
+            {!forgotMode && (
+              <div>
+                <label htmlFor="password" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
+                  Password
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
+                    <LockIcon />
+                  </span>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                    placeholder="Enter your password"
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
         {error && <p className="text-red-600 dark:text-red-400 text-base sm:text-lg">{error}</p>}
         {success && <p className="text-emerald-600 dark:text-emerald-400 text-base sm:text-lg">{success}</p>}
@@ -117,10 +212,10 @@ export default function Login() {
           type="submit"
           className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
         >
-          {forgotMode ? 'Send Reset Link' : 'Sign In'}
+          {recoveryMode ? 'Update password' : forgotMode ? 'Send Reset Link' : 'Sign In'}
         </button>
       </form>
-      {!forgotMode && (
+      {!recoveryMode && !forgotMode && (
         <p className="mt-6 text-center">
           <button
             type="button"
@@ -131,7 +226,7 @@ export default function Login() {
           </button>
         </p>
       )}
-      {forgotMode && (
+      {!recoveryMode && forgotMode && (
         <p className="mt-6 text-center">
           <button
             type="button"
@@ -142,12 +237,14 @@ export default function Login() {
           </button>
         </p>
       )}
+      {!recoveryMode && (
       <p className="mt-6 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
         Don’t have an account?{' '}
         <Link to="/signup" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
           Create Account
         </Link>
       </p>
+      )}
       </div>
     </div>
   )
