@@ -84,9 +84,14 @@ export default function Login() {
       setSuccess('Check your email for a link to reset your password.')
       return
     }
-    const { error: err } = await signIn(email, password)
+    const { data, error: err } = await signIn(email, password)
     if (err) {
       setError(err.message)
+      return
+    }
+    const signedInUser = data?.user ?? data?.session?.user
+    if (signedInUser && !signedInUser.email_confirmed_at) {
+      navigate('/verify-email', { replace: true })
       return
     }
     navigate('/', { replace: true })
