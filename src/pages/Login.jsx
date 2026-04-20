@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { showToast } from '../lib/toast'
 
 function MailIcon({ className = 'w-4 h-4' }) {
   return (
@@ -28,7 +29,8 @@ export default function Login() {
   const [newPassword2, setNewPassword2] = useState('')
   const [error, setError] = useState('')
   const [forgotMode, setForgotMode] = useState(false)
-  const [success, setSuccess] = useState('')
+  /** After "Send reset link" succeeds — show confirmation + back, not the form. */
+  const [resetLinkSent, setResetLinkSent] = useState(false)
   const { signIn, resetPassword, passwordRecoveryRequired, clearPasswordRecovery } = useAuth()
   const navigate = useNavigate()
 
@@ -45,9 +47,12 @@ export default function Login() {
     if (passwordRecoveryRequired) setForgotMode(false)
   }, [passwordRecoveryRequired])
 
+  useEffect(() => {
+    if (!forgotMode) setResetLinkSent(false)
+  }, [forgotMode])
+
   const handleRecoverySubmit = async () => {
     setError('')
-    setSuccess('')
     if (newPassword.length < 8) {
       setError('Password must be at least 8 characters.')
       return
@@ -64,13 +69,14 @@ export default function Login() {
     clearPasswordRecovery()
     setNewPassword('')
     setNewPassword2('')
+    showToast('Password updated.')
     navigate('/', { replace: true })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setSuccess('')
+    if (forgotMode && resetLinkSent) return
     if (passwordRecoveryRequired) {
       await handleRecoverySubmit()
       return
@@ -81,7 +87,8 @@ export default function Login() {
         setError(err.message)
         return
       }
-      setSuccess('Check your email for a link to reset your password.')
+      setResetLinkSent(true)
+      showToast('Check your email for a link to reset your password.')
       return
     }
     const { data, error: err } = await signIn(email, password)
@@ -91,9 +98,11 @@ export default function Login() {
     }
     const signedInUser = data?.user ?? data?.session?.user
     if (signedInUser && !signedInUser.email_confirmed_at) {
+      showToast('Check your email to confirm your account.')
       navigate('/verify-email', { replace: true })
       return
     }
+    showToast('Signed in.')
     navigate('/', { replace: true })
   }
 
@@ -103,18 +112,42 @@ export default function Login() {
         <div className="mb-6 sm:mb-8 flex flex-col items-center text-center">
           <img src="/favicon-96x96.png" alt="" className="mb-3 h-12 w-12 sm:h-14 sm:w-14" />
           <h1 className="text-3xl sm:text-4xl font-bold leading-snug text-stone-900 dark:text-stone-50">
-            {passwordRecoveryRequired ? 'Set a new password' : forgotMode ? 'Reset Password' : 'Welcome Back'}
+            {passwordRecoveryRequired ? 'Set a new password' : forgotMode && resetLinkSent ? 'Check your email' : forgotMode ? 'Reset Password' : 'Welcome Back'}
           </h1>
           <p className="mt-2 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
             {passwordRecoveryRequired
               ? 'Choose a new password for your account.'
-              : forgotMode
-                ? 'Enter your email and we will send you a reset link'
-                : 'Sign in to continue your sustainable shopping journey'}
+              : forgotMode && resetLinkSent
+                ? 'You can go back to sign in or try another email.'
+                : forgotMode
+                  ? 'Enter your email and we will send you a reset link'
+                  : 'Sign in to continue your sustainable shopping journey'}
           </p>
         </div>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {passwordRecoveryRequired ? (
+        {forgotMode && resetLinkSent ? (
+          <div className="space-y-5 text-center">
+            <p className="text-base sm:text-lg text-stone-700 dark:text-stone-200 leading-relaxed">
+              If an account exists for <span className="font-semibold">{email}</span>, we sent a password reset link. Check your inbox and spam folder.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => setForgotMode(false)}
+                className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
+              >
+                Back to sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => setResetLinkSent(false)}
+                className="text-base sm:text-lg font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+              >
+                Use a different email
+              </button>
+            </div>
+          </div>
+        ) : passwordRecoveryRequired ? (
           <>
             <div>
               <label htmlFor="new-password" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
@@ -205,13 +238,14 @@ export default function Login() {
           </>
         )}
         {error && <p className="text-red-600 dark:text-red-400 text-base sm:text-lg">{error}</p>}
-        {success && <p className="text-emerald-600 dark:text-emerald-400 text-base sm:text-lg">{success}</p>}
+        {!(forgotMode && resetLinkSent) && (
         <button
           type="submit"
           className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
         >
           {passwordRecoveryRequired ? 'Update password' : forgotMode ? 'Send Reset Link' : 'Sign In'}
         </button>
+        )}
       </form>
       {!passwordRecoveryRequired && !forgotMode && (
         <p className="mt-6 text-center">
@@ -224,7 +258,7 @@ export default function Login() {
           </button>
         </p>
       )}
-      {!passwordRecoveryRequired && forgotMode && (
+      {!passwordRecoveryRequired && forgotMode && !resetLinkSent && (
         <p className="mt-6 text-center">
           <button
             type="button"

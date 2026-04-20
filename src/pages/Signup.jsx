@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { showToast } from '../lib/toast'
 
 function MailIcon({ className = 'w-4 h-4' }) {
   return (
@@ -34,7 +35,6 @@ export default function Signup() {
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const { signUp } = useAuth()
   const navigate = useNavigate()
 
@@ -46,7 +46,6 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setSuccess('')
     const pwErr = signupPasswordError(password)
     if (pwErr) {
       setError(pwErr)
@@ -57,8 +56,8 @@ export default function Signup() {
       setError(err.message)
       return
     }
-    setSuccess('Account created. Check your email to confirm, or sign in below.')
-    setTimeout(() => navigate('/login', { replace: true }), 2000)
+    showToast('Check your email to confirm your account.')
+    setTimeout(() => navigate('/login', { replace: true }), 1200)
   }
 
   return (
@@ -135,7 +134,6 @@ export default function Signup() {
           </p>
         </div>
         {error && <p className="text-red-600 dark:text-red-400 text-base sm:text-lg">{error}</p>}
-        {success && <p className="text-emerald-600 dark:text-emerald-400 text-base sm:text-lg">{success}</p>}
         <button
           type="submit"
           className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"

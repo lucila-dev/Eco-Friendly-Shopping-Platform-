@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
     let cancelled = false
     supabase.auth.exchangeCodeForSession(window.location.href).then(({ error }) => {
       if (cancelled || error) return
-      setPasswordRecoveryRequired(true)
+      // Recovery vs OAuth: do not set recovery here — only PASSWORD_RECOVERY does that.
       window.history.replaceState({}, '', window.location.pathname)
     })
     return () => {
@@ -132,7 +132,8 @@ export function AuthProvider({ children }) {
     signOut,
     deleteAccount,
     resetPassword,
-    isAuthenticated: !!user,
+    /** True when the user has a normal session (not password-recovery-only). */
+    isAuthenticated: !!user && !passwordRecoveryRequired,
     /** False until the user confirms their email (Supabase: Confirm email + link clicked). */
     emailConfirmed: isEmailConfirmed(user),
     passwordRecoveryRequired,
