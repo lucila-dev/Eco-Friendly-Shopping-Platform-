@@ -138,9 +138,9 @@ export default function Layout() {
       <main
         className={`flex-1 text-stone-900 dark:text-stone-100 ${
           isAuthPage
-            ? `${layoutContentWidthClass} ${layoutContentPadClass} mx-auto flex w-full flex-col justify-center py-8 sm:py-10`
+            ? `${layoutContentWidthClass} ${layoutContentPadClass} mx-auto flex w-full flex-col justify-center py-8 sm:py-12 md:py-16`
             : `${layoutContentWidthClass} ${mainHorizontalPadding} py-5 sm:py-8`
-        } ${!isAuthPage ? 'text-base sm:text-lg leading-relaxed' : ''}`}
+        } text-base sm:text-lg leading-relaxed`}
       >
         <Outlet />
       </main>

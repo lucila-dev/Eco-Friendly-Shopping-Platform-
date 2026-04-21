@@ -32,3 +32,22 @@ body {
 html.ecoshop-comfortable-text {
   font-size: 118.75%;
 }
+
+/* Match autofill paint to auth field shell (avoids “box inside box” margins) */
+@layer components {
+  .auth-field-shell input:-webkit-autofill,
+  .auth-field-shell input:-webkit-autofill:hover,
+  .auth-field-shell input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #292524;
+    caret-color: #292524;
+    transition: background-color 9999s ease-out;
+    box-shadow: 0 0 0 1000px #fafaf9 inset;
+  }
+  .dark .auth-field-shell input:-webkit-autofill,
+  .dark .auth-field-shell input:-webkit-autofill:hover,
+  .dark .auth-field-shell input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #e7e5e4;
+    caret-color: #e7e5e4;
+    box-shadow: 0 0 0 1000px rgb(28 25 23 / 0.96) inset;
+  }
+}

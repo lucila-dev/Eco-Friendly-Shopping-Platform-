@@ -310,7 +310,7 @@ export default function Home() {
                 {featuredProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="shrink-0 w-[min(17.5rem,calc(100vw-3.5rem))] sm:w-[17.5rem] snap-start"
+                    className="flex min-h-0 w-[min(17.5rem,calc(100vw-3.5rem))] shrink-0 snap-start flex-col self-stretch sm:w-[17.5rem]"
                   >
                     <ProductCard product={product} />
                   </div>

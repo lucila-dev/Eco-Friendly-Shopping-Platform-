@@ -42,6 +42,18 @@ function EyeOffIcon({ className = 'w-5 h-5' }) {
   )
 }
 
+const authFieldShell =
+  'auth-field-shell flex min-h-[3.25rem] items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 px-3 shadow-sm transition focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/25 dark:focus-within:bg-stone-950'
+
+const authFieldInput =
+  'min-h-0 min-w-0 flex-1 appearance-none border-0 bg-transparent py-3 text-lg sm:text-xl font-medium leading-normal text-stone-800 outline-none ring-0 placeholder:text-stone-400 focus:ring-0 dark:text-stone-100 dark:placeholder:text-stone-500'
+
+const authFieldIcon =
+  'pointer-events-none flex h-5 w-5 shrink-0 items-center justify-center text-stone-400 dark:text-stone-500'
+
+const authRevealBtn =
+  'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-200/80 hover:text-stone-800 dark:text-stone-400 dark:hover:bg-stone-700 dark:hover:text-stone-100'
+
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -134,14 +146,14 @@ export default function Login() {
   }
 
   return (
-    <div className="w-full flex items-center justify-center">
-      <div className="w-full max-w-lg mx-auto rounded-2xl border border-stone-200 dark:border-emerald-800/50 bg-white dark:bg-stone-900/95 px-6 sm:px-10 py-8 sm:py-10 shadow-lg dark:shadow-xl dark:shadow-black/30">
-        <div className="mb-6 sm:mb-8 flex flex-col items-center text-center">
-          <img src="/favicon-96x96.png" alt="" className="mb-3 h-12 w-12 sm:h-14 sm:w-14" />
-          <h1 className="text-3xl sm:text-4xl font-bold leading-snug text-stone-900 dark:text-stone-50">
+    <div className="flex w-full justify-center">
+      <div className="w-full max-w-lg rounded-2xl border border-stone-200 bg-white px-5 py-6 shadow-lg dark:border-emerald-800/50 dark:bg-stone-900/95 dark:shadow-xl dark:shadow-black/30 sm:px-8 sm:py-8">
+        <div className="mb-4 flex flex-col items-center text-center sm:mb-5">
+          <img src="/favicon-96x96.png" alt="" className="mb-2.5 h-12 w-12 sm:mb-3 sm:h-14 sm:w-14" />
+          <h1 className="text-3xl font-bold leading-snug text-stone-900 dark:text-stone-50 sm:text-4xl">
             {passwordRecoveryRequired ? 'Set a new password' : forgotMode && resetLinkSent ? 'Check your email' : forgotMode ? 'Reset Password' : 'Welcome Back'}
           </h1>
-          <p className="mt-2 text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-md mx-auto leading-relaxed">
+          <p className="mx-auto mt-1.5 max-w-md text-base leading-snug text-stone-500 dark:text-stone-400 sm:mt-2 sm:text-lg sm:leading-relaxed">
             {passwordRecoveryRequired
               ? 'Choose a new password for your account.'
               : forgotMode && resetLinkSent
@@ -151,7 +163,7 @@ export default function Login() {
                   : 'Sign in to continue your sustainable shopping journey'}
           </p>
         </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {forgotMode && resetLinkSent ? (
           <div className="space-y-5 text-center">
             <p className="text-base sm:text-lg text-stone-700 dark:text-stone-200 leading-relaxed">
@@ -161,7 +173,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setForgotMode(false)}
-                className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
+                className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-lg sm:text-xl font-semibold text-white transition hover:bg-emerald-700 shadow-md"
               >
                 Back to sign in
               </button>
@@ -180,8 +192,8 @@ export default function Login() {
               <label htmlFor="new-password" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
                 New password
               </label>
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
+              <div className={authFieldShell}>
+                <span className={authFieldIcon}>
                   <LockIcon />
                 </span>
                 <input
@@ -192,7 +204,7 @@ export default function Login() {
                   required
                   minLength={8}
                   autoComplete="new-password"
-                  className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className={authFieldInput}
                   placeholder="New password"
                 />
               </div>
@@ -201,8 +213,8 @@ export default function Login() {
               <label htmlFor="new-password2" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
                 Confirm new password
               </label>
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-stone-400 dark:text-stone-500">
+              <div className={authFieldShell}>
+                <span className={authFieldIcon}>
                   <LockIcon />
                 </span>
                 <input
@@ -213,7 +225,7 @@ export default function Login() {
                   required
                   minLength={8}
                   autoComplete="new-password"
-                  className="w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-2.5 sm:py-3 pl-10 pr-3 text-base sm:text-lg text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className={authFieldInput}
                   placeholder="Confirm new password"
                 />
               </div>
@@ -225,8 +237,8 @@ export default function Login() {
               <label htmlFor="email" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
                 Email
               </label>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-stone-400 dark:text-stone-500">
+              <div className={authFieldShell}>
+                <span className={authFieldIcon}>
                   <MailIcon />
                 </span>
                 <input
@@ -236,7 +248,7 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="username"
-                  className="box-border w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-3 pl-12 pr-3 text-base sm:text-lg leading-normal text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className={authFieldInput}
                   placeholder="Enter your email"
                 />
               </div>
@@ -246,8 +258,8 @@ export default function Login() {
                 <label htmlFor="password" className="mb-1 block text-base font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300">
                   Password
                 </label>
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 z-[1] flex h-5 w-5 -translate-y-1/2 items-center justify-center text-stone-400 dark:text-stone-500">
+                <div className={authFieldShell}>
+                  <span className={authFieldIcon}>
                     <LockIcon />
                   </span>
                   <input
@@ -258,13 +270,13 @@ export default function Login() {
                     required
                     minLength={8}
                     autoComplete="current-password"
-                    className="box-border w-full rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/90 py-3 pl-12 pr-14 text-base sm:text-lg leading-normal text-stone-800 dark:text-stone-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/25 focus:bg-white dark:focus:bg-stone-950 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                    className={authFieldInput}
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-1.5 top-1/2 z-[1] flex h-10 w-10 shrink-0 -translate-y-1/2 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-200/80 hover:text-stone-800 dark:text-stone-400 dark:hover:bg-stone-700 dark:hover:text-stone-100"
+                    className={authRevealBtn}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     aria-pressed={showPassword}
                   >
@@ -275,46 +287,48 @@ export default function Login() {
             )}
           </>
         )}
-        {error && <p className="text-red-600 dark:text-red-400 text-base sm:text-lg">{error}</p>}
+        {error && <p className="text-base text-red-600 dark:text-red-400 sm:text-lg">{error}</p>}
         {!(forgotMode && resetLinkSent) && (
         <button
           type="submit"
-          className="w-full rounded-xl bg-emerald-600 px-4 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition hover:bg-emerald-700 shadow-md"
+          className="mt-1 w-full rounded-xl bg-emerald-600 px-4 py-3 text-lg font-semibold text-white shadow-md transition hover:bg-emerald-700 sm:py-3.5 sm:text-xl"
         >
           {passwordRecoveryRequired ? 'Update password' : forgotMode ? 'Send Reset Link' : 'Sign In'}
         </button>
         )}
       </form>
-      {!passwordRecoveryRequired && !forgotMode && (
-        <p className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() => setForgotMode(true)}
-            className="text-base sm:text-lg font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
-          >
-            Forgot password?
-          </button>
-        </p>
-      )}
-      {!passwordRecoveryRequired && forgotMode && !resetLinkSent && (
-        <p className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() => setForgotMode(false)}
-            className="text-base sm:text-lg text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400"
-          >
-            Back to sign in
-          </button>
-        </p>
-      )}
-      {!passwordRecoveryRequired && (
-      <p className="mt-6 text-center text-base sm:text-lg text-stone-500 dark:text-stone-400">
-        Don’t have an account?{' '}
-        <Link to="/signup" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
-          Create Account
-        </Link>
-      </p>
-      )}
+      <div className="mt-4 space-y-3 text-center sm:mt-5">
+        {!passwordRecoveryRequired && !forgotMode && (
+          <p>
+            <button
+              type="button"
+              onClick={() => setForgotMode(true)}
+              className="text-base font-semibold text-emerald-600 dark:text-emerald-400 hover:underline sm:text-lg"
+            >
+              Forgot password?
+            </button>
+          </p>
+        )}
+        {!passwordRecoveryRequired && forgotMode && !resetLinkSent && (
+          <p>
+            <button
+              type="button"
+              onClick={() => setForgotMode(false)}
+              className="text-base text-stone-600 hover:text-emerald-600 dark:text-stone-400 dark:hover:text-emerald-400 sm:text-lg"
+            >
+              Back to sign in
+            </button>
+          </p>
+        )}
+        {!passwordRecoveryRequired && (
+          <p className="text-base text-stone-500 dark:text-stone-400 sm:text-lg">
+            Don’t have an account?{' '}
+            <Link to="/signup" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+              Create Account
+            </Link>
+          </p>
+        )}
+      </div>
       </div>
     </div>
   )

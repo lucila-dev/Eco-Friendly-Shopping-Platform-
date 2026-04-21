@@ -370,9 +370,9 @@ export default function ProductCard({ product }) {
       : null
 
   return (
-    <div className="rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800/90 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300">
-      <Link to={`/products/${slug}`} className="block group">
-        <div className="relative aspect-[1/1] w-full min-h-0 overflow-hidden bg-stone-100 dark:bg-stone-900">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-xl dark:border-stone-600 dark:bg-stone-800/90 dark:hover:border-emerald-600">
+      <Link to={`/products/${slug}`} className="group flex min-h-0 flex-1 flex-col">
+        <div className="relative aspect-[1/1] w-full shrink-0 min-h-0 overflow-hidden bg-stone-100 dark:bg-stone-900">
           <img
             src={displayImage}
             alt={displayName}
@@ -389,10 +389,12 @@ export default function ProductCard({ product }) {
             </span>
           )}
         </div>
-        <div className="p-3">
-          <h2 className="font-semibold text-base text-stone-900 dark:text-stone-100 line-clamp-2 transition-colors group-hover:text-emerald-700 dark:group-hover:text-emerald-400 leading-snug">{displayName}</h2>
+        <div className="flex min-h-0 flex-1 flex-col p-3">
+          <h2 className="line-clamp-2 text-base font-semibold leading-snug text-stone-900 transition-colors group-hover:text-emerald-700 dark:text-stone-100 dark:group-hover:text-emerald-400">
+            {displayName}
+          </h2>
           <div
-            className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm"
+            className="mt-1 flex min-h-[1.375rem] flex-wrap items-center gap-x-2 gap-y-0.5 text-sm"
             aria-label={
               reviewCount > 0
                 ? `Average rating ${reviewAvg.toFixed(1)} out of 5 from ${reviewCount} reviews`
@@ -425,13 +427,14 @@ export default function ProductCard({ product }) {
               <p className="text-base text-stone-500 dark:text-stone-400 line-through tabular-nums">{format(originalPrice)}</p>
             )}
           </div>
-          <div className="mt-2 flex items-center justify-between text-base font-medium text-stone-700 dark:text-stone-300 gap-2 tabular-nums">
+          <div className="mt-2 flex items-center justify-between gap-2 text-base font-medium tabular-nums text-stone-700 dark:text-stone-300">
             <span>CO₂ saved: {displayCarbon} kg</span>
             <span className="text-emerald-700 dark:text-emerald-400">+{loyaltyPoints} pts</span>
           </div>
+          <div className="min-h-0 flex-1" aria-hidden />
         </div>
       </Link>
-      <div className="px-3 pb-3 flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2 px-3 pb-3 pt-1">
         <button
           type="button"
           onClick={addFromCard}
