@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import ProductCard from '../components/ProductCard'
+import ProductSearchField from '../components/ProductSearchField'
 import {
   categoryIdsForProductFilter,
   categoriesForProductListPills,
@@ -22,6 +23,7 @@ export default function ProductList() {
   usePageTitle('Products · EcoShop')
   const [searchParams, setSearchParams] = useSearchParams()
   const categorySlug = searchParams.get('category') || ''
+  const qFromUrl = searchParams.get('q') || ''
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [categoriesLoading, setCategoriesLoading] = useState(true)
@@ -40,6 +42,9 @@ export default function ProductList() {
   const [visibleCount, setVisibleCount] = useState(() => productGridStrideViewport())
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filterDraft, setFilterDraft] = useState(null)
+  const [searchInput, setSearchInput] = useState(qFromUrl)
+  const searchParamsRef = useRef(searchParams)
+  searchParamsRef.current = searchParams
 
   const activeFilterCount = useMemo(() => {
     let n = 0
@@ -117,6 +122,23 @@ export default function ProductList() {
     next.delete('sort')
     setSearchParams(next, { replace: true })
   }, [searchParams, setSearchParams])
+
+  useEffect(() => {
+    setSearchInput(qFromUrl)
+  }, [qFromUrl])
+
+  useEffect(() => {
+    const trimmed = searchInput.trim()
+    const urlTrimmed = (searchParamsRef.current.get('q') || '').trim()
+    if (trimmed === urlTrimmed) return
+    const id = window.setTimeout(() => {
+      const next = new URLSearchParams(searchParamsRef.current)
+      if (trimmed) next.set('q', trimmed)
+      else next.delete('q')
+      setSearchParams(next, { replace: true })
+    }, 320)
+    return () => window.clearTimeout(id)
+  }, [searchInput, setSearchParams])
 
   useEffect(() => {
     async function fetchCategories() {
@@ -260,6 +282,24 @@ export default function ProductList() {
             )}
           </button>
         </div>
+      </div>
+
+      <div className="mb-5">
+        <ProductSearchField
+          id="products-page-search"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter') return
+            e.preventDefault()
+            const trimmed = searchInput.trim()
+            const next = new URLSearchParams(searchParamsRef.current)
+            if (trimmed) next.set('q', trimmed)
+            else next.delete('q')
+            setSearchParams(next, { replace: true })
+          }}
+          placeholder="Search by product name…"
+        />
       </div>
 
       <div className="flex flex-wrap gap-2.5 mb-5">

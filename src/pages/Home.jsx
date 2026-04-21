@@ -7,6 +7,7 @@ import { mergeGardenOutdoorsForHome, mergeHomeOfficeForHome } from '../lib/store
 import { categoryCardDescription } from '../lib/categoryCardCopy'
 import { MaterialsIcon, TruckIcon, PackageIcon, WasteReductionIcon, CheckCircleIcon, CarbonReductionIcon } from '../components/Icons'
 import ProductCard from '../components/ProductCard'
+import HomeHeroProductSearch from '../components/HomeHeroProductSearch'
 import { FREE_SHIPPING_MIN_SUBTOTAL } from '../lib/shipping'
 import { useFormatPrice } from '../hooks/useFormatPrice'
 
@@ -172,20 +173,24 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative rounded-2xl overflow-hidden mb-8 sm:mb-10 min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem]">
-        {/* Image under the scrim so dark mode stays visible (avoids 10% opacity + soft-light on the photo) */}
-        <div
-          className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1600')] bg-cover bg-center"
-          aria-hidden
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/90 via-emerald-50/86 to-teal-50/84 dark:from-emerald-950/68 dark:via-stone-900/62 dark:to-emerald-950/58" />
-        <div className="relative z-10 flex min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] flex-col items-center justify-center text-center px-4 py-12 sm:py-14 md:py-16 max-w-3xl mx-auto">
+      <section className="relative mb-8 sm:mb-10 min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] rounded-2xl">
+        {/* Clip backgrounds only so the search suggestions can extend outside the hero card */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+          {/* Image under the scrim so dark mode stays visible (avoids 10% opacity + soft-light on the photo) */}
+          <div
+            className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1600')] bg-cover bg-center"
+            aria-hidden
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/90 via-emerald-50/86 to-teal-50/84 dark:from-emerald-950/68 dark:via-stone-900/62 dark:to-emerald-950/58" />
+        </div>
+        <div className="relative z-10 flex min-h-[20rem] sm:min-h-[26rem] md:min-h-[30rem] flex-col items-center justify-center px-4 py-12 text-center sm:py-14 md:py-16 max-w-3xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-emerald-950 dark:text-emerald-100 mb-5 leading-tight">
             Shop Sustainably, Live Better
           </h1>
-          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-lg sm:text-xl md:text-2xl mb-8 max-w-xl mx-auto leading-relaxed">
+          <p className="text-emerald-950/90 dark:text-emerald-100/85 text-lg sm:text-xl md:text-2xl mb-6 max-w-xl mx-auto leading-relaxed">
             Discover eco-friendly products that make a difference. Every purchase helps reduce your carbon footprint.
           </p>
+          <HomeHeroProductSearch />
           <Link
             to="/products"
             className="inline-flex items-center justify-center px-8 py-3.5 text-base sm:text-lg font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"

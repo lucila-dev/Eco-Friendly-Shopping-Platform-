@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useProfile } from '../hooks/useProfile'
 import {
@@ -61,7 +61,8 @@ const CARDS = [
 ]
 
 export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevTools = false }) {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
+  const navigate = useNavigate()
   const { canManageProducts } = useProfile()
   const email = user?.email ?? ''
   const TitleTag = heading === 'h1' ? 'h1' : 'h2'
@@ -69,13 +70,36 @@ export default function AccountHubPanel({ onNavigate, heading = 'h1', inlineDevT
   return (
     <>
       <header className="mb-6 sm:mb-8">
-        <TitleTag className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
-          Your account
-        </TitleTag>
-        <p className="mt-2 text-stone-600 dark:text-stone-400 text-base sm:text-lg">
-          Signed in as{' '}
-          <span className="font-medium text-stone-800 dark:text-stone-200">{email || 'n/a'}</span>
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+          <div className="min-w-0 flex-1">
+            <TitleTag className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
+              Your account
+            </TitleTag>
+            <p className="mt-2 text-stone-600 dark:text-stone-400 text-base sm:text-lg">
+              Signed in as{' '}
+              <span className="font-medium text-stone-800 dark:text-stone-200">{email || 'n/a'}</span>
+            </p>
+          </div>
+          {user && (
+            <button
+              type="button"
+              onClick={async () => {
+                onNavigate?.()
+                try {
+                  await signOut()
+                } catch (e) {
+                  console.warn('[EcoShop] signOut failed:', e)
+                } finally {
+                  navigate('/login', { replace: true })
+                }
+              }}
+              className="shrink-0 rounded-lg border border-red-200/90 bg-red-50/90 px-3 py-2 text-sm font-semibold text-red-700 shadow-sm transition-colors hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-300 dark:hover:bg-red-950/80 sm:px-4 sm:text-base"
+              aria-label="Log out"
+            >
+              Log out
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 items-stretch">
