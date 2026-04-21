@@ -6,7 +6,6 @@ import { CartIcon, PersonIcon } from './Icons'
 import AccountDropdown from './AccountDropdown'
 import HomeAnnouncementBar from './HomeAnnouncementBar'
 import SiteFooter from './SiteFooter'
-import ToastHost from './ToastHost'
 import { layoutContentPadClass, layoutContentWidthClass } from '../lib/layoutContent'
 
 const navLinkClass =
@@ -146,7 +145,6 @@ export default function Layout() {
         <Outlet />
       </main>
       <SiteFooter />
-      <ToastHost />
     </div>
   )
 }

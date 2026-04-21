@@ -26,7 +26,7 @@ export default function Signup() {
       setError(err.message)
       return
     }
-    setSuccess('Account created. Check your email to confirm, or sign in below.')
+    setSuccess('Check your email to confirm your account.')
     setTimeout(() => navigate('/login', { replace: true }), 2000)
   }
 
