@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../hooks/useCart'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -14,10 +14,9 @@ const navLinkActiveClass =
   'text-base sm:text-[1.0625rem] font-semibold text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 px-2 py-2 rounded-lg hover:bg-stone-100/80 dark:hover:bg-stone-800/70 transition-colors'
 
 export default function Layout() {
-  const { signOut, isAuthenticated, emailConfirmed } = useAuth()
+  const { isAuthenticated, emailConfirmed } = useAuth()
   const { items } = useCart()
   const location = useLocation()
-  const navigate = useNavigate()
   const isAuthPage =
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
@@ -47,19 +46,46 @@ export default function Layout() {
             <img src="/favicon-96x96.png" alt="" aria-hidden="true" className="w-8 h-8 sm:w-9 sm:h-9" />
             <span className="text-xl sm:text-2xl font-bold tracking-tight">EcoShop</span>
           </Link>
-          <nav className="w-full sm:w-auto flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2 sm:gap-y-1.5">
-            <Link to="/" className={navLinkActiveClass}>
-              Home
-            </Link>
-            <Link to="/products" className={navLinkClass}>
-              Products
-            </Link>
-            <Link to="/about" className={navLinkClass}>
-              About
-            </Link>
+          <div className="flex w-full min-w-0 flex-1 flex-row flex-wrap items-center justify-end gap-x-2 gap-y-1 sm:flex-nowrap sm:gap-x-3">
+            <nav className="flex flex-wrap items-center justify-end gap-x-1 gap-y-1 sm:gap-x-2 sm:gap-y-1.5">
+              <Link to="/" className={navLinkActiveClass}>
+                Home
+              </Link>
+              <Link to="/products" className={navLinkClass}>
+                Products
+              </Link>
+              <Link to="/about" className={navLinkClass}>
+                About
+              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link to="/dashboard" className={navLinkClass}>
+                    Dashboard
+                  </Link>
+                  <AccountDropdown />
+                </>
+              ) : (
+                <span className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-2.5 bg-emerald-600 text-white text-base sm:text-[1.0625rem] font-semibold rounded-xl hover:bg-emerald-700 shadow-sm"
+                    aria-label="Log in"
+                  >
+                    <PersonIcon className="w-5 h-5 shrink-0" />
+                    <span>Login</span>
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-base sm:text-[1.0625rem] font-semibold px-3 py-2.5 rounded-xl hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30 border border-transparent hover:border-emerald-200/80 dark:hover:border-emerald-700/50"
+                  >
+                    Sign up
+                  </Link>
+                </span>
+              )}
+            </nav>
             <Link
               to="/cart"
-              className={`relative inline-flex items-center gap-1.5 ${navLinkClass}`}
+              className={`relative inline-flex shrink-0 items-center gap-1.5 ${navLinkClass}`}
             >
               <CartIcon className="w-5 h-5 shrink-0" aria-hidden />
               <span>Cart</span>
@@ -69,48 +95,7 @@ export default function Layout() {
                 </span>
               )}
             </Link>
-            {isAuthenticated ? (
-              <>
-                <Link to="/dashboard" className={navLinkClass}>
-                  Dashboard
-                </Link>
-                <AccountDropdown />
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      await signOut()
-                    } catch (e) {
-                      console.warn('[EcoShop] signOut failed:', e)
-                    } finally {
-                      navigate('/login', { replace: true })
-                    }
-                  }}
-                  className="text-base sm:text-[1.0625rem] font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                  aria-label="Log out"
-                >
-                  Log out
-                </button>
-              </>
-            ) : (
-              <span className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                <Link
-                  to="/login"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-2.5 bg-emerald-600 text-white text-base sm:text-[1.0625rem] font-semibold rounded-xl hover:bg-emerald-700 shadow-sm"
-                  aria-label="Log in"
-                >
-                  <PersonIcon className="w-5 h-5 shrink-0" />
-                  <span>Login</span>
-                </Link>
-                <Link
-                  to="/signup"
-                  className="text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-base sm:text-[1.0625rem] font-semibold px-3 py-2.5 rounded-xl hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30 border border-transparent hover:border-emerald-200/80 dark:hover:border-emerald-700/50"
-                >
-                  Sign up
-                </Link>
-              </span>
-            )}
-          </nav>
+          </div>
         </div>
       </header>
       {isAuthenticated && !emailConfirmed && location.pathname !== '/verify-email' && (
