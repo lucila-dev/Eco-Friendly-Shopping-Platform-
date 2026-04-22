@@ -35,15 +35,19 @@ export default function HomeAnnouncementBar() {
   }, [messages.length])
 
   return (
-    <div className="bg-gradient-to-r from-emerald-700 via-emerald-800 to-teal-800 dark:from-emerald-950 dark:via-emerald-900 dark:to-emerald-950 text-white dark:text-emerald-50 text-center text-base sm:text-lg py-2.5 px-4 border-b border-emerald-600/50 dark:border-emerald-800/90 shadow-sm">
-      <p
-        className={`${layoutContentWidthClass} font-medium transition-opacity duration-300 ease-out ${
-          visible ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-live="polite"
+    <div className="border-b border-emerald-600/50 bg-gradient-to-r from-emerald-700 via-emerald-800 to-teal-800 px-4 py-2.5 text-center text-base text-white shadow-sm dark:border-emerald-800/90 dark:from-emerald-950 dark:via-emerald-900 dark:to-emerald-950 dark:text-emerald-50 sm:text-lg">
+      <div
+        className={`${layoutContentWidthClass} flex items-center justify-center max-sm:min-h-[3.75rem]`}
       >
-        {messages[index]}
-      </p>
+        <p
+          className={`w-full text-balance font-medium leading-snug transition-opacity duration-300 ease-out sm:leading-normal ${
+            visible ? 'opacity-100' : 'opacity-0'
+          }`}
+          aria-live="polite"
+        >
+          {messages[index]}
+        </p>
+      </div>
     </div>
   )
 }
