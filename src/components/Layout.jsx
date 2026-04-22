@@ -38,16 +38,33 @@ export default function Layout() {
     >
       {isHome && <HomeAnnouncementBar />}
       <header className="overflow-visible border-b border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-white via-emerald-50 to-teal-50 dark:from-stone-900 dark:via-emerald-950/50 dark:to-stone-900 shadow-sm sticky top-0 z-20">
-        <div className={`${layoutContentWidthClass} ${layoutContentPadClass} py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3`}>
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 hover:text-emerald-700 dark:hover:text-emerald-200 shrink-0 py-0.5"
-          >
-            <img src="/favicon-96x96.png" alt="" aria-hidden="true" className="w-8 h-8 sm:w-9 sm:h-9" />
-            <span className="text-xl sm:text-2xl font-bold tracking-tight">EcoShop</span>
-          </Link>
-          <div className="flex w-full min-w-0 flex-1 flex-row flex-wrap items-center justify-end gap-x-2 gap-y-1 sm:flex-nowrap sm:gap-x-3">
-            <nav className="flex flex-wrap items-center justify-end gap-x-1 gap-y-1 sm:gap-x-2 sm:gap-y-1.5">
+        <div
+          className={`${layoutContentWidthClass} ${layoutContentPadClass} flex flex-col gap-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-3`}
+        >
+          <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start sm:gap-0">
+            <Link
+              to="/"
+              className="flex min-w-0 items-center gap-2 py-0.5 text-emerald-800 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
+            >
+              <img src="/favicon-96x96.png" alt="" aria-hidden="true" className="h-8 w-8 shrink-0 sm:h-9 sm:w-9" />
+              <span className="truncate text-xl font-bold tracking-tight sm:text-2xl">EcoShop</span>
+            </Link>
+            <Link
+              to="/cart"
+              className={`relative inline-flex shrink-0 items-center gap-1.5 sm:hidden ${navLinkClass}`}
+            >
+              <CartIcon className="h-5 w-5 shrink-0" aria-hidden />
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-600 px-1 text-xs font-semibold leading-none text-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          </div>
+
+          <div className="flex w-full min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+            <nav className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 sm:justify-end sm:gap-x-2 sm:gap-y-1.5">
               <Link to="/" className={navLinkActiveClass}>
                 Home
               </Link>
@@ -65,18 +82,18 @@ export default function Layout() {
                   <AccountDropdown />
                 </>
               ) : (
-                <span className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <span className="inline-flex flex-wrap items-center justify-center gap-2 sm:justify-end sm:gap-2.5">
                   <Link
                     to="/login"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-2.5 bg-emerald-600 text-white text-base sm:text-[1.0625rem] font-semibold rounded-xl hover:bg-emerald-700 shadow-sm"
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 sm:px-5 sm:text-[1.0625rem] sm:py-2.5"
                     aria-label="Log in"
                   >
-                    <PersonIcon className="w-5 h-5 shrink-0" />
+                    <PersonIcon className="h-5 w-5 shrink-0" />
                     <span>Login</span>
                   </Link>
                   <Link
                     to="/signup"
-                    className="text-stone-800 dark:text-stone-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-base sm:text-[1.0625rem] font-semibold px-3 py-2.5 rounded-xl hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30 border border-transparent hover:border-emerald-200/80 dark:hover:border-emerald-700/50"
+                    className="inline-flex items-center rounded-xl border border-transparent px-3 py-2.5 text-base font-semibold text-stone-800 hover:border-emerald-200/80 hover:bg-emerald-100/60 hover:text-emerald-700 dark:text-stone-100 dark:hover:border-emerald-700/50 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400 sm:text-[1.0625rem]"
                   >
                     Sign up
                   </Link>
@@ -85,12 +102,12 @@ export default function Layout() {
             </nav>
             <Link
               to="/cart"
-              className={`relative inline-flex shrink-0 items-center gap-1.5 ${navLinkClass}`}
+              className={`relative hidden shrink-0 items-center gap-1.5 sm:inline-flex ${navLinkClass}`}
             >
-              <CartIcon className="w-5 h-5 shrink-0" aria-hidden />
+              <CartIcon className="h-5 w-5 shrink-0" aria-hidden />
               <span>Cart</span>
               {cartCount > 0 && (
-                <span className="min-w-[1.25rem] h-5 px-1 flex items-center justify-center bg-emerald-600 text-white text-xs font-semibold rounded-full leading-none">
+                <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-600 px-1 text-xs font-semibold leading-none text-white">
                   {cartCount}
                 </span>
               )}
