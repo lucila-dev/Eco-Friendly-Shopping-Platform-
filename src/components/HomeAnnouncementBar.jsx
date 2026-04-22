@@ -35,9 +35,9 @@ export default function HomeAnnouncementBar() {
   }, [messages.length])
 
   return (
-    <div className="border-b border-emerald-600/50 bg-gradient-to-r from-emerald-700 via-emerald-800 to-teal-800 px-4 py-2.5 text-center text-base text-white shadow-sm dark:border-emerald-800/90 dark:from-emerald-950 dark:via-emerald-900 dark:to-emerald-950 dark:text-emerald-50 sm:text-lg">
+    <div className="border-b border-emerald-600/50 bg-gradient-to-r from-emerald-700 via-emerald-800 to-teal-800 px-4 py-2 text-center text-base text-white shadow-sm dark:border-emerald-800/90 dark:from-emerald-950 dark:via-emerald-900 dark:to-emerald-950 dark:text-emerald-50 sm:py-2.5 sm:text-lg">
       <div
-        className={`${layoutContentWidthClass} flex items-center justify-center max-sm:min-h-[3.75rem]`}
+        className={`${layoutContentWidthClass} flex items-center justify-center max-sm:min-h-[2.875rem]`}
       >
         <p
           className={`w-full text-balance font-medium leading-snug transition-opacity duration-300 ease-out sm:leading-normal ${
