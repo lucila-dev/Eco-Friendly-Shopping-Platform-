@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -17,6 +17,7 @@ import { showToast } from '../lib/toast'
 import { useAuth } from '../contexts/AuthContext'
 import { useWishlist } from '../hooks/useWishlist'
 import { useFormatPrice } from '../hooks/useFormatPrice'
+import { useCart } from '../hooks/useCart'
 
 async function upsertCartItem({ userId, productId, normalizedSize }) {
   let existingQuery = supabase
@@ -45,7 +46,15 @@ export default function ProductCard({ product }) {
   const displayImage = getProductImage({ name, slug, image_url })
   const { user } = useAuth()
   const { format } = useFormatPrice()
+  const { items, removeAllForProduct } = useCart()
   const { isWishlisted, toggle, isAuthenticated } = useWishlist()
+  const inCartQty = useMemo(
+    () =>
+      items
+        .filter((row) => row.product_id === product.id)
+        .reduce((sum, row) => sum + (Number(row.quantity) || 0), 0),
+    [items, product.id],
+  )
   const [adding, setAdding] = useState(false)
   const [sizePickerOpen, setSizePickerOpen] = useState(false)
   const [pendingSize, setPendingSize] = useState('')
@@ -75,6 +84,16 @@ export default function ProductCard({ product }) {
     setShoeModalMeasureUnit('cm')
     setShoeModalShowChart(false)
   }, [shoeVariant, product?.id])
+
+  const removeFromCard = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!user || inCartQty < 1) return
+    setAdding(true)
+    await removeAllForProduct(product.id)
+    setAdding(false)
+    showToast('Removed from cart')
+  }
 
   const addFromCard = async (e) => {
     e.preventDefault()
@@ -435,27 +454,73 @@ export default function ProductCard({ product }) {
         </div>
       </Link>
       <div className="flex shrink-0 items-center gap-2 px-3 pb-3 pt-1">
-        <button
-          type="button"
-          onClick={addFromCard}
-          disabled={!user || adding}
-          className="flex-1 px-3 py-2.5 rounded-lg bg-emerald-600 text-white text-base font-semibold hover:bg-emerald-700 disabled:opacity-50"
-        >
-          {!user ? 'Login to add' : requiresSize ? 'Select size' : adding ? 'Adding...' : 'Add to cart'}
-        </button>
-        <button
-          type="button"
-          onClick={onWishlistClick}
-          className={`px-3 py-2.5 rounded-lg text-base font-semibold border ${
-            isWishlisted(product.id)
-              ? 'bg-pink-50 dark:bg-pink-950/40 border-pink-300 dark:border-pink-700 text-pink-700 dark:text-pink-300'
-              : 'bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300'
-          }`}
-          aria-label={isAuthenticated ? 'Toggle wishlist' : 'Login to use wishlist'}
-          title={isAuthenticated ? 'Toggle wishlist' : 'Login to use wishlist'}
-        >
-          {isWishlisted(product.id) ? '\u2665' : '\u2661'}
-        </button>
+        {user && inCartQty > 0 ? (
+          <>
+            <div className="flex min-h-[2.75rem] min-w-0 flex-1 items-stretch overflow-hidden rounded-full border-2 border-emerald-600 bg-white shadow-sm dark:border-emerald-500 dark:bg-stone-900">
+              <button
+                type="button"
+                aria-label="Remove from cart"
+                disabled={adding}
+                onClick={removeFromCard}
+                className="flex shrink-0 items-center justify-center px-3 text-stone-600 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50 dark:text-stone-300 dark:hover:bg-red-950/40 dark:hover:text-red-300"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                  <path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6" strokeLinecap="round" />
+                  <path d="M10 11v6M14 11v6" strokeLinecap="round" />
+                </svg>
+              </button>
+              <span className="flex min-w-0 flex-1 items-center justify-center px-1 text-center text-base font-semibold tabular-nums text-stone-900 dark:text-stone-100">
+                {inCartQty} in cart
+              </span>
+              <button
+                type="button"
+                aria-label="Add one more to cart"
+                disabled={adding}
+                onClick={addFromCard}
+                className="flex shrink-0 items-center justify-center px-3 text-xl font-bold leading-none text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-950/50"
+              >
+                +
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={onWishlistClick}
+              className={`shrink-0 px-3 py-2.5 rounded-lg text-base font-semibold border ${
+                isWishlisted(product.id)
+                  ? 'bg-pink-50 dark:bg-pink-950/40 border-pink-300 dark:border-pink-700 text-pink-700 dark:text-pink-300'
+                  : 'bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300'
+              }`}
+              aria-label={isAuthenticated ? 'Toggle wishlist' : 'Login to use wishlist'}
+              title={isAuthenticated ? 'Toggle wishlist' : 'Login to use wishlist'}
+            >
+              {isWishlisted(product.id) ? '\u2665' : '\u2661'}
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={addFromCard}
+              disabled={!user || adding}
+              className="flex-1 px-3 py-2.5 rounded-lg bg-emerald-600 text-white text-base font-semibold hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {!user ? 'Login to add' : requiresSize ? 'Select size' : adding ? 'Adding...' : 'Add to cart'}
+            </button>
+            <button
+              type="button"
+              onClick={onWishlistClick}
+              className={`px-3 py-2.5 rounded-lg text-base font-semibold border ${
+                isWishlisted(product.id)
+                  ? 'bg-pink-50 dark:bg-pink-950/40 border-pink-300 dark:border-pink-700 text-pink-700 dark:text-pink-300'
+                  : 'bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300'
+              }`}
+              aria-label={isAuthenticated ? 'Toggle wishlist' : 'Login to use wishlist'}
+              title={isAuthenticated ? 'Toggle wishlist' : 'Login to use wishlist'}
+            >
+              {isWishlisted(product.id) ? '\u2665' : '\u2661'}
+            </button>
+          </>
+        )}
       </div>
       {sizeModal}
     </div>
