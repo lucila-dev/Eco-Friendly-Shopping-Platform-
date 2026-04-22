@@ -97,6 +97,16 @@ export function CartProvider({ children }) {
     [fetchCart],
   )
 
+  const removeAllForProduct = useCallback(
+    async (productId) => {
+      if (!userId) return
+      await supabase.from('cart_items').delete().eq('user_id', userId).eq('product_id', productId)
+      window.dispatchEvent(new Event(CART_UPDATED_EVENT))
+      await fetchCart()
+    },
+    [userId, fetchCart],
+  )
+
   const total = useMemo(() => {
     return items.reduce((sum, row) => {
       const p = Array.isArray(row.products) ? row.products[0] : row.products
@@ -111,10 +121,11 @@ export function CartProvider({ children }) {
       error,
       updateQuantity,
       removeItem,
+      removeAllForProduct,
       refetch: fetchCart,
       total,
     }),
-    [items, loading, error, updateQuantity, removeItem, fetchCart, total],
+    [items, loading, error, updateQuantity, removeItem, removeAllForProduct, fetchCart, total],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

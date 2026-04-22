@@ -20,7 +20,7 @@ import {
   totalDiscountForCodes,
 } from '../lib/checkoutPromo'
 import { useFormatPrice } from '../hooks/useFormatPrice'
-import { loyaltyCreditsToMoney } from '../lib/loyaltyValue'
+import { gbpToLoyaltyPoints, loyaltyCreditsToMoney } from '../lib/loyaltyValue'
 import { usdToGbpApprox } from '../lib/shopMoney'
 import {
   PaymentApplePayMark,
@@ -123,6 +123,8 @@ export default function Checkout() {
     [loyaltyCredits],
   )
 
+  const loyaltyPointsForOrder = useMemo(() => gbpToLoyaltyPoints(finalTotal), [finalTotal])
+
   const applyPromo = () => {
     setPromoMessage(null)
     const normalized = normalizePromoCode(promoInput)
@@ -215,7 +217,8 @@ export default function Checkout() {
       }
     }
 
-    if (paymentMethod === 'loyalty' && loyaltyCredits < totalAmount) {
+    const loyaltyPointsCost = paymentMethod === 'loyalty' ? gbpToLoyaltyPoints(totalAmount) : 0
+    if (paymentMethod === 'loyalty' && loyaltyCredits < loyaltyPointsCost) {
       setError('Not enough loyalty credits for this checkout.')
       setSubmitting(false)
       return
@@ -290,7 +293,7 @@ export default function Checkout() {
     }
 
     if (paymentMethod === 'loyalty') {
-      const newBalance = Math.max(0, Number(loyaltyCredits) - Number(totalAmount))
+      const newBalance = Math.max(0, Number(loyaltyCredits) - loyaltyPointsCost)
       const { error: creditError } = await supabase
         .from('profiles')
         .update({ loyalty_credits: newBalance })
@@ -638,7 +641,11 @@ export default function Checkout() {
                     </span>
                   </>
                 )}{' '}
-                · This order: {format(finalTotal)}
+                · This order:{' '}
+                <span className="font-semibold text-stone-800 dark:text-stone-200">
+                  {loyaltyPointsForOrder.toLocaleString()} pts
+                </span>{' '}
+                <span className="text-stone-500 dark:text-stone-400">(≈ {format(finalTotal)})</span>
               </p>
             )}
 
