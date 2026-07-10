@@ -10,16 +10,35 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST API
+      - name: Visit live website
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: |
+          SITE="${SITE_URL:-https://eco-friendly-shopping-platform.vercel.app}"
+          SITE="${SITE%/}"
+          echo "Warming site: $SITE"
+          curl -sfL -o /dev/null -w "home %{http_code}\n" "$SITE/"
+          curl -sfL -o /dev/null -w "products %{http_code}\n" "$SITE/products"
+          echo "Website visit OK"
+
+      - name: Ping Supabase like the shop does
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
             echo "Missing SUPABASE_URL or SUPABASE_ANON_KEY repository secrets."
+            echo "Add them under Settings → Secrets and variables → Actions."
             exit 1
           fi
-          curl -sf "${SUPABASE_URL%/}/rest/v1/products?select=id&limit=1" \
+          BASE="${SUPABASE_URL%/}"
+          # Same kind of reads the home/products pages make
+          curl -sf "${BASE}/rest/v1/products?select=id&limit=5" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}"
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -o /dev/null
+          curl -sf "${BASE}/rest/v1/categories?select=id&limit=5" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -o /dev/null
           echo "Supabase ping OK"
